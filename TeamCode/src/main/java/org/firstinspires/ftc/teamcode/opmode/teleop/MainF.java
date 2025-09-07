@@ -12,7 +12,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.Robot;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Slides;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 
 import java.util.List;
@@ -47,6 +46,7 @@ public class MainF extends OpMode {
             hub.clearBulkCache();
         }
 
+        // Driver inputs
         double y = -driver.getLeftY();
         double x = driver.getLeftX();
         double rx = -driver.getRightX();
@@ -69,53 +69,15 @@ public class MainF extends OpMode {
             robot.actions.schedule(trajectory.vectorAlign(robot.driveTrain.getDrive(), robot.limelight.PSSTargetVectorRobotSpace()));
         }
 
-        // Reset the orientation for field-centric drive
         if (driver.wasJustPressed(GamepadKeys.Button.START)) {
             Vector2d current = robot.driveTrain.getDrive().localizer.getPose().position;
             robot.driveTrain.getDrive().localizer.setPose(new Pose2d(current, 0));
         }
 
-        if (operator.wasJustPressed(GamepadKeys.Button.BACK)) {
-            robot.actions.schedule(robot.resetControlArm());
-        }
+        // Operator inputs
 
-        if (operator.wasJustPressed(GamepadKeys.Button.START)) {
-            robot.slides.positions.setSelected(Slides.State.HOME);
-            robot.slides.stopAndResetEncoders();
-        }
 
-        if (operator.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-            if(!robot.slides.isMoving){
-                robot.actions.schedule(robot.slides.nextPos());
-            }
-        }
-        if (operator.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-            if(!robot.slides.isMoving){
-                robot.actions.schedule(new SequentialAction(
-                        robot.slides.prevPos(),
-                        new InstantAction(
-                                () -> {
-                                    if (robot.slides.positions.getSelected() == Slides.State.HOME)
-                                        robot.slides.stopAndResetEncoders();
-                                }
-                        )
-                ));
-            }
-        }
-
-        if (operator.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
-            if(!robot.slides.isMoving && !robot.isExtended()){
-                robot.actions.schedule(robot.collectFromWall());
-            }
-        }
-
-        if (operator.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-            robot.actions.schedule(robot.claw.prevPivot());
-        }
-        if (operator.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-            robot.actions.schedule(robot.claw.nextPivot());
-        }
-
+        // Periodic calls
         if (!robot.driveTrain.getDrive().isBusy) {
             if (robot.limelight.isDetected() && alignToAT) {
                 robot.limelight.setPipeline(Limelight.Pipeline.AT1);
@@ -131,8 +93,6 @@ public class MainF extends OpMode {
         operator.readButtons();
 
         robot.driveTrain.periodic();
-        robot.slides.periodic();
-        robot.arm.periodic();
 
         robot.actions.run();
     }

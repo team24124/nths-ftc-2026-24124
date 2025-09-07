@@ -9,13 +9,13 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 public class Reset extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        DcMotorEx leftSlide = hardwareMap.get(DcMotorEx.class, "left_slide");
-        DcMotorEx rightSlide = hardwareMap.get(DcMotorEx.class, "right_slide");
-        DcMotorEx arm = hardwareMap.get(DcMotorEx.class, "arm");
+        DcMotorEx x = hardwareMap.get(DcMotorEx.class, "x");
+        DcMotorEx y = hardwareMap.get(DcMotorEx.class, "y");
+        DcMotorEx z = hardwareMap.get(DcMotorEx.class, "z");
 
-        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        x.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        y.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        z.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         telemetry.addLine("Encoders successfully reset to zero.");
         telemetry.update();

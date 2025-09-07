@@ -73,7 +73,9 @@ public class DriveOnly extends OpMode {
 
         driver.readButtons();
 
-        drivetrain.drive(x, y, rx);
+        if (!drivetrain.getDrive().isBusy) {
+            drivetrain.drive(x, y, rx);
+        }
 
         drivetrain.periodic();
 

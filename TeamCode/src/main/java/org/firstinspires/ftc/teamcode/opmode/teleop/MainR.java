@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.Robot;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Slides;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 
 import java.util.List;
@@ -25,10 +24,8 @@ public class MainR extends OpMode {
 
     @Override
     public void init() {
-        // Get all hubs (Control Hub internal + any Expansion Hubs)
         hubs = hardwareMap.getAll(LynxModule.class);
 
-        // Set bulk caching mode
         for (LynxModule hub : hubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
@@ -43,16 +40,15 @@ public class MainR extends OpMode {
 
     @Override
     public void loop() {
-        // MANUAL mode: bulk cache refresh happens once per loop
         for (LynxModule hub : hubs) {
             hub.clearBulkCache();
         }
 
+        // Driver inputs
         double y = -driver.getLeftY();
         double x = driver.getLeftX();
         double rx = -driver.getRightX();
 
-        // Alter drivetrain speeds
         if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             robot.actions.schedule(new InstantAction(robot.driveTrain.getSpeeds()::previous));
         }
@@ -60,7 +56,6 @@ public class MainR extends OpMode {
             robot.actions.schedule(new InstantAction(robot.driveTrain.getSpeeds()::next));
         }
 
-        // Enable AT following
         if (driver.wasJustPressed(GamepadKeys.Button.B)) {
             alignToAT = true;
         }
@@ -68,55 +63,14 @@ public class MainR extends OpMode {
             alignToAT = false;
         }
 
-        // Autonomous alignment
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
             robot.actions.schedule(trajectory.vectorAlign(robot.driveTrain.getDrive(), robot.limelight.PSSTargetVectorRobotSpace()));
         }
 
-        // Reset Top Arm to starting positions
-        if (operator.wasJustPressed(GamepadKeys.Button.BACK)) {
-            robot.actions.schedule(robot.resetControlArm());
-        }
+        // Operator inputs
 
-        if (operator.wasJustPressed(GamepadKeys.Button.START)) {
-            robot.slides.positions.setSelected(Slides.State.HOME);
-            robot.slides.stopAndResetEncoders();
-        }
 
-        if (operator.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-            if(!robot.slides.isMoving){
-                robot.actions.schedule(robot.slides.nextPos());
-            }
-        }
-        if (operator.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-            if(!robot.slides.isMoving){
-                robot.actions.schedule(new SequentialAction(
-                        robot.slides.prevPos(),
-                        new InstantAction(
-                                () -> {
-                                    if (robot.slides.positions.getSelected() == Slides.State.HOME)
-                                        robot.slides.stopAndResetEncoders();
-                                }
-                        )
-                ));
-            }
-        }
-
-        if (operator.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
-            if(!robot.slides.isMoving && !robot.isExtended()){
-                robot.actions.schedule(robot.collectFromWall());
-            }
-        }
-
-        // Collection Claw Pivots
-        if (operator.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-            robot.actions.schedule(robot.claw.prevPivot());
-        }
-        if (operator.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-            robot.actions.schedule(robot.claw.nextPivot());
-        }
-
-        // Periodic functions
+        // Periodic calls
         if (!robot.driveTrain.getDrive().isBusy) {
             if (robot.limelight.isDetected() && alignToAT) {
                 robot.limelight.setPipeline(Limelight.Pipeline.AT1);
@@ -127,16 +81,14 @@ public class MainR extends OpMode {
         }
 
 
-        robot.telemetryControl.update(); // Update telemetry
+        robot.telemetryControl.update();
 
         driver.readButtons();
         operator.readButtons();
 
         robot.driveTrain.periodic();
-        robot.slides.periodic();
-        robot.arm.periodic();
 
-        robot.actions.run(); // Call this in order for scheduled actions to run
+        robot.actions.run();
     }
 
     @Override
