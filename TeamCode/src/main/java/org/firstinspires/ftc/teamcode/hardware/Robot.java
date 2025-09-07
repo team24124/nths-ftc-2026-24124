@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -19,12 +17,10 @@ public class Robot {
     public FlyWheel flyWheel;
     public Drivetrain driveTrain;
     public Limelight limelight;
+
     public ActionScheduler actions;
 
     public TelemetryControl telemetryControl;
-
-    private boolean isExtended = false;
-    private boolean isInScoringMode = false;
 
     public Robot(HardwareMap hw, Telemetry telemetry, boolean robotCentric) {
         flyWheel = new FlyWheel(hw);
@@ -41,15 +37,7 @@ public class Robot {
                 .subscribe(flyWheel)
                 .subscribe(limelight)
                 .subscribe(driveTrain)
-                .subscribe(actions);
-    }
-
-    public boolean isExtended() {
-        return isExtended;
-    }
-
-    public boolean isInScoringMode() {
-        return isInScoringMode;
+                .subscribe(actions); // Show on telemetry
     }
 
     public Action xyz() {

@@ -43,7 +43,7 @@ public abstract class Drivetrain implements SubsystemBase, TelemetryObservable {
      */
     public abstract void drive(double x, double y, double turn);
 
-    public void align(double x, double dist, double theta) {}
+    public void align(double x, double y, double dist, double theta) {} // Align with AT
 
     public MecanumDrive getDrive(){
         return drive;

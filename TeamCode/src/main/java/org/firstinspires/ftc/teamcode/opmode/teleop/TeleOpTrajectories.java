@@ -20,10 +20,10 @@ public enum TeleOpTrajectories {
 
     // Aligns by strafing and turning
     public Action poseAlign(MecanumDrive drivebase, Pose2d targetPose) {
-        Pose2d temporary = new Pose2d(0,0,drivebase.localizer.getPose().heading.toDouble());
+        Pose2d temporary = new Pose2d(0,0,targetPose.heading.toDouble());
         drivebase.localizer.setPose(temporary);
         return drivebase.actionBuilder(temporary, true)
-                        .strafeToSplineHeading(new Vector2d(targetPose.position.x, targetPose.position.y), drivebase.localizer.getPose().heading.toDouble() + targetPose.heading.toDouble())
+                        .strafeToSplineHeading(new Vector2d(targetPose.position.x, targetPose.position.y), 0) // 0 to face directly into target
                         .build();
     }
 

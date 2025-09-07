@@ -18,14 +18,13 @@ public class ArmDebugger extends OpMode {
     private VoltageSensor voltageSensor;
     private List<LynxModule> hubs;
 
-
     // --- tune ---
     public static double Kp = 0;
     public static double Ki = 0;
     public static double Kd = 0;
     public static double Kf = 0; // Gravitational correction (feedforward)
-    public static double a = 0.74; // a can be anything from 0 < a < 1. heavier smoothing but less responsiveness towards 1
-    public static double integralSumLimit = 0.8;
+    public static double a = 0.74; // a can be any value from 0 < a < 1. heavier smoothing but less responsiveness towards 1
+    public static double integralSumLimit = 0.8; // Integral cap to prevent unnecessary accumulation
 
     // Internal math
     private int target = 0;
@@ -42,25 +41,26 @@ public class ArmDebugger extends OpMode {
     private ElapsedTime timer = new ElapsedTime();
     private ElapsedTime timer2 = new ElapsedTime();
 
-    // Radical oscillations
-    int timeLagCount = 0;
-    int integralOvershoot = 0;
-    int integralUndershoot = 0;
+    // Radical oscillation counter
+    private int timeLagCount = 0;
+    private int integralOvershoot = 0;
+    private int integralUndershoot = 0;
 
 
     @Override
     public void init() {
         hubs = hardwareMap.getAll(LynxModule.class);
-
         for (LynxModule hub : hubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
+
+        voltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
         arm = hardwareMap.get(DcMotorEx.class, "arm");
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        voltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
+
         timer.reset();
         timer2.reset();
     }
@@ -107,15 +107,15 @@ public class ArmDebugger extends OpMode {
         }
 
         // Derivative setter & sensor noise filters
-        currentFilterEstimate = (a * previousFilterEstimate) + (1 - a) * (error - prevError);
-        previousFilterEstimate = currentFilterEstimate;
-        derivative = currentFilterEstimate / dt;
+        double rawDerivative = (error - prevError) / dt;
+        currentFilterEstimate = (a * previousFilterEstimate) + (1 - a) * rawDerivative;
+        derivative = currentFilterEstimate;
 
         // Angle getter
         double radians = 2 * Math.PI * ((double) arm.getCurrentPosition() / motorTPR); // Assumes arm is initialized horizontally, TPR is gear ratio * 28, goBILDA 312rpm 5203 yellowjacket motor
 
         // Output calculator
-        double out = ((Kp * error) + (Ki * integralSum) + (Kd * derivative) + (Math.cos(radians) * Kf)) * (12.0 / Math.max(voltageSensor.getVoltage(), 5.0));
+        double out = ((Kp * error) + (Ki * integralSum) + (Kd * derivative) + (Math.cos(radians) * Kf)) * (12.0 / Math.max(voltageSensor.getVoltage(), 8.0));
         out = Math.max(-1, Math.min(1, out));
 
         // Output & error setter

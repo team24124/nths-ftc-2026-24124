@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.opmode.teleop;
 
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -58,30 +57,30 @@ public class MainF extends OpMode {
             robot.actions.schedule(new InstantAction(robot.driveTrain.getSpeeds()::next));
         }
 
-        if (driver.wasJustPressed(GamepadKeys.Button.B)) {
+        if (driver.wasJustPressed(GamepadKeys.Button.A)) {
+            robot.limelight.setPipeline(Limelight.Pipeline.AT1);
             alignToAT = true;
         }
         if (driver.wasJustPressed(GamepadKeys.Button.X)) {
             alignToAT = false;
         }
 
-        if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            robot.actions.schedule(trajectory.vectorAlign(robot.driveTrain.getDrive(), robot.limelight.PSSTargetVectorRobotSpace()));
+        if (driver.wasJustPressed(GamepadKeys.Button.B)) {
+            robot.actions.schedule(trajectory.poseAlign(robot.driveTrain.getDrive(), robot.limelight.ATTargetPoseRobotSpace()));
         }
 
-        if (driver.wasJustPressed(GamepadKeys.Button.START)) {
+        if (driver.wasJustPressed(GamepadKeys.Button.START)) { // Reset orientation for FC drive
             Vector2d current = robot.driveTrain.getDrive().localizer.getPose().position;
             robot.driveTrain.getDrive().localizer.setPose(new Pose2d(current, 0));
         }
 
-        // Operator inputs
+        // Operator inputs (yet to be added)
 
 
         // Periodic calls
         if (!robot.driveTrain.getDrive().isBusy) {
             if (robot.limelight.isDetected() && alignToAT) {
-                robot.limelight.setPipeline(Limelight.Pipeline.AT1);
-                robot.driveTrain.align(x, robot.limelight.distance(), robot.limelight.degreeOffset());
+                robot.driveTrain.align(x, y, robot.limelight.distance(), robot.limelight.degreeOffset());
             } else {
                 robot.driveTrain.drive(x, y, rx);
             }

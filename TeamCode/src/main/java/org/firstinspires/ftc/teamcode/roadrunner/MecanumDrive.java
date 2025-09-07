@@ -94,7 +94,7 @@ public final class MecanumDrive {
 
     public static Params PARAMS = new Params();
 
-    public boolean isBusy = false;
+    public boolean isBusy = false; // Is robot performing a movement
 
     public final MecanumKinematics kinematics = new MecanumKinematics(
             PARAMS.inPerTick * PARAMS.trackWidthTicks, PARAMS.inPerTick / PARAMS.lateralInPerTick);
@@ -226,7 +226,7 @@ public final class MecanumDrive {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
-        // TODO: make sure your config has motors with these names (or change them)
+        // TODO: make sure config has motors with these names (or change them)
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
@@ -241,7 +241,7 @@ public final class MecanumDrive {
         // TODO: reverse motor directions if needed
         //   leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        // TODO: make sure your config has an IMU with this name (can be BNO or BHI)
+        // TODO: make sure config has an IMU with this name (can be BNO or BHI)
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
         lazyImu = new LazyHardwareMapImu(hardwareMap, "imu", new RevHubOrientationOnRobot(
                 PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));
@@ -310,7 +310,7 @@ public final class MecanumDrive {
 
             isBusy = true;
 
-            if (ECT && t >= timeTrajectory.duration && error.position.norm() < 2 && robotVelRobot.linearVel.norm() < 0.4 || t >= timeTrajectory.duration + 1) {
+            if (ECT && t >= timeTrajectory.duration && error.position.norm() < 1.5 && robotVelRobot.linearVel.norm() < 0.4 || t >= timeTrajectory.duration + 2) {
                 leftFront.setPower(0);
                 leftBack.setPower(0);
                 rightBack.setPower(0);
@@ -502,7 +502,7 @@ public final class MecanumDrive {
     public TrajectoryActionBuilder actionBuilder(Pose2d beginPose, boolean enableTrajectoryExtraCorrection) {
         return new TrajectoryActionBuilder(
                 TurnAction::new,
-                t -> new FollowTrajectoryAction(t, enableTrajectoryExtraCorrection),
+                t -> new FollowTrajectoryAction(t, enableTrajectoryExtraCorrection), // Second parameter is used to enable/disable extra correction
                 new TrajectoryBuilderParams(
                         1e-6,
                         new ProfileParams(

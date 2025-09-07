@@ -16,10 +16,9 @@ import org.firstinspires.ftc.teamcode.util.telemetry.TelemetryObservable;
 public class Limelight implements SubsystemBase, TelemetryObservable {
     private final Limelight3A limelight;
     public enum Pipeline {
-        PSS0(0),
-        AT0(1),
-        AT1(2),
-        AT2(3);
+        PSS1(0), // First python snapscript
+        AT1(1), // First Apriltag pipeline
+        AT2(2); // Second Apriltag pipeline
 
         public final int pipelineNum;
 
@@ -30,16 +29,17 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
 
     private Pipeline pipeline;
 
-    private final double cameraAngle = 0;
+    private final double cameraAngle = 0; // From facing forward == 0 degrees
 
     public Limelight(HardwareMap hw){
         limelight = hw.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(Pipeline.PSS0.pipelineNum);
-        limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
+        limelight.pipelineSwitch(Pipeline.AT1.pipelineNum);
+        limelight.setPollRateHz(100); // Ask Limelight for data (100 times per second)
         limelight.start();
-        pipeline = Pipeline.PSS0;
+        pipeline = Pipeline.AT1;
     }
 
+    // Switch pipeline if input is not the same as pipeline
     public void setPipeline(Pipeline pipeline) {
         if (pipeline != this.pipeline) {
             limelight.pipelineSwitch(pipeline.pipelineNum);
@@ -47,6 +47,7 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
         }
     }
 
+    // Checks python output & validity
     public boolean isDetected() {
         double[] array = getResult().getPythonOutput();
         boolean valid = getResult().isValid();
@@ -58,6 +59,7 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
         return getResult().getFiducialResults().get(getResult().getFiducialResults().size() - 1);
     }
 
+    // AT type to determine Obelisk pattern (use for state machine within autonomous)
     public int ATType() {
         return getFiducial().getFiducialId();
     }
@@ -71,6 +73,7 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
         return getResult().getTx();
     }
 
+    // Distance in inches
     public double distance() {
         return Math.tan(Math.toRadians(cameraAngle + getResult().getTyNC())) * 20;
     }
@@ -104,25 +107,23 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
 
     // Robot space X and Y offset for apriltag
     public Vector2d ATTargetVectorRobotSpace() {
-        setPipeline(Pipeline.AT2);
+        setPipeline(Pipeline.AT1);
         Pose3D targetPose = getFiducial().getTargetPoseRobotSpace();
-        return new Vector2d(targetPose.getPosition().x * 39.37 - 34, targetPose.getPosition().y * 39.37 - 50);
+        return new Vector2d(targetPose.getPosition().x * 39.37 - 0, targetPose.getPosition().y * 39.37 - 60);
     }
 
     // Robot space X and Y offset and heading for apriltag
     public Pose2d ATTargetPoseRobotSpace() {
-        setPipeline(Pipeline.AT2);
+        setPipeline(Pipeline.AT1);
         Pose3D pose = getFiducial().getRobotPoseTargetSpace();
         double yaw;
-        if ((pose.getOrientation().getYaw(AngleUnit.DEGREES) + 180) >= 180) {
-            yaw = (pose.getOrientation().getYaw(AngleUnit.DEGREES));
-        } else {
-            yaw = (pose.getOrientation().getYaw(AngleUnit.DEGREES) + 360);
-        }
-        return new Pose2d(-pose.getPosition().x * 39.37, pose.getPosition().z * 39.37 + 50, 360 - yaw);
+        double rawYaw = pose.getOrientation().getYaw(AngleUnit.DEGREES);
+        yaw = (rawYaw < 0) ? rawYaw + 360 : rawYaw; // Normalize heading
+
+        return new Pose2d(-pose.getPosition().x * 39.37, pose.getPosition().z * 39.37 - 50, 360 - yaw); // Start trajectory at 0, 0, but heading has to be inputted heading. If robot turns other way, remove 360 -
     }
 
-    // Field Space bot pose !!FACE DESIRED APRILTAG, THIS IS MAPPED!!
+    // Field space bot pose (this is mapped, face desired AT)
     public Pose2d ATBotPoseFieldSpace() {
         setPipeline(Pipeline.AT2);
         Pose3D pose3d = getResult().getBotpose_MT2();

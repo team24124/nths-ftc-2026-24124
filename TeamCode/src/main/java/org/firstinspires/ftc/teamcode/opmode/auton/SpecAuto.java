@@ -1,16 +1,13 @@
 package org.firstinspires.ftc.teamcode.opmode.auton;
 
 import com.acmerobotics.roadrunner.AccelConstraint;
-import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.AngularVelConstraint;
 import com.acmerobotics.roadrunner.MinVelConstraint;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.VelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -24,13 +21,6 @@ import java.util.Arrays;
 
 @Autonomous(name = "Specimen Auto")
 public class SpecAuto extends LinearOpMode {
-    /**
-     * Similar to 24124 in 2025 this robot will be a mecanumdrive robot with 2 viper slides,
-     * one arm with one motor,
-     * one limelight,
-     * a grabber system with two elbow servers, one pivot servo, and one claw servo.
-     * additional mechanisms added: flywheel,
-     */
     Robot robot;
 
     // Field error variables
@@ -46,7 +36,7 @@ public class SpecAuto extends LinearOpMode {
                 new TranslationalVelConstraint(50.0),
                 new AngularVelConstraint(Math.PI / 2)
         ));
-        AccelConstraint baseAccelConstraint = new ProfileAccelConstraint(-10.0, 20.0); // Optional constraints to change from constraints in mecanumdrive
+        AccelConstraint baseAccelConstraint = new ProfileAccelConstraint(-10.0, 20.0); // Optional constraints to change from constraints in MecanumDrive
 
         Pose2d initialPose = new Pose2d(8, 62 + vertical, Math.toRadians(90)); // Initialize position and heading of robot
         drivebase.localizer.setPose(initialPose); // Set the localizer start position to initialPose
@@ -69,6 +59,7 @@ public class SpecAuto extends LinearOpMode {
 
                 )
         );
-        PoseStorage.currentPose = drivebase.localizer.getPose();
+
+        PoseStorage.currentPose = drivebase.localizer.getPose(); // Set global pose value for TeleOp to utilize
     }
 }

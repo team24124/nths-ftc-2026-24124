@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.util.ArraySelect;
+import org.firstinspires.ftc.teamcode.util.Utilities;
 import org.firstinspires.ftc.teamcode.util.telemetry.TelemetryObservable;
 
 public class FieldCentricDrive extends Drivetrain implements TelemetryObservable {
@@ -49,10 +50,15 @@ public class FieldCentricDrive extends Drivetrain implements TelemetryObservable
         );
     }
 
-    public void align(double x, double dist, double theta) {
+    @Override
+    public void align(double x, double y, double dist, double theta) { // Method called during alignment mode
         double voltage = voltageSensor.getVoltage();
-        double rx = thetaPID.calculate(dist, 0, voltage);
-        double y = distancePID.calculate(dist, 60, voltage);
+        double rx = thetaPID.calculate(theta, 0, voltage);
+        if (!Utilities.isBetween(dist, 60, 108) && dist <= 60) { // Utilize gamepad1 y if inside threshold
+            y = distancePID.calculate(dist, 61, voltage);
+        } else if (!Utilities.isBetween(dist, 60, 108) && dist >= 108) {
+            y = distancePID.calculate(dist, 107, voltage);
+        }
         double botHeading = getDrive().localizer.getPose().heading.toDouble();
 
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);

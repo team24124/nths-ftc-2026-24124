@@ -32,7 +32,6 @@ public class DriveOnly extends OpMode {
     @Override
     public void init() {
         hubs = hardwareMap.getAll(LynxModule.class);
-
         for (LynxModule hub : hubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
@@ -62,22 +61,22 @@ public class DriveOnly extends OpMode {
         }
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            Vector2d targetPose = new Vector2d(2,2);
+            Vector2d targetPose = new Vector2d(5,20);
             trajectory.vectorAlign(drivetrain.getDrive(), targetPose);
         }
 
+        // Checks if drivetrain has been switched and switches drivetrain type
         if (t != robotCentric) {
             switchDrive();
             t = robotCentric;
         }
 
         driver.readButtons();
+        drivetrain.periodic();
 
         if (!drivetrain.getDrive().isBusy) {
             drivetrain.drive(x, y, rx);
         }
-
-        drivetrain.periodic();
 
         ActionScheduler.INSTANCE.run();
     }

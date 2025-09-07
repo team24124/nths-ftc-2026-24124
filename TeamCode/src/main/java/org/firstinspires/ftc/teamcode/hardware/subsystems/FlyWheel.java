@@ -20,14 +20,14 @@ public class FlyWheel implements SubsystemBase, TelemetryObservable {
     }
 
     public void runFlyWheel(double distance) {
-        targetPower = distance * 0.01;
+        targetPower = distance * 0.01; // Many ways to tune (mechanism not yet determined)
         flyWheel.setPower(targetPower);
         powered = true;
     }
 
     public void stopFlyWheel() {
         targetPower = 0;
-        flyWheel.setPower(0);
+        flyWheel.setPower(targetPower);
         powered = false;
     }
 

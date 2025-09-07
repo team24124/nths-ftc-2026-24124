@@ -5,8 +5,8 @@ import org.firstinspires.ftc.teamcode.hardware.SubsystemBase;
 
 public interface TelemetryObservable {
     /**
-     * Method called by TelemetryControl {@link TelemetryControl} to update corresponding telemetry.
-     * @param telemetry Telemetry system to use.
+     * Method called by TelemetryControl {@link TelemetryControl} to update corresponding telemetry
+     * @param telemetry Telemetry system to use
      */
     void updateTelemetry(Telemetry telemetry);
 

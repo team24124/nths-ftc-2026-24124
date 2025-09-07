@@ -18,9 +18,9 @@
 //    public static double yT = 0;
 //    public static int zT = 0;
 //
-//    private x arm;
-//    private y claw;
-//    private z slides;
+//    private x x;
+//    private y y;
+//    private z z;
 //
 //    private ActionScheduler actions;
 //
@@ -31,7 +31,6 @@
 //    @Override
 //    public void init() {
 //        hubs = hardwareMap.getAll(LynxModule.class);
-//
 //        for (LynxModule hub : hubs) {
 //            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
 //        }

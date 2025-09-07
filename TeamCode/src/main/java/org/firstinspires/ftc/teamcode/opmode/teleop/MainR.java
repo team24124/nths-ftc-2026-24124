@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
 import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.SequentialAction;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -24,8 +23,10 @@ public class MainR extends OpMode {
 
     @Override
     public void init() {
+        // Get all hubs (Control Hub internal + any Expansion Hubs)
         hubs = hardwareMap.getAll(LynxModule.class);
 
+        // Set bulk caching mode MANUAl
         for (LynxModule hub : hubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
@@ -40,6 +41,7 @@ public class MainR extends OpMode {
 
     @Override
     public void loop() {
+        // MANUAL mode: bulk cache refresh happens once per loop
         for (LynxModule hub : hubs) {
             hub.clearBulkCache();
         }
@@ -56,39 +58,40 @@ public class MainR extends OpMode {
             robot.actions.schedule(new InstantAction(robot.driveTrain.getSpeeds()::next));
         }
 
-        if (driver.wasJustPressed(GamepadKeys.Button.B)) {
+        // Enable constant AT alignment
+        if (driver.wasJustPressed(GamepadKeys.Button.A)) {
+            robot.limelight.setPipeline(Limelight.Pipeline.AT1);
             alignToAT = true;
         }
         if (driver.wasJustPressed(GamepadKeys.Button.X)) {
             alignToAT = false;
         }
 
-        if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            robot.actions.schedule(trajectory.vectorAlign(robot.driveTrain.getDrive(), robot.limelight.PSSTargetVectorRobotSpace()));
+        // Move to target position in front of AT
+        if (driver.wasJustPressed(GamepadKeys.Button.B)) {
+            robot.actions.schedule(trajectory.poseAlign(robot.driveTrain.getDrive(), robot.limelight.ATTargetPoseRobotSpace()));
         }
 
-        // Operator inputs
+        // Operator inputs (yet to be added)
 
 
         // Periodic calls
-        if (!robot.driveTrain.getDrive().isBusy) {
+        if (!robot.driveTrain.getDrive().isBusy) { // Ensure drive and align aren't called during trajectory
             if (robot.limelight.isDetected() && alignToAT) {
-                robot.limelight.setPipeline(Limelight.Pipeline.AT1);
-                robot.driveTrain.align(x, robot.limelight.distance(), robot.limelight.degreeOffset());
+                robot.driveTrain.align(x, y, robot.limelight.distance(), robot.limelight.degreeOffset());
             } else {
                 robot.driveTrain.drive(x, y, rx);
             }
         }
-
 
         robot.telemetryControl.update();
 
         driver.readButtons();
         operator.readButtons();
 
-        robot.driveTrain.periodic();
+        robot.driveTrain.periodic(); // Update position
 
-        robot.actions.run();
+        robot.actions.run(); // Call for scheduled actions to run
     }
 
     @Override

@@ -19,8 +19,10 @@ public class PIDF {
     private double previousFilterEstimate = 0;
     private double currentFilterEstimate = 0;
     private double motorTPR = 537.6;
+
     private ElapsedTime timer = new ElapsedTime();
 
+    // Feedback and feedforward
     public void setPIDF(double Kp, double Ki, double Kd, double Kf, double a, double integralSumLimit) {
         timer.reset();
         this.Kp = Kp;
@@ -31,6 +33,7 @@ public class PIDF {
         this.integralSumLimit = integralSumLimit;
     }
 
+    // Feedback only
     public void setPID(double Kp, double Ki, double Kd, double a, double integralSumLimit) {
         timer.reset();
         this.Kp = Kp;
@@ -40,6 +43,7 @@ public class PIDF {
         this.integralSumLimit = integralSumLimit;
     }
 
+    // Output power
     public double calculate(double position, double target, double voltage) {
         double dt = timer.seconds();
         timer.reset();
@@ -59,13 +63,13 @@ public class PIDF {
             integralSum = -integralSumLimit;
         }
 
-        currentFilterEstimate = (a * previousFilterEstimate) + (1 - a) * (error - prevError);
-        previousFilterEstimate = currentFilterEstimate;
-        derivative = currentFilterEstimate / dt;
+        double rawDerivative = (error - prevError) / dt;
+        currentFilterEstimate = (a * previousFilterEstimate) + (1 - a) * rawDerivative;
+        derivative = currentFilterEstimate;
 
         double radians = 2 * Math.PI * (position / motorTPR);
 
-        double out = ((Kp * error) + (Ki * integralSum) + (Kd * derivative) + (Math.cos(radians) * Kf)) * (12.0 / Math.max(voltage, 5.0));
+        double out = ((Kp * error) + (Ki * integralSum) + (Kd * derivative) + (Math.cos(radians) * Kf)) * (12.0 / Math.max(voltage, 8.0));
         out = Math.max(-1, Math.min(1, out));
 
         prevError = error;
