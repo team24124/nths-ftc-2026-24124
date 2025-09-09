@@ -53,24 +53,37 @@ public class RobotCentricDrive extends Drivetrain implements TelemetryObservable
     @Override
     public void align(double x, double y, double dist, double theta) { // Method called during alignment mode
         double voltage = voltageSensor.getVoltage();
-        double rx = thetaPID.calculate(theta, 0, voltage);
-        if (!Utilities.isBetween(dist, 60, 108) && dist <= 60) { // Utilize gamepad1 y if inside threshold
-            y = distancePID.calculate(dist, 61, voltage);
-        } else if (!Utilities.isBetween(dist, 60, 108) && dist >= 108) {
-            y = distancePID.calculate(dist, 107, voltage);
-        }
         double botHeading = getDrive().localizer.getPose().heading.toDouble();
-
+        double forwardPower = 0;
+        double rx = thetaPID.calculate(theta, 0, voltage);
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
         double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+        double frontLeftPower;
+        double backLeftPower;
+        double frontRightPower;
+        double backRightPower;
 
         rotX = rotX * 1.1;
 
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        double frontLeftPower = (rotY + rotX + rx) / denominator;
-        double backLeftPower = (rotY - rotX + rx) / denominator;
-        double frontRightPower = (rotY - rotX - rx) / denominator;
-        double backRightPower = (rotY + rotX - rx) / denominator;
+        if (!Utilities.isBetween(dist, 60, 108)) { // Utilize gamepad1 x & y if inside threshold
+            if (dist < 60) {
+                forwardPower = distancePID.calculate(dist, 62, voltage);
+            } else if (dist > 108) {
+                forwardPower = distancePID.calculate(dist, 107, voltage);
+            }
+
+            double denominator = Math.max(Math.abs(forwardPower) + Math.abs(rx), 1);
+            frontLeftPower = (forwardPower + rx) / denominator;
+            backLeftPower = (forwardPower + rx) / denominator;
+            frontRightPower = (forwardPower - rx) / denominator;
+            backRightPower = (forwardPower - rx) / denominator;
+        } else {
+            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 2); // Slower speed
+            frontLeftPower = (rotY + rotX + rx) / denominator;
+            backLeftPower = (rotY - rotX + rx) / denominator;
+            frontRightPower = (rotY - rotX - rx) / denominator;
+            backRightPower = (rotY + rotX - rx) / denominator;
+        }
 
         ArraySelect<Double> speeds = getSpeeds();
         super.setDrivePowers(
@@ -92,7 +105,7 @@ public class RobotCentricDrive extends Drivetrain implements TelemetryObservable
 
         telemetry.addData("X", current.position.x);
         telemetry.addData("Y", current.position.y);
-        telemetry.addData("Heading (°)", current.heading.toDouble());
-        telemetry.addData("Heading (°)", Math.toRadians(current.heading.toDouble()));
+        telemetry.addData("Heading (rad)", current.heading.toDouble());
+        telemetry.addData("Heading (°)", Math.toDegrees(current.heading.toDouble()));
     }
 }

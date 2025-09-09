@@ -11,8 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
 import org.firstinspires.ftc.teamcode.util.ArraySelect;
 import org.firstinspires.ftc.teamcode.util.PIDF;
 import org.firstinspires.ftc.teamcode.util.Utilities;
@@ -55,7 +55,7 @@ public class AlignmentDebugger extends OpMode {
         }
 
         voltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
-        driveTrain = new RobotCentricDrive(hardwareMap, new Pose2d(new Vector2d(0, 0), Math.toRadians(0)));
+        driveTrain = new FieldCentricDrive(hardwareMap, new Pose2d(new Vector2d(0, 0), Math.toRadians(0)));
         driver = new GamepadEx(gamepad1);
         limelight = new Limelight(hardwareMap);
 
@@ -71,10 +71,10 @@ public class AlignmentDebugger extends OpMode {
 
         distancePID.setPID(Kp, Ki, Kd, a, integralSumLimit);
         thetaPID.setPID(tKp, tKi, tKd, ta, tIntegralSumLimit);
-        
-        double y = -driver.getLeftY();
-        double x = driver.getLeftX();
-        double rx = -driver.getRightX();
+
+        double y = Math.abs(-driver.getLeftY()) > 0.05 ? -driver.getLeftY() : 0;
+        double x = Math.abs(driver.getLeftX()) > 0.05 ? driver.getLeftX() : 0;
+        double rx = Math.abs(-driver.getRightX()) > 0.05 ? -driver.getRightX() : 0;
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
             limelight.setPipeline(Limelight.Pipeline.AT1);
@@ -88,34 +88,51 @@ public class AlignmentDebugger extends OpMode {
         driveTrain.periodic();
 
         if (!driveTrain.getDrive().isBusy) {
-            if (limelight.isDetected() && alignToAT) {
-                align(x, y, limelight.distance(), limelight.degreeOffset()); // Private align method to avoid using DriveTrain PIDs
+            if (alignToAT) {
+                if (limelight.isDetected()) {
+                    align(x, y, limelight.distance(), limelight.degreeOffset()); // Private align method to avoid using DriveTrain PIDs
+                } else {
+                    driveTrain.drive(x, y, 0.75);
+                }
             } else {
                 driveTrain.drive(x, y, rx);
             }
         }
     }
 
-    private void align(double x, double y, double dist, double theta) {
+    public void align(double x, double y, double dist, double theta) {
         double voltage = voltageSensor.getVoltage();
+        double botHeading = driveTrain.getDrive().localizer.getPose().heading.toDouble();
+        double forwardPower = 0;
         double rx = thetaPID.calculate(theta, 0, voltage);
-        if (!Utilities.isBetween(dist, 60, 108) && dist <= 60) {
-            y = distancePID.calculate(dist, 61, voltage);
-        } else if (!Utilities.isBetween(dist, 60, 108) && dist >= 108) {
-            y = distancePID.calculate(dist, 107, voltage);
-        }
-        double botHeading = driveTrain.getHeading();
-
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
         double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+        double frontLeftPower;
+        double backLeftPower;
+        double frontRightPower;
+        double backRightPower;
 
         rotX = rotX * 1.1;
 
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        double frontLeftPower = (rotY + rotX + rx) / denominator;
-        double backLeftPower = (rotY - rotX + rx) / denominator;
-        double frontRightPower = (rotY - rotX - rx) / denominator;
-        double backRightPower = (rotY + rotX - rx) / denominator;
+        if (!Utilities.isBetween(dist, 60, 108)) {
+            if (dist < 60) {
+                forwardPower = distancePID.calculate(dist, 62, voltage);
+            } else if (dist > 108) {
+                forwardPower = distancePID.calculate(dist, 107, voltage);
+            }
+
+            double denominator = Math.max(Math.abs(forwardPower) + Math.abs(rx), 1);
+            frontLeftPower = (forwardPower + rx) / denominator;
+            backLeftPower = (forwardPower + rx) / denominator;
+            frontRightPower = (forwardPower - rx) / denominator;
+            backRightPower = (forwardPower - rx) / denominator;
+        } else {
+            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 2);
+            frontLeftPower = (rotY + rotX + rx) / denominator;
+            backLeftPower = (rotY - rotX + rx) / denominator;
+            frontRightPower = (rotY - rotX - rx) / denominator;
+            backRightPower = (rotY + rotX - rx) / denominator;
+        }
 
         ArraySelect<Double> speeds = driveTrain.getSpeeds();
         driveTrain.setDrivePowers(

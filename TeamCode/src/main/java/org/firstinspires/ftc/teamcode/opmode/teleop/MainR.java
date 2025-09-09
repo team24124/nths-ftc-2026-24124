@@ -20,6 +20,7 @@ public class MainR extends OpMode {
     private TeleOpTrajectories trajectory;
     private List<LynxModule> hubs;
     private boolean alignToAT = false;
+    private boolean trajectoryAlign = false;
 
     @Override
     public void init() {
@@ -47,9 +48,9 @@ public class MainR extends OpMode {
         }
 
         // Driver inputs
-        double y = -driver.getLeftY();
-        double x = driver.getLeftX();
-        double rx = -driver.getRightX();
+        double y = Math.abs(-driver.getLeftY()) > 0.05 ? -driver.getLeftY() : 0;
+        double x = Math.abs(driver.getLeftX()) > 0.05 ? driver.getLeftX() : 0;
+        double rx = Math.abs(-driver.getRightX()) > 0.05 ? -driver.getRightX() : 0;
 
         if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             robot.actions.schedule(new InstantAction(robot.driveTrain.getSpeeds()::previous));
@@ -59,17 +60,34 @@ public class MainR extends OpMode {
         }
 
         // Enable constant AT alignment
-        if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            robot.limelight.setPipeline(Limelight.Pipeline.AT1);
+        if (driver.wasJustPressed(GamepadKeys.Button.A)) { // Semi autonomous alignment mode
+            robot.limelight.setPipeline(Limelight.Pipeline.AT2);
+            trajectoryAlign = false;
             alignToAT = true;
         }
-        if (driver.wasJustPressed(GamepadKeys.Button.X)) {
+        if (driver.wasJustPressed(GamepadKeys.Button.X)) { // Pure TeleOp with ability to reset pose
+            robot.limelight.setPipeline(Limelight.Pipeline.AT4);
+            trajectoryAlign = false;
             alignToAT = false;
         }
+        if (driver.wasJustPressed(GamepadKeys.Button.B)) { // Full autonomous alignment
+            robot.limelight.setPipeline(Limelight.Pipeline.AT3);
+            alignToAT = false;
+            trajectoryAlign = true;
+        }
 
-        // Move to target position in front of AT
-        if (driver.wasJustPressed(GamepadKeys.Button.B)) {
-            robot.actions.schedule(trajectory.poseAlign(robot.driveTrain.getDrive(), robot.limelight.ATTargetPoseRobotSpace()));
+        // Align with Roadrunner trajectory
+        if (driver.wasJustPressed(GamepadKeys.Button.Y)) {
+            if (robot.limelight.isDetected()) {
+                trajectory.poseAlign(robot.driveTrain.getDrive(), robot.limelight.ATTargetPoseFieldSpace(robot.driveTrain.getDrive().localizer.getPose()));
+            }
+        }
+
+        // Reset robot pose with MT2
+        if (driver.wasJustPressed(GamepadKeys.Button.START)) {
+            if (robot.limelight.isDetected() && !alignToAT && !trajectoryAlign) {
+                robot.driveTrain.getDrive().localizer.setPose(robot.limelight.ATRobotPoseFieldSpace());
+            }
         }
 
         // Operator inputs (yet to be added)
@@ -77,8 +95,12 @@ public class MainR extends OpMode {
 
         // Periodic calls
         if (!robot.driveTrain.getDrive().isBusy) { // Ensure drive and align aren't called during trajectory
-            if (robot.limelight.isDetected() && alignToAT) {
-                robot.driveTrain.align(x, y, robot.limelight.distance(), robot.limelight.degreeOffset());
+            if (alignToAT) {
+                if (robot.limelight.isDetected()) {
+                    robot.driveTrain.align(x, y, robot.limelight.distance(), robot.limelight.degreeOffset());
+                } else {
+                    robot.driveTrain.drive(x, y, 0.75);
+                }
             } else {
                 robot.driveTrain.drive(x, y, rx);
             }

@@ -49,9 +49,9 @@ public class DriveOnly extends OpMode {
             hub.clearBulkCache();
         }
 
-        double y = -driver.getLeftY();
-        double x = driver.getLeftX();
-        double rx = -driver.getRightX();
+        double y = Math.abs(-driver.getLeftY()) > 0.05 ? -driver.getLeftY() : 0;
+        double x = Math.abs(driver.getLeftX()) > 0.05 ? driver.getLeftX() : 0;
+        double rx = Math.abs(-driver.getRightX()) > 0.05 ? -driver.getRightX() : 0;
 
         if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             actions.schedule(new InstantAction(drivetrain.getSpeeds()::previous));
@@ -61,7 +61,7 @@ public class DriveOnly extends OpMode {
         }
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            Vector2d targetPose = new Vector2d(5,20);
+            Pose2d targetPose = new Pose2d(3, 30, Math.toRadians(90));
             trajectory.vectorAlign(drivetrain.getDrive(), targetPose);
         }
 

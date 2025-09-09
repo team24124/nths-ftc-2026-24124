@@ -22,6 +22,7 @@ public class MainF extends OpMode {
     private TeleOpTrajectories trajectory;
     private List<LynxModule> hubs;
     private boolean alignToAT = false;
+    private boolean trajectoryAlign = false;
 
     @Override
     public void init() {
@@ -31,7 +32,7 @@ public class MainF extends OpMode {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
-        robot = new Robot(hardwareMap, telemetry, false);
+        robot = new Robot(hardwareMap, telemetry, true);
         robot.actions = ActionScheduler.INSTANCE;
         trajectory = TeleOpTrajectories.INSTANCE;
         robot.actions.init();
@@ -46,9 +47,9 @@ public class MainF extends OpMode {
         }
 
         // Driver inputs
-        double y = -driver.getLeftY();
-        double x = driver.getLeftX();
-        double rx = -driver.getRightX();
+        double y = Math.abs(-driver.getLeftY()) > 0.05 ? -driver.getLeftY() : 0;
+        double x = Math.abs(driver.getLeftX()) > 0.05 ? driver.getLeftX() : 0;
+        double rx = Math.abs(-driver.getRightX()) > 0.05 ? -driver.getRightX() : 0;
 
         if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             robot.actions.schedule(new InstantAction(robot.driveTrain.getSpeeds()::previous));
@@ -58,18 +59,35 @@ public class MainF extends OpMode {
         }
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            robot.limelight.setPipeline(Limelight.Pipeline.AT1);
+            robot.limelight.setPipeline(Limelight.Pipeline.AT2);
+            trajectoryAlign = false;
             alignToAT = true;
         }
         if (driver.wasJustPressed(GamepadKeys.Button.X)) {
+            robot.limelight.setPipeline(Limelight.Pipeline.AT4);
+            trajectoryAlign = false;
             alignToAT = false;
         }
-
         if (driver.wasJustPressed(GamepadKeys.Button.B)) {
-            robot.actions.schedule(trajectory.poseAlign(robot.driveTrain.getDrive(), robot.limelight.ATTargetPoseRobotSpace()));
+            robot.limelight.setPipeline(Limelight.Pipeline.AT3);
+            alignToAT = false;
+            trajectoryAlign = true;
         }
 
-        if (driver.wasJustPressed(GamepadKeys.Button.START)) { // Reset orientation for FC drive
+        if (driver.wasJustPressed(GamepadKeys.Button.Y)) {
+            if (robot.limelight.isDetected()) {
+                robot.actions.schedule(trajectory.poseAlign(robot.driveTrain.getDrive(), robot.limelight.ATTargetPoseFieldSpace(robot.driveTrain.getDrive().localizer.getPose())));
+            }
+        }
+
+        if (driver.wasJustPressed(GamepadKeys.Button.START)) {
+            if (robot.limelight.isDetected() && !alignToAT && !trajectoryAlign) {
+                robot.driveTrain.getDrive().localizer.setPose(robot.limelight.ATRobotPoseFieldSpace());
+            }
+        }
+
+        // Reset orientation for FC drive
+        if (driver.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
             Vector2d current = robot.driveTrain.getDrive().localizer.getPose().position;
             robot.driveTrain.getDrive().localizer.setPose(new Pose2d(current, 0));
         }
@@ -79,8 +97,12 @@ public class MainF extends OpMode {
 
         // Periodic calls
         if (!robot.driveTrain.getDrive().isBusy) {
-            if (robot.limelight.isDetected() && alignToAT) {
-                robot.driveTrain.align(x, y, robot.limelight.distance(), robot.limelight.degreeOffset());
+            if (alignToAT) {
+                if (robot.limelight.isDetected()) {
+                    robot.driveTrain.align(x, y, robot.limelight.distance(), robot.limelight.degreeOffset());
+                } else {
+                    robot.driveTrain.drive(x, y, 0.75);
+                }
             } else {
                 robot.driveTrain.drive(x, y, rx);
             }
