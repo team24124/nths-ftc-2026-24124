@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -14,7 +13,7 @@ public class ColourSensor implements SubsystemBase, TelemetryObservable {
     private NormalizedColorSensor colorSensor;
 
     public ColourSensor(HardwareMap hw) {
-        colorSensor = hw.get(NormalizedColorSensor.class, "test_color");
+        colorSensor = hw.get(NormalizedColorSensor.class, "color_sensor");
     }
 
     @Override
@@ -22,7 +21,7 @@ public class ColourSensor implements SubsystemBase, TelemetryObservable {
         telemetry.addData("Light Detected", ((OpticalDistanceSensor) colorSensor).getLightDetected());
         NormalizedRGBA colors = colorSensor.getNormalizedColors();
 
-        //Determining the amount of red, green, and blue
+        // Determining the amount of red, green, and blue
         telemetry.addData("Red", "%.3f", colors.red);
         telemetry.addData("Green", "%.3f", colors.green);
         telemetry.addData("Blue", "%.3f", colors.blue);

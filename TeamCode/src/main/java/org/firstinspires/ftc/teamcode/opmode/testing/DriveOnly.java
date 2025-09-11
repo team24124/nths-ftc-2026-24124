@@ -26,7 +26,7 @@ public class DriveOnly extends OpMode {
     private Drivetrain drivetrain;
     private ActionScheduler actions;
     private GamepadEx driver;
-    private TeleOpTrajectories trajectory;
+    private TeleOpTrajectories trajectories;
     private List<LynxModule> hubs;
 
     @Override
@@ -38,7 +38,7 @@ public class DriveOnly extends OpMode {
 
         drivetrain = new RobotCentricDrive(hardwareMap, new Pose2d(new Vector2d(0, 0), Math.toRadians(0)));
         actions = ActionScheduler.INSTANCE;
-        trajectory = TeleOpTrajectories.INSTANCE;
+        trajectories = TeleOpTrajectories.INSTANCE;
         actions.init();
         driver = new GamepadEx(gamepad1);
     }
@@ -62,7 +62,7 @@ public class DriveOnly extends OpMode {
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
             Pose2d targetPose = new Pose2d(0, 30, Math.toRadians(90));
-            trajectory.vectorAlign(drivetrain.getDrive(), targetPose);
+            trajectories.vectorAlign(drivetrain.getDrive(), targetPose);
         }
 
         // Checks if drivetrain has been switched and switches drivetrain type
@@ -86,9 +86,9 @@ public class DriveOnly extends OpMode {
     }
     public void switchDrive() {
         if (robotCentric) {
-            drivetrain = new RobotCentricDrive(hardwareMap, drivetrain.getDrive().localizer.getPose());
+            drivetrain = new RobotCentricDrive(hardwareMap, drivetrain.getPosition());
         } else {
-            drivetrain = new FieldCentricDrive(hardwareMap, drivetrain.getDrive().localizer.getPose());
+            drivetrain = new FieldCentricDrive(hardwareMap, drivetrain.getPosition());
         }
     }
 }

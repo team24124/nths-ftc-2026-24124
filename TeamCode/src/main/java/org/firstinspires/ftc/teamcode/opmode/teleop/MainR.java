@@ -17,7 +17,7 @@ import java.util.List;
 public class MainR extends OpMode {
     private Robot robot;
     private GamepadEx driver, operator;
-    private TeleOpTrajectories trajectory;
+    private TeleOpTrajectories trajectories;
     private List<LynxModule> hubs;
     private boolean alignToAT = false;
     private boolean trajectoryAlign = false;
@@ -34,7 +34,7 @@ public class MainR extends OpMode {
 
         robot = new Robot(hardwareMap, telemetry, true);
         robot.actions = ActionScheduler.INSTANCE;
-        trajectory = TeleOpTrajectories.INSTANCE;
+        trajectories = TeleOpTrajectories.INSTANCE;
         robot.actions.init();
         driver = new GamepadEx(gamepad1);
         operator = new GamepadEx(gamepad2);
@@ -79,7 +79,7 @@ public class MainR extends OpMode {
         // Align with Roadrunner trajectory
         if (driver.wasJustPressed(GamepadKeys.Button.Y)) {
             if (robot.limelight.isDetected()) {
-                trajectory.poseAlign(robot.driveTrain.getDrive(), robot.limelight.ATTargetPoseFieldSpace(robot.driveTrain.getDrive().localizer.getPose()));
+                trajectories.poseAlign(robot.driveTrain.getDrive(), robot.limelight.ATTargetPoseFieldSpace(robot.driveTrain.getDrive().localizer.getPose()));
             }
         }
 
@@ -94,12 +94,12 @@ public class MainR extends OpMode {
 
 
         // Periodic calls
-        if (!robot.driveTrain.getDrive().isBusy) { // Ensure drive and align aren't called during trajectory
+        if (!robot.driveTrain.getDrive().isBusy) { // Ensure drive isn't called during trajectory
             if (alignToAT) {
                 if (robot.limelight.isDetected()) {
                     robot.driveTrain.drive(x, y, robot.limelight.degreeOffset(), true);
                 } else {
-                    robot.driveTrain.drive(x, y, 0.75, false);
+                    robot.driveTrain.drive(x, y, trajectories.rotation(robot.driveTrain), false);
                 }
             } else {
                 robot.driveTrain.drive(x, y, rx, false);

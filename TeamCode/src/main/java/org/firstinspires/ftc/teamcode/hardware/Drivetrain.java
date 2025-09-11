@@ -49,6 +49,10 @@ public abstract class Drivetrain implements SubsystemBase, TelemetryObservable {
         return speeds;
     }
 
+    public Pose2d getPosition() {
+        return drive.localizer.getPose();
+    }
+
     public double getHeading() {
         return drive.localizer.getPose().heading.toDouble();
     }

@@ -19,7 +19,7 @@ import java.util.List;
 public class MainF extends OpMode {
     private Robot robot;
     private GamepadEx driver, operator;
-    private TeleOpTrajectories trajectory;
+    private TeleOpTrajectories trajectories;
     private List<LynxModule> hubs;
     private boolean alignToAT = false;
     private boolean trajectoryAlign = false;
@@ -34,7 +34,7 @@ public class MainF extends OpMode {
 
         robot = new Robot(hardwareMap, telemetry, true);
         robot.actions = ActionScheduler.INSTANCE;
-        trajectory = TeleOpTrajectories.INSTANCE;
+        trajectories = TeleOpTrajectories.INSTANCE;
         robot.actions.init();
         driver = new GamepadEx(gamepad1);
         operator = new GamepadEx(gamepad2);
@@ -76,7 +76,7 @@ public class MainF extends OpMode {
 
         if (driver.wasJustPressed(GamepadKeys.Button.Y)) {
             if (robot.limelight.isDetected()) {
-                robot.actions.schedule(trajectory.poseAlign(robot.driveTrain.getDrive(), robot.limelight.ATTargetPoseFieldSpace(robot.driveTrain.getDrive().localizer.getPose())));
+                robot.actions.schedule(trajectories.poseAlign(robot.driveTrain.getDrive(), robot.limelight.ATTargetPoseFieldSpace(robot.driveTrain.getDrive().localizer.getPose())));
             }
         }
 
@@ -101,7 +101,7 @@ public class MainF extends OpMode {
                 if (robot.limelight.isDetected()) {
                     robot.driveTrain.drive(x, y, robot.limelight.degreeOffset(), true);
                 } else {
-                    robot.driveTrain.drive(x, y, 0.75, false);
+                    robot.driveTrain.drive(x, y, trajectories.rotation(robot.driveTrain), false);
                 }
             } else {
                 robot.driveTrain.drive(x, y, rx, false);

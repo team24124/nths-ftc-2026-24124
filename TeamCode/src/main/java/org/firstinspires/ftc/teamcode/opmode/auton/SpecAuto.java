@@ -38,7 +38,7 @@ public class SpecAuto extends LinearOpMode {
         ));
         AccelConstraint baseAccelConstraint = new ProfileAccelConstraint(-10.0, 20.0); // Optional constraints to change from constraints in MecanumDrive
 
-        Pose2d initialPose = new Pose2d(8, 62 + vertical, Math.toRadians(90)); // Initialize position and heading of robot
+        Pose2d initialPose = new Pose2d(8, -62 + vertical, Math.toRadians(0)); // Initialize position and heading of robot, position is grid of -72, 0, 72 from left to right and bottom to top
         drivebase.localizer.setPose(initialPose); // Set the localizer start position to initialPose
         PoseStorage.currentPose = initialPose; // Set global pose value
 

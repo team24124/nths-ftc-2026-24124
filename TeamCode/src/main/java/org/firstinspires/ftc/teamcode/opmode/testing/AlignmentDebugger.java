@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
+import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.util.ArraySelect;
 import org.firstinspires.ftc.teamcode.util.PIDF;
 
@@ -24,6 +25,7 @@ public class AlignmentDebugger extends OpMode {
     private List<LynxModule> hubs;
     private VoltageSensor voltageSensor;
     private Drivetrain driveTrain;
+    private TeleOpTrajectories trajectories;
     private Limelight limelight;
     private GamepadEx driver;
 
@@ -37,7 +39,6 @@ public class AlignmentDebugger extends OpMode {
     // --- PIDs ---
     private boolean alignToAT = false;
     private PIDF thetaPID = new PIDF();
-    private PIDF distancePID = new PIDF();
 
     @Override
     public void init() {
@@ -48,6 +49,7 @@ public class AlignmentDebugger extends OpMode {
 
         voltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
         driveTrain = new FieldCentricDrive(hardwareMap, new Pose2d(new Vector2d(0, 0), Math.toRadians(0)));
+        trajectories = TeleOpTrajectories.INSTANCE;
         driver = new GamepadEx(gamepad1);
         limelight = new Limelight(hardwareMap);
 
@@ -82,7 +84,7 @@ public class AlignmentDebugger extends OpMode {
                 if (limelight.isDetected()) {
                     align(x, y, limelight.degreeOffset()); // Private align method to avoid using DriveTrain PID
                 } else {
-                    driveTrain.drive(x, y, 0.75, false);
+                    driveTrain.drive(x, y, trajectories.rotation(driveTrain), false);
                 }
             } else {
                 driveTrain.drive(x, y, rx, false);
@@ -92,7 +94,7 @@ public class AlignmentDebugger extends OpMode {
 
     public void align(double x, double y, double theta) {
         double voltage = voltageSensor.getVoltage();
-        double botHeading = driveTrain.getDrive().localizer.getPose().heading.toDouble();
+        double botHeading = driveTrain.getHeading();
         double rx = thetaPID.calculate(theta, 0, voltage);
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
         double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
