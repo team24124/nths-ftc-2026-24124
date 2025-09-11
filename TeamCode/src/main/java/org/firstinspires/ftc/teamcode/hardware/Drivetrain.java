@@ -21,7 +21,6 @@ public abstract class Drivetrain implements SubsystemBase, TelemetryObservable {
     private final MecanumDrive drive;
     private final ArraySelect<Double> speeds;
     protected PIDF thetaPID = new PIDF();
-    protected PIDF distancePID = new PIDF();
     protected VoltageSensor voltageSensor;
 
     public Drivetrain(HardwareMap hw, Pose2d start) {
@@ -29,7 +28,6 @@ public abstract class Drivetrain implements SubsystemBase, TelemetryObservable {
         speeds = new ArraySelect<>(new Double[]{0.5, 1.0});
 
         thetaPID.setPID(3,3,3,3,3);
-        distancePID.setPID(3,3,3,3,3);
 
         voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
     }
@@ -39,11 +37,9 @@ public abstract class Drivetrain implements SubsystemBase, TelemetryObservable {
      * given values for an x, y, and a turn
      * @param x Amount of x (Ex. left/right on the left joystick)
      * @param y Amount of y (Ex. up/down on the left joystick)
-     * @param turn Amount of turn (Ex. left/right on the right joystick)
+     * @param rx Amount of turn (Ex. left/right on the right joystick) / Vision target offset
      */
-    public abstract void drive(double x, double y, double turn);
-
-    public void align(double x, double y, double dist, double theta) {} // Align with AT
+    public abstract void drive(double x, double y, double rx, boolean align);
 
     public MecanumDrive getDrive(){
         return drive;

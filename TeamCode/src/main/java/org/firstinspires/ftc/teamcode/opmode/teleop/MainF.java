@@ -99,12 +99,12 @@ public class MainF extends OpMode {
         if (!robot.driveTrain.getDrive().isBusy) {
             if (alignToAT) {
                 if (robot.limelight.isDetected()) {
-                    robot.driveTrain.align(x, y, robot.limelight.distance(), robot.limelight.degreeOffset());
+                    robot.driveTrain.drive(x, y, robot.limelight.degreeOffset(), true);
                 } else {
-                    robot.driveTrain.drive(x, y, 0.75);
+                    robot.driveTrain.drive(x, y, 0.75, false);
                 }
             } else {
-                robot.driveTrain.drive(x, y, rx);
+                robot.driveTrain.drive(x, y, rx, false);
             }
         }
 

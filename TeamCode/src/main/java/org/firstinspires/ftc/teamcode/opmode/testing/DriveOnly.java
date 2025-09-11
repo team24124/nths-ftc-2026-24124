@@ -61,7 +61,7 @@ public class DriveOnly extends OpMode {
         }
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            Pose2d targetPose = new Pose2d(3, 30, Math.toRadians(90));
+            Pose2d targetPose = new Pose2d(0, 30, Math.toRadians(90));
             trajectory.vectorAlign(drivetrain.getDrive(), targetPose);
         }
 
@@ -75,7 +75,7 @@ public class DriveOnly extends OpMode {
         drivetrain.periodic();
 
         if (!drivetrain.getDrive().isBusy) {
-            drivetrain.drive(x, y, rx);
+            drivetrain.drive(x, y, rx, false);
         }
 
         ActionScheduler.INSTANCE.run();
