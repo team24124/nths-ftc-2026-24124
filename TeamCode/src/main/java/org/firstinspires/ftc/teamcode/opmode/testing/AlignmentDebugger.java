@@ -29,16 +29,14 @@ public class AlignmentDebugger extends OpMode {
     private Limelight limelight;
     private GamepadEx driver;
 
-    // --- tune theta PID
-    public static double tKp = 0;
-    public static double tKi = 0;
-    public static double tKd = 0;
-    public static double ta = 0;
-    public static double tIntegralSumLimit = 0;
+    // --- tune theta PD ---
+    public static double Kp = 0;
+    public static double Kd = 0;
+    public static double a = 0;
 
-    // --- PIDs ---
+    // --- PD ---
     private boolean alignToAT = false;
-    private PIDF thetaPID = new PIDF();
+    private PIDF thetaPD = new PIDF();
 
     @Override
     public void init() {
@@ -53,7 +51,7 @@ public class AlignmentDebugger extends OpMode {
         driver = new GamepadEx(gamepad1);
         limelight = new Limelight(hardwareMap);
 
-        thetaPID.setPID(tKp, tKi, tKd, ta, tIntegralSumLimit);
+        thetaPD.setPD(Kp, Kd, a, 537.6);
     }
 
     @Override
@@ -62,7 +60,7 @@ public class AlignmentDebugger extends OpMode {
             hub.clearBulkCache();
         }
 
-        thetaPID.setPID(tKp, tKi, tKd, ta, tIntegralSumLimit);
+        thetaPD.setPD(Kp, Kd, a, 537.6);
 
         double y = Math.abs(-driver.getLeftY()) > 0.05 ? -driver.getLeftY() : 0;
         double x = Math.abs(driver.getLeftX()) > 0.05 ? driver.getLeftX() : 0;
@@ -82,9 +80,9 @@ public class AlignmentDebugger extends OpMode {
         if (!driveTrain.getDrive().isBusy) {
             if (alignToAT) {
                 if (limelight.isDetected()) {
-                    align(x, y, limelight.degreeOffset()); // Private align method to avoid using DriveTrain PID
+                    align(x, y, limelight.degreeOffset()); // Private align method to avoid using DriveTrain PD
                 } else {
-                    driveTrain.drive(x, y, trajectories.rotation(driveTrain), false);
+                    driveTrain.drive(x, y, trajectories.rotation(driveTrain, -72), false);
                 }
             } else {
                 driveTrain.drive(x, y, rx, false);
@@ -94,22 +92,19 @@ public class AlignmentDebugger extends OpMode {
 
     public void align(double x, double y, double theta) {
         double voltage = voltageSensor.getVoltage();
-        double botHeading = driveTrain.getHeading();
-        double rx = thetaPID.calculate(theta, 0, voltage);
-        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-        double frontLeftPower;
-        double backLeftPower;
-        double frontRightPower;
-        double backRightPower;
+        double botHeading = (driveTrain.getHeading() + Math.PI/2) % (Math.PI*2);
 
+        double rotX = x * Math.cos(botHeading) + y * Math.sin(botHeading);
+        double rotY = -x * Math.sin(botHeading) + y * Math.cos(botHeading);
         rotX = rotX * 1.1;
 
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 2);
-        frontLeftPower = (rotY + rotX + rx) / denominator;
-        backLeftPower = (rotY - rotX + rx) / denominator;
-        frontRightPower = (rotY - rotX - rx) / denominator;
-        backRightPower = (rotY + rotX - rx) / denominator;
+        double rx = thetaPD.calculate(theta, 0, voltage);
+
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        double frontLeftPower = (rotY + rotX + rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx) / denominator;
+        double frontRightPower = (rotY - rotX - rx) / denominator;
+        double backRightPower = (rotY + rotX - rx) / denominator;
 
         ArraySelect<Double> speeds = driveTrain.getSpeeds();
         driveTrain.setDrivePowers(

@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.util.ArraySelect;
-import org.firstinspires.ftc.teamcode.util.telemetry.TelemetryObservable;
+import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 
 public class FieldCentricDrive extends Drivetrain implements TelemetryObservable {
     public FieldCentricDrive(HardwareMap hw, Pose2d start) {
@@ -22,11 +22,11 @@ public class FieldCentricDrive extends Drivetrain implements TelemetryObservable
     @Override
     public void drive(double x, double y, double rx, boolean align) {
         double voltage = voltageSensor.getVoltage();
-        double botHeading = getDrive().localizer.getPose().heading.toDouble();
+        double botHeading = (getHeading() + Math.PI/2) % (Math.PI*2);
 
         // Rotate the movement direction counter to the bot's rotation
-        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+        double rotX = x * Math.cos(botHeading) + y * Math.sin(botHeading);
+        double rotY = -x * Math.sin(botHeading) + y * Math.cos(botHeading);
         rotX = rotX * 1.1;  // Counteract imperfect strafing
 
         double denominator;
@@ -39,8 +39,8 @@ public class FieldCentricDrive extends Drivetrain implements TelemetryObservable
              */
             denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
         } else {
-            rx = thetaPID.calculate(rx, 0, voltage);
-            denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1.3);
+            rx = thetaPD.calculate(rx, 0, voltage); // rx is limelight input
+            denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1.2);
         }
 
         double frontLeftPower = (rotY + rotX + rx) / denominator;

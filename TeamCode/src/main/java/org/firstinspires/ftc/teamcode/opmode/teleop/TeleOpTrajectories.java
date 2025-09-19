@@ -25,17 +25,19 @@ public enum TeleOpTrajectories {
                         .build();
     }
 
-    // Calculates whether to turn right or left to align with the top right corner of the field
-    public double rotation(Drivetrain drivebase) {
-        double botX = Math.abs(drivebase.getPosition().position.x - 72); // Shifts normal coordinate system so that (0, 0) is at the top right
-        double botY = Math.abs(drivebase.getPosition().position.y - 72);
+    // Calculates whether to turn right or left to align with the corners of the field
+    public double rotation(Drivetrain drivebase, double X) {
+        double heading = (drivebase.getHeading() + Math.PI/2) % (Math.PI*2);
+        double botX = drivebase.getPosition().position.x;
+        double botY = drivebase.getPosition().position.y;
 
-        double theta = Math.atan(botY/botX); // Calculate angle from 90 degrees to target (0 being north)
+        double theta = Math.atan2(72 - botY, X - botX); // Calculate angle to target (0 being east CCW)
 
+        if (Utilities.isBetween(heading, theta - Math.toRadians(10), theta + Math.toRadians(10))) { // Potential flickers may cause unnecessary rotation
+            return 0;
+        }
         if (
-                Utilities.isBetween(drivebase.getHeading(), 0, (Math.PI / 2) - theta) // Between 0 and angle to target
-                    ||
-                Utilities.isBetween(drivebase.getHeading(), (Math.PI / 2) - theta + Math.PI, Math.PI * 2) // Or between opposite angle to target and 360
+                Utilities.isBetween(heading, theta, Math.PI + theta) // Between angle to target from 0 = east & opposite
         ) {
             return 0.8; // Turn right
         } else {

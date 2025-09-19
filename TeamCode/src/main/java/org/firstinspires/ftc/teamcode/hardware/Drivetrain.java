@@ -6,10 +6,11 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
+import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.util.ArraySelect;
 import org.firstinspires.ftc.teamcode.util.PIDF;
-import org.firstinspires.ftc.teamcode.util.telemetry.TelemetryObservable;
+import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 
 /**
  * Abstract DriveTrain class used to implement different types of drives
@@ -20,14 +21,14 @@ import org.firstinspires.ftc.teamcode.util.telemetry.TelemetryObservable;
 public abstract class Drivetrain implements SubsystemBase, TelemetryObservable {
     private final MecanumDrive drive;
     private final ArraySelect<Double> speeds;
-    protected PIDF thetaPID = new PIDF();
-    protected VoltageSensor voltageSensor;
+    protected PIDF thetaPD = new PIDF();
+    protected final VoltageSensor voltageSensor;
 
     public Drivetrain(HardwareMap hw, Pose2d start) {
         drive = new MecanumDrive(hw, start);
         speeds = new ArraySelect<>(new Double[]{0.5, 1.0});
 
-        thetaPID.setPID(3,3,3,3,3);
+        thetaPD.setPD(3,3,3, 537.6);
 
         voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
     }

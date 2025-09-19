@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.teamcode.hardware.SubsystemBase;
-import org.firstinspires.ftc.teamcode.util.telemetry.TelemetryObservable;
+import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
+import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 
 import java.util.List;
 
@@ -42,6 +42,12 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
         pipeline = Pipeline.AT1;
     }
 
+    private double normalizeAngleTo2Pi(double a) {
+        a = a % (2 * Math.PI);
+        if (a < 0) a += 2 * Math.PI;
+        return a;
+    }
+
     // Switch pipeline if input is not the same as pipeline
     public void setPipeline(Pipeline pipeline) {
         if (pipeline != this.pipeline) {
@@ -57,11 +63,7 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
 
     private LLResultTypes.FiducialResult getFiducial() {
         List<LLResultTypes.FiducialResult> fiducials = getResult().getFiducialResults();
-        if (!fiducials.isEmpty()) {
-            return fiducials.get(0); // Gets first detected tag in the list of tags of fiducials
-        } else {
-            return null;
-        }
+        return fiducials.get(0); // Gets first detected tag in the list of tags of fiducials
     }
 
     // AT type to determine Obelisk pattern (use for state machine within autonomous)
@@ -80,7 +82,7 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
 
     // Distance in inches
     public double distance() {
-        return 8 + Math.tan(Math.toRadians(cameraAngle + getResult().getTyNC())) * 20; // +8 to center limelight to center of robot
+        return 8 + 20 / Math.tan(Math.toRadians(cameraAngle + getResult().getTyNC())); // +8 to center limelight to center of robot
     }
 
     //---------------------------------- target position returners ----------------------------------
@@ -88,13 +90,12 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
     // Field space X and Y offset for detected
     public Pose2d targetVectorFieldSpace(Pose2d botPose) {
         // Target raw data
-        double ty = Math.tan(Math.toRadians(cameraAngle + getResult().getTyNC())) * 20;
-        double distanceFromCam = Math.sqrt(Math.pow(ty, 2) + Math.pow(20, 2));
-        double tx = Math.tan(Math.toRadians(0 + getResult().getTxNC())) * distanceFromCam; // +0 for limelight yaw
+        double ty = 20 / Math.tan(Math.toRadians(cameraAngle + getResult().getTyNC())); // Target height (opposite) / ratio to find adjacent (robot distance)
+        double tx = Math.tan(Math.toRadians(0 + getResult().getTxNC())) * ty; // +0 for limelight yaw. Multiply tan by adjacent to get opposite
 
         // Target offset
-        double x = tx - 13;
-        double y = ty - 19;
+        double x = tx - 0;
+        double y = ty - 100;
 
         double heading = botPose.heading.toDouble();
 
@@ -133,13 +134,13 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
         double x1 = botPose.position.x + (x * Math.cos(heading) - y * Math.sin(heading));
         double y1 = botPose.position.y + (x * Math.sin(heading) + y * Math.cos(heading));
 
-        return new Pose2d(x1, y1, (heading + (2 * Math.PI - theta)) % (2 * Math.PI)); // Combine heading and rotation needed
+        return new Pose2d(x1, y1, normalizeAngleTo2Pi(heading - theta)); // Combine heading and rotation needed
     }
 
     // Field space bot pose (this is mapped, face desired AT ID 20 or 24)
     public Pose2d ATRobotPoseFieldSpace() {
         Pose3D pose3d = getResult().getBotpose_MT2();
-        return new Pose2d(pose3d.getPosition().x * 39.37, pose3d.getPosition().y * 39.37, pose3d.getOrientation().getYaw(AngleUnit.RADIANS) + 180);
+        return new Pose2d(pose3d.getPosition().x * 39.37, pose3d.getPosition().y * 39.37, normalizeAngleTo2Pi(pose3d.getOrientation().getYaw(AngleUnit.RADIANS)));
     }
 
     //---------------------------------- telemetry ----------------------------------
@@ -149,7 +150,7 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
         LLResult result = getResult();
         telemetry.addData("Status", limelight.getStatus().toString());
         telemetry.addData("pipeline", pipeline.name());
-        if (getResult().isValid() && result.getPythonOutput().length > 2) {
+        if (getResult().isValid() && result.getPythonOutput() != null) {
             double[] pythonOutputs = result.getPythonOutput();
             telemetry.addData("validity", pythonOutputs[0]);
             telemetry.addData("targetX", Math.round(pythonOutputs[1]));

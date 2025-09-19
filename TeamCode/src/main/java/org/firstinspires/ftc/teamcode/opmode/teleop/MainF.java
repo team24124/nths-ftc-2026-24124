@@ -101,7 +101,7 @@ public class MainF extends OpMode {
                 if (robot.limelight.isDetected()) {
                     robot.driveTrain.drive(x, y, robot.limelight.degreeOffset(), true);
                 } else {
-                    robot.driveTrain.drive(x, y, trajectories.rotation(robot.driveTrain), false);
+                    robot.driveTrain.drive(x, y, trajectories.rotation(robot.driveTrain, 72), false);
                 }
             } else {
                 robot.driveTrain.drive(x, y, rx, false);
@@ -113,7 +113,10 @@ public class MainF extends OpMode {
         driver.readButtons();
         operator.readButtons();
 
-        robot.driveTrain.periodic();
+        robot.turretBase.setHeadings(robot.driveTrain.getDrive(), robot.limelight.degreeOffset(), robot.limelight.isDetected(), true); // TODO second teleop with diffferent align
+
+        robot.driveTrain.periodic(); // Update position
+        robot.turretBase.periodic(); // PD loop
 
         robot.actions.run();
     }

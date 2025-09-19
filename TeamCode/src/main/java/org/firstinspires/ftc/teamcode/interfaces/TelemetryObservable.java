@@ -1,7 +1,7 @@
-package org.firstinspires.ftc.teamcode.util.telemetry;
+package org.firstinspires.ftc.teamcode.interfaces;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.hardware.SubsystemBase;
+import org.firstinspires.ftc.teamcode.util.TelemetryControl;
 
 public interface TelemetryObservable {
     /**

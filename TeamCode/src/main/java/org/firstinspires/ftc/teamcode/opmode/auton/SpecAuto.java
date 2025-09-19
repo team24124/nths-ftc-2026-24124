@@ -2,12 +2,15 @@ package org.firstinspires.ftc.teamcode.opmode.auton;
 
 import com.acmerobotics.roadrunner.AccelConstraint;
 import com.acmerobotics.roadrunner.AngularVelConstraint;
+import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.MinVelConstraint;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.VelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -56,7 +59,9 @@ public class SpecAuto extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-
+                        drivebase.actionBuilder(initialPose, true)
+                                .splineToConstantHeading(new Vector2d(9, 9), 0)
+                                .build()
                 )
         );
 

@@ -62,7 +62,7 @@ public class DriveOnly extends OpMode {
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
             Pose2d targetPose = new Pose2d(0, 30, Math.toRadians(90));
-            trajectories.vectorAlign(drivetrain.getDrive(), targetPose);
+            actions.schedule(trajectories.vectorAlign(drivetrain.getDrive(), targetPose));
         }
 
         // Checks if drivetrain has been switched and switches drivetrain type

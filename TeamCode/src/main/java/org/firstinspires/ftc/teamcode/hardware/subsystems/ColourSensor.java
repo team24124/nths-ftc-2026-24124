@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.hardware.SubsystemBase;
-import org.firstinspires.ftc.teamcode.util.telemetry.TelemetryObservable;
+import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
+import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 
 public class ColourSensor implements SubsystemBase, TelemetryObservable {
     private NormalizedColorSensor colorSensor;

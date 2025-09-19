@@ -60,18 +60,18 @@ public class MainR extends OpMode {
         }
 
         // Enable constant AT alignment
-        if (driver.wasJustPressed(GamepadKeys.Button.A)) { // Semi autonomous alignment mode
+        if (driver.wasJustPressed(GamepadKeys.Button.A)) { // Semi autonomous alignment mode (PIDs with limelight)
             robot.limelight.setPipeline(Limelight.Pipeline.AT2);
             trajectoryAlign = false;
             alignToAT = true;
         }
-        if (driver.wasJustPressed(GamepadKeys.Button.X)) { // Pure TeleOp with ability to reset pose
+        if (driver.wasJustPressed(GamepadKeys.Button.X)) { // Pure TeleOp with ability to reset pose (MT2)
             robot.limelight.setPipeline(Limelight.Pipeline.AT4);
             trajectoryAlign = false;
             alignToAT = false;
         }
-        if (driver.wasJustPressed(GamepadKeys.Button.B)) { // Full autonomous alignment
-            robot.limelight.setPipeline(Limelight.Pipeline.AT3);
+        if (driver.wasJustPressed(GamepadKeys.Button.B)) { // Full autonomous alignment (Same AT pipeline as semi alignment)
+            robot.limelight.setPipeline(Limelight.Pipeline.AT2);
             alignToAT = false;
             trajectoryAlign = true;
         }
@@ -99,7 +99,7 @@ public class MainR extends OpMode {
                 if (robot.limelight.isDetected()) {
                     robot.driveTrain.drive(x, y, robot.limelight.degreeOffset(), true);
                 } else {
-                    robot.driveTrain.drive(x, y, trajectories.rotation(robot.driveTrain), false);
+                    robot.driveTrain.drive(x, y, trajectories.rotation(robot.driveTrain, 72), false); // TODO second teleop with reversed 72
                 }
             } else {
                 robot.driveTrain.drive(x, y, rx, false);
@@ -111,7 +111,10 @@ public class MainR extends OpMode {
         driver.readButtons();
         operator.readButtons();
 
+        robot.turretBase.setHeadings(robot.driveTrain.getDrive(), robot.limelight.degreeOffset(), robot.limelight.isDetected(), true);
+
         robot.driveTrain.periodic(); // Update position
+        robot.turretBase.periodic(); // PD loop
 
         robot.actions.run(); // Call for scheduled actions to run
     }

@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.hardware.SubsystemBase;
-import org.firstinspires.ftc.teamcode.util.telemetry.TelemetryObservable;
+import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
+import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 
 public class FlyWheel implements SubsystemBase, TelemetryObservable {
     private final DcMotorEx flyWheel;

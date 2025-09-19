@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.util.ArraySelect;
-import org.firstinspires.ftc.teamcode.util.telemetry.TelemetryObservable;
+import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 
 public class RobotCentricDrive extends Drivetrain implements TelemetryObservable {
     public RobotCentricDrive(HardwareMap hw, Pose2d start) {
@@ -23,7 +23,7 @@ public class RobotCentricDrive extends Drivetrain implements TelemetryObservable
     public void drive(double x, double y, double rx, boolean align) {
         double voltage = voltageSensor.getVoltage();
         if (align) {
-            rx = thetaPID.calculate(rx, 0, voltage);
+            rx = thetaPD.calculate(rx, 0, voltage);
         }
 
         double theta = Math.atan2(y, x);
@@ -40,9 +40,7 @@ public class RobotCentricDrive extends Drivetrain implements TelemetryObservable
 
         if ((power + Math.abs(rx)) > 1) {
             double denominator = power + Math.abs(rx);
-            if (align) {
-                denominator += 0.3;
-            }
+            if (align) denominator += 0.2;
             leftPower /= denominator;
             leftBackPower /= denominator;
             rightPower /= denominator;

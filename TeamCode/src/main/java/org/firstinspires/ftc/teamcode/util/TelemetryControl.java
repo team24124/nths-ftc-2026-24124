@@ -1,8 +1,10 @@
-package org.firstinspires.ftc.teamcode.util.telemetry;
+package org.firstinspires.ftc.teamcode.util;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
+
 import java.util.ArrayList;
 
 public class TelemetryControl {
