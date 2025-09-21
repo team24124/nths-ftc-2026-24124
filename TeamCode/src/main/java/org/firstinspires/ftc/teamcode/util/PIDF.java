@@ -7,7 +7,7 @@ public class PIDF {
     private double Ki = 0;
     private double Kd = 0;
     private double Kg = 0; // Gravitational correction (feedforward)
-    private double smoothingFactor = 0; // a can be any value from 0 < a < 1. heavier smoothing but less responsiveness towards 1
+    private double smoothingFactor = 0; // a can be any value from 0 < a < 1. Heavier smoothing but less responsiveness towards 1
     private double integralSumLimit = 0; // Integral cap to prevent unnecessary accumulation
 
     private double target = 0;
@@ -31,6 +31,7 @@ public class PIDF {
         this.Kg = Kg;
         this.smoothingFactor = smoothingFactor;
         this.integralSumLimit = integralSumLimit;
+        this.motorTPR = motorTPR;
     }
 
     // Feedback only
@@ -41,6 +42,7 @@ public class PIDF {
         this.Kd = Kd;
         this.smoothingFactor = smoothingFactor;
         this.integralSumLimit = integralSumLimit;
+        this.motorTPR = motorTPR;
     }
 
     // Removed integral for uncertain error
@@ -49,9 +51,10 @@ public class PIDF {
         this.Kp = Kp;
         this.Kd = Kd;
         this.smoothingFactor = smoothingFactor;
+        this.motorTPR = motorTPR;
     }
 
-    // Output power
+    // Outputs processed power
     public double calculate(double position, double target, double voltage) {
         // Time
         double dt = timer.seconds();

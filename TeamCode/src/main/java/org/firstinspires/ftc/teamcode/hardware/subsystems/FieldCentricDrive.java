@@ -27,7 +27,7 @@ public class FieldCentricDrive extends Drivetrain implements TelemetryObservable
         // Rotate the movement direction counter to the bot's rotation
         double rotX = x * Math.cos(botHeading) + y * Math.sin(botHeading);
         double rotY = -x * Math.sin(botHeading) + y * Math.cos(botHeading);
-        rotX = rotX * 1.1;  // Counteract imperfect strafing
+        rotX = rotX * 1.1; // Counteract imperfect strafing
 
         double denominator;
 
@@ -39,7 +39,7 @@ public class FieldCentricDrive extends Drivetrain implements TelemetryObservable
              */
             denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
         } else {
-            rx = thetaPD.calculate(rx, 0, voltage); // rx is limelight input
+            rx = thetaPD.calculate(rx, 0, voltage); // rx is limelight input in this case due to different input parameters in main TeleOp's
             denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1.2);
         }
 

@@ -32,8 +32,9 @@ public enum TeleOpTrajectories {
         double botY = drivebase.getPosition().position.y;
 
         double theta = Math.atan2(72 - botY, X - botX); // Calculate angle to target (0 being east CCW)
+        if (theta < 0) theta += Math.PI*2; // Normalize to 0 - 360
 
-        if (Utilities.isBetween(heading, theta - Math.toRadians(10), theta + Math.toRadians(10))) { // Potential flickers may cause unnecessary rotation
+        if (Utilities.isBetween(heading, theta - Math.toRadians(15), theta + Math.toRadians(15))) { // Potential flickers may cause unnecessary rotation, a threshold is necessary
             return 0;
         }
         if (

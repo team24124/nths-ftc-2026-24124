@@ -28,7 +28,7 @@ public class SpecAuto extends LinearOpMode {
 
     // Field error variables
     private final double lateral = 0; // Add to poses where aligning to side walls is necessary
-    private final double vertical = 0; // Add to poses where aligning to bottom wall is necessary
+    private final double vertical = 0; // Add to poses where aligning to bottom wall is necessary (including start pose)
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -41,7 +41,7 @@ public class SpecAuto extends LinearOpMode {
         ));
         AccelConstraint baseAccelConstraint = new ProfileAccelConstraint(-10.0, 20.0); // Optional constraints to change from constraints in MecanumDrive
 
-        Pose2d initialPose = new Pose2d(8, -62 + vertical, Math.toRadians(0)); // Initialize position and heading of robot, position is grid of -72, 0, 72 from left to right and bottom to top
+        Pose2d initialPose = new Pose2d(8, -62 + vertical, Math.toRadians(0)); // Initialize position and heading of robot. Position is grid of -72, 0, 72 from left to right and bottom to top, heading is 0 - 360, CCW, 0 = north
         drivebase.localizer.setPose(initialPose); // Set the localizer start position to initialPose
         PoseStorage.currentPose = initialPose; // Set global pose value
 
@@ -51,17 +51,22 @@ public class SpecAuto extends LinearOpMode {
 
         // Autonomous sequence
 
+        // Actions called during init
         Actions.runBlocking(new ParallelAction());
 
         waitForStart();
 
         if (isStopRequested()) return;
 
+        // Main sequence
         Actions.runBlocking(
                 new SequentialAction(
                         drivebase.actionBuilder(initialPose, true)
                                 .splineToConstantHeading(new Vector2d(9, 9), 0)
-                                .build()
+                                .build(),
+
+                        new InstantAction(() -> robot.turretBase.periodic())
+
                 )
         );
 

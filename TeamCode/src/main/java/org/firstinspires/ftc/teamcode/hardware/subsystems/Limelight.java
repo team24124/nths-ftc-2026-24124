@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.hardware.subsystems;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -19,8 +20,8 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
     public enum Pipeline {
         PSS1(0), // First python snapscript
         AT1(1), // Obelisk detection
-        AT2(2), // 2D goal detection
-        AT3(3), // Full 3D goal detection
+        AT2(2), // Full 3D goal detection BLUE
+        AT3(3), // Full 3D goal detection RED
         AT4(4); // MT2 for pose reset
 
         public final int pipelineNum;
@@ -32,16 +33,21 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
 
     private Pipeline pipeline;
 
-    private final double cameraAngle = 0; // Facing forward == 0 degrees
+    private final double cameraAngle = 0; // Facing forward == 0 degrees, +east -west
 
     public Limelight(HardwareMap hw){
         limelight = hw.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(Pipeline.AT1.pipelineNum);
         limelight.setPollRateHz(100); // Ask Limelight for data (100 times per second)
-        limelight.start();
+        limelight.start(); // Starts polling for data. If start() is neglected, getLatestResult() will return null
         pipeline = Pipeline.AT1;
     }
 
+    public LLStatus status() {
+        return limelight.getStatus();
+    }
+
+    // Radian range normalizer method
     private double normalizeAngleTo2Pi(double a) {
         a = a % (2 * Math.PI);
         if (a < 0) a += 2 * Math.PI;
@@ -56,14 +62,22 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
         }
     }
 
-    // Checks python output & validity
+    // Only use in limelight tester
+    public void setPipeline(int pipeline) {
+        if (pipeline != this.pipeline.pipelineNum) {
+            limelight.pipelineSwitch(pipeline);
+        }
+    }
+
+    // Checks if there is a valid detected target
     public boolean isDetected() {
         return getResult().isValid();
     }
 
+    // Gets first detected tag in the list of tags of fiducials
     private LLResultTypes.FiducialResult getFiducial() {
         List<LLResultTypes.FiducialResult> fiducials = getResult().getFiducialResults();
-        return fiducials.get(0); // Gets first detected tag in the list of tags of fiducials
+        return fiducials.get(0);
     }
 
     // AT type to determine Obelisk pattern (use for state machine within autonomous)
@@ -71,18 +85,18 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
         return getFiducial().getFiducialId();
     }
 
-    private LLResult getResult() { return limelight.getLatestResult(); }
+    public LLResult getResult() { return limelight.getLatestResult(); }
 
     //---------------------------------- values for PIDF ----------------------------------
 
-    // Tx for rotation
+    // Tx for rotation, +east -west
     public double degreeOffset() {
         return getResult().getTx();
     }
 
-    // Distance in inches
+    // Distance in inches, AT height / tan of forward to angle to target
     public double distance() {
-        return 8 + 20 / Math.tan(Math.toRadians(cameraAngle + getResult().getTyNC())); // +8 to center limelight to center of robot
+        return 8 + 20 / Math.tan(Math.toRadians(Math.max(0.00001, cameraAngle + getResult().getTyNC()))); // +8 to center limelight to center of robot
     }
 
     //---------------------------------- target position returners ----------------------------------
@@ -93,13 +107,13 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
         double ty = 20 / Math.tan(Math.toRadians(cameraAngle + getResult().getTyNC())); // Target height (opposite) / ratio to find adjacent (robot distance)
         double tx = Math.tan(Math.toRadians(0 + getResult().getTxNC())) * ty; // +0 for limelight yaw. Multiply tan by adjacent to get opposite
 
-        // Target offset
+        // Desired pose relative to target
         double x = tx - 0;
         double y = ty - 100;
 
         double heading = botPose.heading.toDouble();
 
-        // Target converted into field centric
+        // Target converted into field coordinates
         double x1 = botPose.position.x + (x * Math.cos(heading) - y * Math.sin(heading));
         double y1 = botPose.position.y + (x * Math.sin(heading) + y * Math.cos(heading));
 
@@ -110,11 +124,13 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
     public Pose2d ATTargetVectorFieldSpace(Pose2d botPose) {
         Pose3D targetPose = getFiducial().getTargetPoseRobotSpace();
 
-        double y = targetPose.getPosition().x * 39.37 - 50; // Robot space is cartesian with X+ pointing forward and Y+ pointing right
+        // Robot space is cartesian with X+ pointing forward and Y+ pointing right
         double x = targetPose.getPosition().y * 39.37 - 0;
+        double y = targetPose.getPosition().x * 39.37 - 50;
 
         double heading = botPose.heading.toDouble();
 
+        // Same conversion steps as method above
         double x1 = botPose.position.x + (x * Math.cos(heading) - y * Math.sin(heading));
         double y1 = botPose.position.y + (x * Math.sin(heading) + y * Math.cos(heading));
 
@@ -127,17 +143,17 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
         double theta = Math.toRadians(degreeOffset());
 
         double x = pose.getPosition().y * 39.37;
-        double y = pose.getPosition().x * 39.37 - 50; // Offset target
+        double y = pose.getPosition().x * 39.37 - 50;
 
         double heading = botPose.heading.toDouble();
 
         double x1 = botPose.position.x + (x * Math.cos(heading) - y * Math.sin(heading));
         double y1 = botPose.position.y + (x * Math.sin(heading) + y * Math.cos(heading));
 
-        return new Pose2d(x1, y1, normalizeAngleTo2Pi(heading - theta)); // Combine heading and rotation needed
+        return new Pose2d(x1, y1, normalizeAngleTo2Pi(heading - theta)); // Combine heading and rotation counter
     }
 
-    // Field space bot pose (this is mapped, face desired AT ID 20 or 24)
+    // Field space bot pose (this is mapped, face desired AT ID 20 or 24. All other AT's are neglected due to uncertain placement)
     public Pose2d ATRobotPoseFieldSpace() {
         Pose3D pose3d = getResult().getBotpose_MT2();
         return new Pose2d(pose3d.getPosition().x * 39.37, pose3d.getPosition().y * 39.37, normalizeAngleTo2Pi(pose3d.getOrientation().getYaw(AngleUnit.RADIANS)));

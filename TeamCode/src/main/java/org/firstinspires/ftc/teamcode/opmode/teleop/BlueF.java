@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import java.util.List;
 
 @TeleOp(name = "MainF", group = "!")
-public class MainF extends OpMode {
+public class BlueF extends OpMode {
     private Robot robot;
     private GamepadEx driver, operator;
     private TeleOpTrajectories trajectories;
@@ -59,7 +59,7 @@ public class MainF extends OpMode {
         }
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            robot.limelight.setPipeline(Limelight.Pipeline.AT3);
+            robot.limelight.setPipeline(Limelight.Pipeline.AT2);
             trajectoryAlign = false;
             alignToAT = true;
         }
@@ -69,7 +69,7 @@ public class MainF extends OpMode {
             alignToAT = false;
         }
         if (driver.wasJustPressed(GamepadKeys.Button.B)) {
-            robot.limelight.setPipeline(Limelight.Pipeline.AT3);
+            robot.limelight.setPipeline(Limelight.Pipeline.AT2);
             alignToAT = false;
             trajectoryAlign = true;
         }
@@ -86,7 +86,6 @@ public class MainF extends OpMode {
             }
         }
 
-        // Reset orientation for FC drive
         if (driver.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
             Vector2d current = robot.driveTrain.getDrive().localizer.getPose().position;
             robot.driveTrain.getDrive().localizer.setPose(new Pose2d(current, 0));
@@ -109,7 +108,7 @@ public class MainF extends OpMode {
                 if (robot.limelight.isDetected()) {
                     robot.driveTrain.drive(x, y, robot.limelight.degreeOffset(), true);
                 } else {
-                    robot.driveTrain.drive(x, y, trajectories.rotation(robot.driveTrain, 72), false);
+                    robot.driveTrain.drive(x, y, trajectories.rotation(robot.driveTrain, -72), false);
                 }
             } else {
                 robot.driveTrain.drive(x, y, rx, false);
@@ -120,7 +119,7 @@ public class MainF extends OpMode {
         driver.readButtons();
         operator.readButtons();
 
-        robot.turretBase.setHeadings(robot.driveTrain.getDrive(), robot.limelight.degreeOffset(), robot.limelight.isDetected(), true);
+        robot.turretBase.setHeadings(robot.driveTrain.getDrive(), robot.limelight.degreeOffset(), robot.limelight.isDetected(), false);
         robot.turretBase.periodic();
 
         robot.telemetryControl.update();

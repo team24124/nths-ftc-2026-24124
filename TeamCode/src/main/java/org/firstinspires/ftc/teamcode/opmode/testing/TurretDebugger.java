@@ -35,11 +35,10 @@ public class TurretDebugger extends OpMode {
     public static double Kd = 0;
     public static double a = 0;
 
-    // Internal math
-    private double target = 0;
     private final double motorTPR = 537.6;
 
     private boolean align = false;
+    private boolean redAlign = false;
 
     @Override
     public void init() {
@@ -75,34 +74,45 @@ public class TurretDebugger extends OpMode {
         double x = Math.abs(driver.getLeftX()) > 0.05 ? driver.getLeftX() : 0;
         double rx = Math.abs(-driver.getRightX()) > 0.05 ? -driver.getRightX() : 0;
 
-        pd.setPD(Kp, Kd, a, 537.6);
+        pd.setPD(Kp, Kd, a, motorTPR);
 
         if (align) {
-            double botX = drivetrain.getPosition().position.x;
+            int position = turretBase.getCurrentPosition();
             double botY = drivetrain.getPosition().position.y;
-            double Tx = limelight.degreeOffset();
+            double botX = drivetrain.getPosition().position.x;
             double heading = drivetrain.getHeading();
+            double target;
 
             if (limelight.isDetected()) {
-                target = (turretBase.getCurrentPosition() + (motorTPR/360) * Tx) % motorTPR; // current position + Range / 360 degrees * offset degrees
+                target = (position - (motorTPR/360) * limelight.degreeOffset()) % motorTPR;
             } else {
-                double theta = -Math.atan2(72 - botX, 72 - botY) + Math.PI * 2; // -atan2 + 360 to reverse CCW, inverse x & y to transfer 0+ from east to north
-
-                double thetaEncoders = (motorTPR / (Math.PI * 2)) * theta;
-
-                target = ((motorTPR / (Math.PI * 2)) * ((Math.PI * 2) - heading) + thetaEncoders);
-                //                TPR per radian           * radians to get T     + more rotation
-
-                if (target > (motorTPR/2)) { // Wrapper into -180, 0, 180 degrees
-                    target -= motorTPR;
-                } else if (target < -(motorTPR/2)) {
-                    target += motorTPR;
+                double theta;
+                if (redAlign) {
+                    theta = Math.atan2(72 - botY, 72 - botX);
+                } else {
+                    theta = Math.atan2(72 - botY, -72 - botX);
                 }
-            }
+                if (theta < 0) theta += (Math.PI * 2);
+                theta = (theta + Math.PI/2) % (Math.PI*2);
 
-            turretBase.setPower(pd.calculate(turretBase.getCurrentPosition(), target, voltageSensor.getVoltage()));
-        } else {
-            turretBase.setPower(driver.getLeftX());
+                double thetaTicks = (motorTPR / (Math.PI * 2)) * theta;
+
+                double headingTicks = ((heading + Math.PI) % (Math.PI * 2)) * (motorTPR / (Math.PI * 2));
+
+                target = thetaTicks - headingTicks + (motorTPR/2);
+                target %= motorTPR;
+            }
+            if (target < 0) target += motorTPR;
+
+            double power = pd.calculate(position, target, voltageSensor.getVoltage());
+            turretBase.setPower(power);
+        }
+
+        if (driver.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+            power(-1);
+        }
+        if (driver.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+            power(1);
         }
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
@@ -112,11 +122,22 @@ public class TurretDebugger extends OpMode {
             align = false;
         }
 
-        driver.readButtons();
+        drivetrain.drive(x, y, rx, false);
         drivetrain.periodic();
 
-        if (!drivetrain.getDrive().isBusy) {
-            drivetrain.drive(x, y, rx, false);
+        driver.readButtons();
+
+        telemetry.addData("Position", turretBase.getCurrentPosition());
+        telemetry.addData("Align", align);
+        telemetry.addData("Red Align", redAlign);
+        telemetry.addData("Power", turretBase.getPower());
+        telemetry.update();
+    }
+
+    // Set power if within tick range of turret
+    public void power(double power) {
+        if (!(turretBase.getCurrentPosition() < 0) && !(turretBase.getCurrentPosition() > 537.6)) {
+            turretBase.setPower(power);
         }
     }
 }

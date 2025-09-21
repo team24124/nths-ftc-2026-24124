@@ -273,6 +273,7 @@ public final class MecanumDrive {
         private double beginTs = -1;
 
         private final double[] xPoints, yPoints;
+
         private boolean ECT;
 
         public FollowTrajectoryAction(TimeTrajectory t, boolean ECT) {
@@ -502,7 +503,7 @@ public final class MecanumDrive {
     public TrajectoryActionBuilder actionBuilder(Pose2d beginPose, boolean enableTrajectoryExtraCorrection) {
         return new TrajectoryActionBuilder(
                 TurnAction::new,
-                t -> new FollowTrajectoryAction(t, enableTrajectoryExtraCorrection), // Second parameter is used to enable/disable extra correction
+                t -> new FollowTrajectoryAction(t, enableTrajectoryExtraCorrection), // Second parameter is used to enable/disable extra correction (somewhat disables the end of trajectory using time and instead uses distance)
                 new TrajectoryBuilderParams(
                         1e-6,
                         new ProfileParams(

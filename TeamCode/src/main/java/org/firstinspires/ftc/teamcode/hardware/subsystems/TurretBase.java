@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -12,7 +14,7 @@ import org.firstinspires.ftc.teamcode.util.PIDF;
 import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 
 public class TurretBase implements SubsystemBase, TelemetryObservable {
-    private final DcMotorEx turretBase; // Runs on CCW
+    private final DcMotorEx turretBase; // Runs on 0 - 360, CCW, 0 = south
     private final VoltageSensor voltageSensor;
     private PIDF pd;
     private double heading;
@@ -25,6 +27,7 @@ public class TurretBase implements SubsystemBase, TelemetryObservable {
     public TurretBase(HardwareMap hw) {
         voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
 
+        // PD setup
         pd = new PIDF();
         pd.setPD(0,0,0, 537.6);
 
@@ -33,6 +36,7 @@ public class TurretBase implements SubsystemBase, TelemetryObservable {
         turretBase.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
+    // Second periodic function to set necessary values for feedback derivative loop
     public void setHeadings(MecanumDrive drivebase, double Tx, boolean isDetected, boolean redAlign) {
         this.heading = drivebase.localizer.getPose().heading.toDouble();
         this.Tx = Tx;
@@ -47,29 +51,47 @@ public class TurretBase implements SubsystemBase, TelemetryObservable {
         int position = turretBase.getCurrentPosition();
         double target;
         if (isDetected) {
-            target = (turretBase.getCurrentPosition() + (537.6/360) * Tx) % 537.6; // Current position + Range / 360 degrees * offset degrees
+            target = (position - (537.6/360) * Tx) % 537.6; // Current position - offset degrees converted into ticks % 360 to center on target
         } else {
             double theta;
+            // Sets theta to the angle to the target based on field centric coordinates. 0 - 360, CCW, 0 = south after theta normalization
             if (redAlign) {
-                theta = (Math.atan2(72 - botY, 72 - botX) + Math.PI/2) % (Math.PI*2); // Normalize atan2 to 0 at north CCW
+                theta = Math.atan2(72 - botY, 72 - botX);
             } else {
-                theta = (Math.atan2(72 - botY, -72 - botX) + Math.PI/2) % (Math.PI*2); // Top left position
+                theta = Math.atan2(72 - botY, -72 - botX);
             }
+            if (theta < 0) theta += (Math.PI * 2); // Convert atan2 from 0 --- 180 --- -180 --- 0 into 0 - 360
+            theta = (theta + Math.PI/2) % (Math.PI*2); // Covert 0 = east to 0 = south
 
-            double thetaEncoders = (537.6 / (Math.PI * 2)) * theta; // Convert to ticks
+            // Convert theta into ticks
+            double thetaTicks = (537.6 / (Math.PI * 2)) * theta;
 
-            target = thetaEncoders - ((537.6 / (Math.PI * 2)) * heading); // Convert heading to ticks
-            //  Position derived ticks           - Heading ticks
+            double headingTicks = ((heading + Math.PI) % (Math.PI * 2)) * (537.6 / (Math.PI * 2)); // Heading in ticks from 0 = south CCW
 
-            if (target > (537.6/2)) { // Wrapper into 180, 0, -180 degrees
-                target -= 537.6;
-            } else if (target < -(537.6/2)) {
-                target += 537.6;
-            }
+            target = thetaTicks - headingTicks + (537.6/2); // Calc angle between tick values and normalize
+            target %= 537.6;
         }
+        if (target < 0) target += 537.6; // Add 360 if angle is negative to normalize once again
 
+        // Calculates power with PD inputs
         double power = pd.calculate(position, target, voltageSensor.getVoltage());
         turretBase.setPower(power);
+    }
+
+    // moveTo for use in roadrunner autonomous
+    public Action moveTo(MecanumDrive drivebase, double Tx, boolean isDetected, boolean redAlign) {
+        return (TelemetryPacket packet) -> {
+            heading = drivebase.localizer.getPose().heading.toDouble();
+            this.Tx = Tx;
+            this.isDetected = isDetected;
+            botX = drivebase.localizer.getPose().position.x;
+            botY = drivebase.localizer.getPose().position.y;
+            this.redAlign = redAlign;
+
+            periodic();
+
+            return true;
+        };
     }
 
     @Override

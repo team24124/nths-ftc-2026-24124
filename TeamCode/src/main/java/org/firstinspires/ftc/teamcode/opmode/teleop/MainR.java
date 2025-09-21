@@ -47,7 +47,7 @@ public class MainR extends OpMode {
             hub.clearBulkCache();
         }
 
-        // Driver inputs
+        // --- Driver inputs ---
         double y = Math.abs(-driver.getLeftY()) > 0.05 ? -driver.getLeftY() : 0;
         double x = Math.abs(driver.getLeftX()) > 0.05 ? driver.getLeftX() : 0;
         double rx = Math.abs(-driver.getRightX()) > 0.05 ? -driver.getRightX() : 0;
@@ -59,9 +59,9 @@ public class MainR extends OpMode {
             robot.actions.schedule(new InstantAction(robot.driveTrain.getSpeeds()::next));
         }
 
-        // Enable constant AT alignment
-        if (driver.wasJustPressed(GamepadKeys.Button.A)) { // Semi autonomous alignment mode (PIDs with limelight)
-            robot.limelight.setPipeline(Limelight.Pipeline.AT2);
+        // Enable AT alignment
+        if (driver.wasJustPressed(GamepadKeys.Button.A)) { // Semi autonomous alignment mode (PD's with limelight)
+            robot.limelight.setPipeline(Limelight.Pipeline.AT3);
             trajectoryAlign = false;
             alignToAT = true;
         }
@@ -71,7 +71,7 @@ public class MainR extends OpMode {
             alignToAT = false;
         }
         if (driver.wasJustPressed(GamepadKeys.Button.B)) { // Full autonomous alignment (Same AT pipeline as semi alignment)
-            robot.limelight.setPipeline(Limelight.Pipeline.AT2);
+            robot.limelight.setPipeline(Limelight.Pipeline.AT3);
             alignToAT = false;
             trajectoryAlign = true;
         }
@@ -90,32 +90,43 @@ public class MainR extends OpMode {
             }
         }
 
-        // Operator inputs (yet to be added)
+        // --- Operator inputs ---
+        if (operator.isDown(GamepadKeys.Button.A)) {
+            robot.actions.schedule(new InstantAction(() ->
+                    robot.flyWheel.runFlyWheel(robot.limelight.distance())
+            ));
+        } else if (robot.flyWheel.powered) {
+            robot.actions.schedule(new InstantAction(() ->
+                    robot.flyWheel.stopFlyWheel()
+            ));
+        }
 
+        // Add if left bumper = green, right bumper = purple
 
-        // Periodic calls
+        // --- Periodic calls ---
         if (!robot.driveTrain.getDrive().isBusy) { // Ensure drive isn't called during trajectory
             if (alignToAT) {
                 if (robot.limelight.isDetected()) {
+                    // Align heading by passing Tx value to drive
                     robot.driveTrain.drive(x, y, robot.limelight.degreeOffset(), true);
                 } else {
-                    robot.driveTrain.drive(x, y, trajectories.rotation(robot.driveTrain, 72), false); // TODO second teleop with reversed 72
+                    // Rotate to the general direction of the target with 30 inch threshold
+                    robot.driveTrain.drive(x, y, trajectories.rotation(robot.driveTrain, 72), false);
                 }
             } else {
+                // Pure drive
                 robot.driveTrain.drive(x, y, rx, false);
             }
         }
-
-        robot.telemetryControl.update();
+        robot.driveTrain.periodic(); // Update position
 
         driver.readButtons();
         operator.readButtons();
 
         robot.turretBase.setHeadings(robot.driveTrain.getDrive(), robot.limelight.degreeOffset(), robot.limelight.isDetected(), true);
-
-        robot.driveTrain.periodic(); // Update position
         robot.turretBase.periodic(); // PD loop
 
+        robot.telemetryControl.update();
         robot.actions.run(); // Call for scheduled actions to run
     }
 

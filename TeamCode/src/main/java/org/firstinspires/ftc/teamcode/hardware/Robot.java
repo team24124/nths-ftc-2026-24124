@@ -16,8 +16,11 @@ import org.firstinspires.ftc.teamcode.util.TelemetryControl;
 
 public class Robot {
     public FlyWheel flyWheel;
+
     public TurretBase turretBase;
+
     public Drivetrain driveTrain;
+
     public Limelight limelight;
 
     public ActionScheduler actions;
@@ -41,7 +44,7 @@ public class Robot {
                 .subscribe(turretBase)
                 .subscribe(limelight)
                 .subscribe(driveTrain)
-                .subscribe(actions); // Show on telemetry
+                .subscribe(actions); // Display on telemetry
     }
 
     public Action xyz() {

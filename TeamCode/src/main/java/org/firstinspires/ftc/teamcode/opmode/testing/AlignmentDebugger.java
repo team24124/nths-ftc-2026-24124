@@ -29,10 +29,10 @@ public class AlignmentDebugger extends OpMode {
     private Limelight limelight;
     private GamepadEx driver;
 
-    // --- tune theta PD ---
-    public static double Kp = 0;
-    public static double Kd = 0;
-    public static double a = 0;
+    // --- Tune theta PD ---
+    public static double Kp = 0.0000001;
+    public static double Kd = 0.0000001;
+    public static double a = 0.0000001;
 
     // --- PD ---
     private boolean alignToAT = false;
@@ -67,27 +67,31 @@ public class AlignmentDebugger extends OpMode {
         double rx = Math.abs(-driver.getRightX()) > 0.05 ? -driver.getRightX() : 0;
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            limelight.setPipeline(Limelight.Pipeline.AT1);
+            limelight.setPipeline(Limelight.Pipeline.AT2);
             alignToAT = true;
         }
         if (driver.wasJustPressed(GamepadKeys.Button.X)) {
             alignToAT = false;
         }
 
-        driver.readButtons();
+        if (alignToAT) {
+            if (limelight.isDetected()) {
+                align(x, y, limelight.degreeOffset()); // Private align method to avoid using DriveTrain PD
+            } else {
+                driveTrain.drive(x, y, trajectories.rotation(driveTrain, -72), false);
+            }
+        } else {
+            driveTrain.drive(x, y, rx, false);
+        }
         driveTrain.periodic();
 
-        if (!driveTrain.getDrive().isBusy) {
-            if (alignToAT) {
-                if (limelight.isDetected()) {
-                    align(x, y, limelight.degreeOffset()); // Private align method to avoid using DriveTrain PD
-                } else {
-                    driveTrain.drive(x, y, trajectories.rotation(driveTrain, -72), false);
-                }
-            } else {
-                driveTrain.drive(x, y, rx, false);
-            }
-        }
+        driver.readButtons();
+
+        telemetry.addData("\nAlign", alignToAT);
+        telemetry.addData("\nDetected", limelight.isDetected());
+        telemetry.addData("\nTurn", trajectories.rotation(driveTrain, -72));
+        telemetry.addData("\nPose", driveTrain.getPosition());
+        telemetry.update();
     }
 
     public void align(double x, double y, double theta) {

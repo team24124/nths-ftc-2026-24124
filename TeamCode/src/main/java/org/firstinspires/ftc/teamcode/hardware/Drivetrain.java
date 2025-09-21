@@ -28,7 +28,7 @@ public abstract class Drivetrain implements SubsystemBase, TelemetryObservable {
         drive = new MecanumDrive(hw, start);
         speeds = new ArraySelect<>(new Double[]{0.5, 1.0});
 
-        thetaPD.setPD(3,3,3, 537.6);
+        thetaPD.setPD(0,0,0, 537.6);
 
         voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
     }

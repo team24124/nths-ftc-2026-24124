@@ -7,7 +7,7 @@ package org.firstinspires.ftc.teamcode.util;
  */
 public class ArraySelect<T> {
     /*
-        representation for array of size four
+        Representation for array of size four
         ------------------------------------------------------------------------------
         |      value0      |     > value1 <    |      value2      |      value3      |
         ------------------------------------------------------------------------------
