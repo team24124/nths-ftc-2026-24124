@@ -37,7 +37,7 @@ public class FlyWheel implements SubsystemBase, TelemetryObservable {
         wheel2.setPower(targetPower);
         powered = true;
 
-        // 20 is height of AT TODO change this and 20 in limelight and tune
+        // 29.5 is height of AT
         adjustFlap(distance);
     }
 
@@ -49,7 +49,7 @@ public class FlyWheel implements SubsystemBase, TelemetryObservable {
     }
 
     public void adjustFlap(double distance) {
-        flap.setPosition(Math.atan2(20, distance)/100); // / 100 to reduce to decimal
+        flap.setPosition(Math.atan2(29.5, distance)/100); // / 100 to reduce to decimal
     }
 
     @Override

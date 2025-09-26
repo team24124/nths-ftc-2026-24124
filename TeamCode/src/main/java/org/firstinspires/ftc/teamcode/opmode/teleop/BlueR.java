@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 
 import java.util.List;
 
-@TeleOp(name = "MainR", group = "!")
+@TeleOp(name = "BlueR", group = "!")
 public class BlueR extends OpMode {
     private Robot robot;
     private GamepadEx driver, operator;
@@ -45,9 +45,9 @@ public class BlueR extends OpMode {
         }
 
         // --- Driver inputs ---
-        double y = Math.abs(-driver.getLeftY()) > 0.05 ? -driver.getLeftY() : 0;
+        double y = Math.abs(driver.getLeftY()) > 0.05 ? driver.getLeftY() : 0;
         double x = Math.abs(driver.getLeftX()) > 0.05 ? driver.getLeftX() : 0;
-        double rx = Math.abs(-driver.getRightX()) > 0.05 ? -driver.getRightX() : 0;
+        double rx = Math.abs(driver.getRightX()) > 0.05 ? driver.getRightX() : 0;
 
         if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             robot.actions.schedule(new InstantAction(robot.driveTrain.getSpeeds()::previous));

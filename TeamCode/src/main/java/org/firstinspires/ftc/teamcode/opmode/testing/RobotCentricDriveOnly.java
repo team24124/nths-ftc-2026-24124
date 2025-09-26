@@ -11,18 +11,14 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
-import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 
 import java.util.List;
 
 @Config
-@TeleOp(name = "DriveOnly", group = "test")
-public class DriveOnly extends OpMode {
-    public static boolean robotCentric = true;
-    private boolean t = true;
+@TeleOp(name = "Robot Centric Drive", group = "test")
+public class RobotCentricDriveOnly extends OpMode {
     private Drivetrain drivetrain;
     private ActionScheduler actions;
     private GamepadEx driver;
@@ -47,10 +43,9 @@ public class DriveOnly extends OpMode {
             hub.clearBulkCache();
         }
 
-        Pose2d current = drivetrain.getPosition();
-        double y = Math.abs(-driver.getLeftY()) > 0.05 ? -driver.getLeftY() : 0;
+        double y = Math.abs(driver.getLeftY()) > 0.05 ? driver.getLeftY() : 0;
         double x = Math.abs(driver.getLeftX()) > 0.05 ? driver.getLeftX() : 0;
-        double rx = Math.abs(-driver.getRightX()) > 0.05 ? -driver.getRightX() : 0;
+        double rx = Math.abs(driver.getRightX()) > 0.05 ? driver.getRightX() : 0;
 
         if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             actions.schedule(new InstantAction(drivetrain.getSpeeds()::previous));
@@ -59,40 +54,15 @@ public class DriveOnly extends OpMode {
             actions.schedule(new InstantAction(drivetrain.getSpeeds()::next));
         }
 
-        // Reset pose
-        if (driver.wasJustPressed(GamepadKeys.Button.START)) {
-            drivetrain.getDrive().localizer.setPose(new Pose2d(current.position, 0));
-        }
-
-        // Checks if drivetrain has been switched and switches drivetrain type
-        if (t != robotCentric) {
-            switchDrive();
-            t = robotCentric;
-        }
-
         drivetrain.drive(x, y, rx, false);
-        drivetrain.periodic();
 
         driver.readButtons();
 
         ActionScheduler.INSTANCE.run();
-
-        telemetry.addData("\nX", current.position.x);
-        telemetry.addData("\nY", current.position.y);
-        telemetry.addData("\nHeading", current.heading.toDouble());
-        telemetry.update();
     }
 
     @Override
     public void stop() {
         actions.stop();
-    }
-
-    public void switchDrive() {
-        if (robotCentric) {
-            drivetrain = new RobotCentricDrive(hardwareMap, drivetrain.getPosition());
-        } else {
-            drivetrain = new FieldCentricDrive(hardwareMap, drivetrain.getPosition());
-        }
     }
 }

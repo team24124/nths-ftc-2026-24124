@@ -96,7 +96,7 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
 
     // Distance in inches, AT height / tan of forward to angle to target
     public double distance() {
-        return 8 + 20 / Math.tan(Math.toRadians(Math.max(0.00001, cameraAngle + getResult().getTyNC()))); // +8 to center limelight to center of robot
+        return 8 + 29.5 / Math.tan(Math.toRadians(Math.max(0.00001, cameraAngle + getResult().getTyNC()))); // +8 to center limelight to center of robot
     }
 
     //---------------------------------- target position returners ----------------------------------
@@ -104,7 +104,7 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
     // Field space X and Y offset for detected
     public Pose2d targetVectorFieldSpace(Pose2d botPose) {
         // Target raw data
-        double ty = 20 / Math.tan(Math.toRadians(cameraAngle + getResult().getTyNC())); // Target height (opposite) / ratio to find adjacent (robot distance)
+        double ty = 29.5 / Math.tan(Math.toRadians(cameraAngle + getResult().getTyNC())); // Target height (opposite) / ratio to find adjacent (robot distance)
         double tx = Math.tan(Math.toRadians(0 + getResult().getTxNC())) * ty; // +0 for limelight yaw. Multiply tan by adjacent to get opposite
 
         // Desired pose relative to target
