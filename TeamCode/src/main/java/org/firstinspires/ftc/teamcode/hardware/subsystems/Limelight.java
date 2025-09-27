@@ -56,10 +56,9 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
 
     // Switch pipeline if input is not the same as pipeline
     public void setPipeline(Pipeline pipeline) {
-        if (pipeline != this.pipeline) {
-            limelight.pipelineSwitch(pipeline.pipelineNum);
-            this.pipeline = pipeline;
-        }
+        this.pipeline = pipeline;
+
+        setPipeline(pipeline.pipelineNum);
     }
 
     // Only use in limelight tester

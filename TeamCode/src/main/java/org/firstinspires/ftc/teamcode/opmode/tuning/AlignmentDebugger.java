@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmode.testing;
+package org.firstinspires.ftc.teamcode.opmode.tuning;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.util.ArraySelect;
-import org.firstinspires.ftc.teamcode.util.PIDF;
+import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
 
 import java.util.List;
 
@@ -51,7 +51,7 @@ public class AlignmentDebugger extends OpMode {
         driver = new GamepadEx(gamepad1);
         limelight = new Limelight(hardwareMap);
 
-        thetaPD.setPD(Kp, Kd, a, 537.6);
+        thetaPD.setPD(Kp, Kd, a);
     }
 
     @Override
@@ -60,11 +60,11 @@ public class AlignmentDebugger extends OpMode {
             hub.clearBulkCache();
         }
 
-        thetaPD.setPD(Kp, Kd, a, 537.6);
+        thetaPD.setPD(Kp, Kd, a);
 
-        double y = Math.abs(-driver.getLeftY()) > 0.05 ? -driver.getLeftY() : 0;
+        double y = Math.abs(driver.getLeftY()) > 0.05 ? driver.getLeftY() : 0;
         double x = Math.abs(driver.getLeftX()) > 0.05 ? driver.getLeftX() : 0;
-        double rx = Math.abs(-driver.getRightX()) > 0.05 ? -driver.getRightX() : 0;
+        double rx = Math.abs(driver.getRightX()) > 0.05 ? driver.getRightX() : 0;
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
             limelight.setPipeline(Limelight.Pipeline.AT2);

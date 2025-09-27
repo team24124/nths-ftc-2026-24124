@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
-import org.firstinspires.ftc.teamcode.util.PIDF;
+import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
 import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 
 public class TurretBase implements SubsystemBase, TelemetryObservable {
@@ -29,9 +29,10 @@ public class TurretBase implements SubsystemBase, TelemetryObservable {
 
         // PD setup
         pd = new PIDF();
-        pd.setPD(0,0,0, 537.6);
+        pd.setPD(0,0,0);
 
         turretBase = hw.get(DcMotorEx.class, "turret_base");
+        turretBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretBase.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turretBase.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
@@ -92,6 +93,11 @@ public class TurretBase implements SubsystemBase, TelemetryObservable {
 
             return true;
         };
+    }
+
+    public void stopAndResetEncoders() {
+        turretBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretBase.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     @Override

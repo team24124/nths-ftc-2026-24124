@@ -12,8 +12,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
-import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 
 import java.util.List;

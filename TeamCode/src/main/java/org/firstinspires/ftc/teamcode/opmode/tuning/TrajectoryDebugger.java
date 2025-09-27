@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmode.testing;
+package org.firstinspires.ftc.teamcode.opmode.tuning;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.InstantAction;
@@ -52,9 +52,9 @@ public class TrajectoryDebugger extends OpMode {
             hub.clearBulkCache();
         }
 
-        double y = Math.abs(-driver.getLeftY()) > 0.05 ? -driver.getLeftY() : 0;
+        double y = Math.abs(driver.getLeftY()) > 0.05 ? driver.getLeftY() : 0;
         double x = Math.abs(driver.getLeftX()) > 0.05 ? driver.getLeftX() : 0;
-        double rx = Math.abs(-driver.getRightX()) > 0.05 ? -driver.getRightX() : 0;
+        double rx = Math.abs(driver.getRightX()) > 0.05 ? driver.getRightX() : 0;
 
         if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             actions.schedule(new InstantAction(drivetrain.getSpeeds()::previous));
@@ -122,10 +122,12 @@ public class TrajectoryDebugger extends OpMode {
 
         telemetry.update();
     }
+
     @Override
     public void stop() {
         actions.stop();
     }
+
     public void switchDrive() {
         if (robotCentric) {
             drivetrain = new RobotCentricDrive(hardwareMap, drivetrain.getPosition());

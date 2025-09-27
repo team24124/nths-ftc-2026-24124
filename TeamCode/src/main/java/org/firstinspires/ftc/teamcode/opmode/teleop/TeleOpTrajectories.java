@@ -12,24 +12,24 @@ public enum TeleOpTrajectories {
     INSTANCE;
 
     // Aligns by strafing
-    public Action vectorAlign(MecanumDrive drivebase, Pose2d targetPose) {
-        return drivebase.actionBuilder(drivebase.localizer.getPose(), true)
+    public Action vectorAlign(MecanumDrive driveBase, Pose2d targetPose) {
+        return driveBase.actionBuilder(driveBase.localizer.getPose(), true)
                         .splineToConstantHeading(targetPose.position, targetPose.heading.toDouble())
                         .build();
     }
 
     // Aligns by strafing and turning
-    public Action poseAlign(MecanumDrive drivebase, Pose2d targetPose) {
-        return drivebase.actionBuilder(drivebase.localizer.getPose(), true)
+    public Action poseAlign(MecanumDrive driveBase, Pose2d targetPose) {
+        return driveBase.actionBuilder(driveBase.localizer.getPose(), true)
                         .strafeToSplineHeading(new Vector2d(targetPose.position.x, targetPose.position.y), targetPose.heading.toDouble()) // 0 to face directly into target
                         .build();
     }
 
     // Calculates whether to turn right or left to align with the corners of the field
-    public double rotation(Drivetrain drivebase, double X) {
-        double heading = (drivebase.getHeading() + Math.PI/2) % (Math.PI*2);
-        double botX = drivebase.getPosition().position.x;
-        double botY = drivebase.getPosition().position.y;
+    public double rotation(Drivetrain driveBase, double X) {
+        double heading = (driveBase.getHeading() + Math.PI/2) % (Math.PI*2);
+        double botX = driveBase.getPosition().position.x;
+        double botY = driveBase.getPosition().position.y;
 
         double theta = Math.atan2(72 - botY, X - botX); // Calculate angle to target (0 being east CCW)
         if (theta < 0) theta += Math.PI*2; // Normalize to 0 - 360

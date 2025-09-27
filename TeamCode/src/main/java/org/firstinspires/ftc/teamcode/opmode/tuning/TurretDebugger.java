@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmode.testing;
+package org.firstinspires.ftc.teamcode.opmode.tuning;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -10,12 +10,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
-import org.firstinspires.ftc.teamcode.util.PIDF;
+import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
 
 import java.util.List;
 
@@ -61,7 +60,7 @@ public class TurretDebugger extends OpMode {
         turretBase.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         pd = new PIDF();
-        pd.setPD(Kp, Kd, a, 537.6);
+        pd.setPD(Kp, Kd, a);
     }
 
     @Override
@@ -70,11 +69,11 @@ public class TurretDebugger extends OpMode {
             hub.clearBulkCache();
         }
 
-        double y = Math.abs(-driver.getLeftY()) > 0.05 ? -driver.getLeftY() : 0;
+        double y = Math.abs(driver.getLeftY()) > 0.05 ? driver.getLeftY() : 0;
         double x = Math.abs(driver.getLeftX()) > 0.05 ? driver.getLeftX() : 0;
-        double rx = Math.abs(-driver.getRightX()) > 0.05 ? -driver.getRightX() : 0;
+        double rx = Math.abs(driver.getRightX()) > 0.05 ? driver.getRightX() : 0;
 
-        pd.setPD(Kp, Kd, a, motorTPR);
+        pd.setPD(Kp, Kd, a);
 
         if (align) {
             int position = turretBase.getCurrentPosition();

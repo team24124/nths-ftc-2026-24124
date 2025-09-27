@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
 import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.util.ArraySelect;
-import org.firstinspires.ftc.teamcode.util.PIDF;
+import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
 import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 
 /**
@@ -28,7 +28,7 @@ public abstract class Drivetrain implements SubsystemBase, TelemetryObservable {
         drive = new MecanumDrive(hw, start);
         speeds = new ArraySelect<>(new Double[]{0.5, 1.0});
 
-        thetaPD.setPD(0,0,0, 537.6);
+        thetaPD.setPD(0,0,0);
 
         voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
     }

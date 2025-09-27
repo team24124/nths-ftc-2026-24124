@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.util;
+package org.firstinspires.ftc.teamcode.util.controllers;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -14,7 +14,6 @@ public class PIDF {
     private double lastTarget = target;
     private double integralSum = 0;
     private double derivative = 0;
-    private double error = 0;
     private double prevError = 0;
     private double previousFilterEstimate = 0;
     private double currentFilterEstimate = 0;
@@ -23,7 +22,7 @@ public class PIDF {
     private ElapsedTime timer = new ElapsedTime();
 
     // Feedback and feedforward
-    public void setPIDF(double Kp, double Ki, double Kd, double Kg, double smoothingFactor, double integralSumLimit, double motorTPR) {
+    public void setPIDG(double Kp, double Ki, double Kd, double Kg, double smoothingFactor, double integralSumLimit, double motorTPR) {
         timer.reset();
         this.Kp = Kp;
         this.Ki = Ki;
@@ -35,23 +34,21 @@ public class PIDF {
     }
 
     // Feedback only
-    public void setPID(double Kp, double Ki, double Kd, double smoothingFactor, double integralSumLimit, double motorTPR) {
+    public void setPID(double Kp, double Ki, double Kd, double smoothingFactor, double integralSumLimit) {
         timer.reset();
         this.Kp = Kp;
         this.Ki = Ki;
         this.Kd = Kd;
         this.smoothingFactor = smoothingFactor;
         this.integralSumLimit = integralSumLimit;
-        this.motorTPR = motorTPR;
     }
 
     // Removed integral for uncertain error
-    public void setPD(double Kp, double Kd, double smoothingFactor, double motorTPR) {
+    public void setPD(double Kp, double Kd, double smoothingFactor) {
         timer.reset();
         this.Kp = Kp;
         this.Kd = Kd;
         this.smoothingFactor = smoothingFactor;
-        this.motorTPR = motorTPR;
     }
 
     // Outputs processed power
@@ -62,7 +59,7 @@ public class PIDF {
         if (dt > 0.1) dt = 0.1;
 
         // Error
-        error = target - position;
+        double error = target - position;
 
         // Integral setters & limiters
         if (lastTarget != target) {
