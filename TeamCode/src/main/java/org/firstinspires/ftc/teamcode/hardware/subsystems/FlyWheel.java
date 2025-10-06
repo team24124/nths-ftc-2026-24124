@@ -18,11 +18,11 @@ public class FlyWheel implements SubsystemBase, TelemetryObservable {
     private double targetPower = 0;
 
     public FlyWheel(HardwareMap hw) {
-        wheel1 = hw.get(DcMotorEx.class, "arm");
+        wheel1 = hw.get(DcMotorEx.class, "wheel1");
         wheel1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         wheel1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        wheel2 = hw.get(DcMotorEx.class, "arm");
+        wheel2 = hw.get(DcMotorEx.class, "wheel2");
         wheel2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         wheel2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         wheel2.setDirection(DcMotorSimple.Direction.REVERSE);

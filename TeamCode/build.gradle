@@ -50,7 +50,7 @@ dependencies {
     //implementation "com.acmerobotics.roadrunner:ftc:0.1.24"
     implementation "com.acmerobotics.roadrunner:core:1.0.1"
     //implementation "com.acmerobotics.roadrunner:actions:1.0.1"
-    implementation("com.acmerobotics.roadrunner:ftc:0.1.24") { // Sloth stuff
+    implementation("com.acmerobotics.roadrunner:ftc:0.1.25") { // Sloth stuff
         exclude group: "com.acmerobotics.dashboard"
     }
     implementation ("com.acmerobotics.roadrunner:actions:1.0.1"){ // Sloth stuff

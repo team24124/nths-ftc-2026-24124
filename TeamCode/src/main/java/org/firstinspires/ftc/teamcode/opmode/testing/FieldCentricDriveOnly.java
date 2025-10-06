@@ -44,9 +44,9 @@ public class FieldCentricDriveOnly extends OpMode {
         }
 
         Pose2d current = drivetrain.getPosition();
-        double y = Math.abs(driver.getLeftY()) > 0.05 ? driver.getLeftY() : 0;
-        double x = Math.abs(driver.getLeftX()) > 0.05 ? driver.getLeftX() : 0;
-        double rx = Math.abs(driver.getRightX()) > 0.05 ? driver.getRightX() : 0;
+        double y = driver.getLeftY();
+        double x = driver.getLeftX();
+        double rx = driver.getRightX();
 
         if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             actions.schedule(new InstantAction(drivetrain.getSpeeds()::previous));
