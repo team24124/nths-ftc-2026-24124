@@ -16,13 +16,16 @@ public class SquID {
      * Recommended for a decrease in power: 0.112
      */
     private double stretchFactor;
+    private double tolerance;
 
-    public SquID(double stretchFactor) {
+    public SquID(double stretchFactor, double tolerance) {
         this.stretchFactor = stretchFactor;
+        this.tolerance = tolerance;
     }
 
-    public void setSquID(double stretchFactor) {
+    public void setSquID(double stretchFactor, double tolerance) {
         this.stretchFactor = stretchFactor;
+        this.tolerance = tolerance;
     }
 
     /**
@@ -33,12 +36,12 @@ public class SquID {
      * @param voltage The current battery voltage, used for compensation.
      * @return The calculated motor power, clipped to the range [-1.0, 1.0].
      */
-    public double calculate(int position, int target, double voltage) {
+    public double calculate(double position, double target, double voltage) {
         // Remaining distance to target
         double error = target - position;
 
         // Using a small tolerance to prevent jitter
-        if (Math.abs(error) < 3) {
+        if (Math.abs(error) < tolerance) {
             return 0.0;
         }
 

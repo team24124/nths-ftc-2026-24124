@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmode.tuning;
+package org.firstinspires.ftc.teamcode.opmode.testing;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.InstantAction;
@@ -28,8 +28,8 @@ public class TrajectoryDebugger extends OpMode {
     private GamepadEx driver;
     private TeleOpTrajectories trajectories;
     private List<LynxModule> hubs;
-    private double x = 0;
-    private double y = 0;
+    private double xPos = 0;
+    private double yPos = 0;
     private boolean debugX = true;
 
     @Override
@@ -64,7 +64,7 @@ public class TrajectoryDebugger extends OpMode {
         }
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            Pose2d targetPose = new Pose2d(x, y, drivetrain.getHeading());
+            Vector2d targetPose = new Vector2d(xPos, yPos);
             actions.schedule(trajectories.vectorAlign(drivetrain.getDrive(), targetPose));
         }
 
@@ -77,16 +77,16 @@ public class TrajectoryDebugger extends OpMode {
 
         // Adjust x and y
         if (debugX) {
-            if (driver.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-                x += 1;
-            } else if (driver.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-                x -= 1;
+            if (driver.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+                xPos += 1;
+            } else if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+                xPos -= 1;
             }
         } else {
-            if (driver.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-                y += 1;
-            } else if (driver.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-                y -= 1;
+            if (driver.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+                yPos += 1;
+            } else if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+                yPos -= 1;
             }
         }
 
@@ -107,17 +107,17 @@ public class TrajectoryDebugger extends OpMode {
 
         Pose2d current = drivetrain.getPosition();
         telemetry.addData("\nBusy", drivetrain.getDrive().isBusy);
-        telemetry.addData("\nX", current.position.x);
-        telemetry.addData("\nY", current.position.y);
-        telemetry.addData("\nHeading", current.heading.toDouble());
+        telemetry.addData("\nX", drivetrain.getPosition().position.x);
+        telemetry.addData("\nY", drivetrain.getPosition().position.y);
+        telemetry.addData("\nHeading", drivetrain.getHeading());
 
         // Show on telemetry what is being edited
         if (debugX) {
-            telemetry.addData("\n\n> Targeted X", x);
-            telemetry.addData("Targeted Y", y);
+            telemetry.addData("\n\n> Targeted X", xPos);
+            telemetry.addData("Targeted Y", yPos);
         } else {
-            telemetry.addData("\n\nTargeted X", x);
-            telemetry.addData("> Targeted Y", y);
+            telemetry.addData("\n\nTargeted X", xPos);
+            telemetry.addData("> Targeted Y", yPos);
         }
 
         telemetry.update();

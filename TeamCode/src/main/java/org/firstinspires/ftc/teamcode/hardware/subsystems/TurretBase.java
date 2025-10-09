@@ -38,12 +38,12 @@ public class TurretBase implements SubsystemBase, TelemetryObservable {
     }
 
     // Second periodic function to set necessary values for feedback derivative loop
-    public void setHeadings(MecanumDrive drivebase, double Tx, boolean isDetected, boolean redAlign) {
-        this.heading = drivebase.localizer.getPose().heading.toDouble();
+    public void setHeadings(MecanumDrive drivetrain, double Tx, boolean isDetected, boolean redAlign) {
+        this.heading = drivetrain.localizer.getPose().heading.toDouble();
         this.Tx = Tx;
         this.isDetected = isDetected;
-        this.botX = drivebase.localizer.getPose().position.x;
-        this.botY = drivebase.localizer.getPose().position.y;
+        this.botX = drivetrain.localizer.getPose().position.x;
+        this.botY = drivetrain.localizer.getPose().position.y;
         this.redAlign = redAlign;
     }
 
@@ -80,13 +80,13 @@ public class TurretBase implements SubsystemBase, TelemetryObservable {
     }
 
     // moveTo for use in roadrunner autonomous
-    public Action moveTo(MecanumDrive drivebase, double Tx, boolean isDetected, boolean redAlign) {
+    public Action moveTo(MecanumDrive drivetrain, double Tx, boolean isDetected, boolean redAlign) {
         return (TelemetryPacket packet) -> {
-            heading = drivebase.localizer.getPose().heading.toDouble();
+            heading = drivetrain.localizer.getPose().heading.toDouble();
             this.Tx = Tx;
             this.isDetected = isDetected;
-            botX = drivebase.localizer.getPose().position.x;
-            botY = drivebase.localizer.getPose().position.y;
+            botX = drivetrain.localizer.getPose().position.x;
+            botY = drivetrain.localizer.getPose().position.y;
             this.redAlign = redAlign;
 
             periodic();

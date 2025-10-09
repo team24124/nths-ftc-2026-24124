@@ -50,10 +50,10 @@ public class BlueR extends OpMode {
         double rx = driver.getRightX();
 
         if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-            robot.actions.schedule(new InstantAction(robot.driveTrain.getSpeeds()::previous));
+            robot.actions.schedule(new InstantAction(robot.drivetrain.getSpeeds()::previous));
         }
         if (driver.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-            robot.actions.schedule(new InstantAction(robot.driveTrain.getSpeeds()::next));
+            robot.actions.schedule(new InstantAction(robot.drivetrain.getSpeeds()::next));
         }
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
@@ -74,13 +74,13 @@ public class BlueR extends OpMode {
 
         if (driver.wasJustPressed(GamepadKeys.Button.Y)) {
             if (robot.limelight.isDetected()) {
-                trajectories.poseAlign(robot.driveTrain.getDrive(), robot.limelight.ATTargetPoseFieldSpace(robot.driveTrain.getDrive().localizer.getPose()));
+                trajectories.poseAlign(robot.drivetrain.getDrive(), robot.limelight.ATTargetPoseFieldSpace(robot.drivetrain.getDrive().localizer.getPose()));
             }
         }
 
         if (driver.wasJustPressed(GamepadKeys.Button.START)) {
             if (robot.limelight.isDetected() && !alignToAT && !trajectoryAlign) {
-                robot.driveTrain.getDrive().localizer.setPose(robot.limelight.ATRobotPoseFieldSpace());
+                robot.drivetrain.getDrive().localizer.setPose(robot.limelight.ATRobotPoseFieldSpace());
             }
         }
 
@@ -96,23 +96,23 @@ public class BlueR extends OpMode {
         }
 
         // --- Periodic calls ---
-        if (!robot.driveTrain.getDrive().isBusy) {
+        if (!robot.drivetrain.getDrive().isBusy) {
             if (alignToAT) {
                 if (robot.limelight.isDetected()) {
-                    robot.driveTrain.drive(x, y, robot.limelight.degreeOffset(), true);
+                    robot.drivetrain.drive(x, y, robot.limelight.degreeOffset(), true);
                 } else {
-                    robot.driveTrain.drive(x, y, trajectories.rotation(robot.driveTrain, -72), false);
+                    robot.drivetrain.drive(x, y, trajectories.rotation(robot.drivetrain, -72), false);
                 }
             } else {
-                robot.driveTrain.drive(x, y, rx, false);
+                robot.drivetrain.drive(x, y, rx, false);
             }
         }
-        robot.driveTrain.periodic();
+        robot.drivetrain.periodic();
 
         driver.readButtons();
         operator.readButtons();
 
-        robot.turretBase.setHeadings(robot.driveTrain.getDrive(), robot.limelight.degreeOffset(), robot.limelight.isDetected(), false);
+        robot.turretBase.setHeadings(robot.drivetrain.getDrive(), robot.limelight.degreeOffset(), robot.limelight.isDetected(), false);
         robot.turretBase.periodic();
 
         robot.telemetryControl.update();

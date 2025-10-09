@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
 import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -15,8 +13,8 @@ import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 
 import java.util.List;
 
-@TeleOp(name = "MainF", group = "!")
-public class MainF extends OpMode {
+@TeleOp(name = "RedR", group = "!")
+public class RedR extends OpMode {
     private Robot robot;
     private GamepadEx driver, operator;
     private TeleOpTrajectories trajectories;
@@ -26,8 +24,10 @@ public class MainF extends OpMode {
 
     @Override
     public void init() {
+        // Get all hubs (Control Hub internal + any Expansion Hubs)
         hubs = hardwareMap.getAll(LynxModule.class);
 
+        // Set bulk caching mode MANUAl
         for (LynxModule hub : hubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
@@ -42,6 +42,7 @@ public class MainF extends OpMode {
 
     @Override
     public void loop() {
+        // MANUAL mode: bulk cache refresh happens once per loop
         for (LynxModule hub : hubs) {
             hub.clearBulkCache();
         }
@@ -52,44 +53,41 @@ public class MainF extends OpMode {
         double rx = driver.getRightX();
 
         if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-            robot.actions.schedule(new InstantAction(robot.driveTrain.getSpeeds()::previous));
+            robot.actions.schedule(new InstantAction(robot.drivetrain.getSpeeds()::previous));
         }
         if (driver.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-            robot.actions.schedule(new InstantAction(robot.driveTrain.getSpeeds()::next));
+            robot.actions.schedule(new InstantAction(robot.drivetrain.getSpeeds()::next));
         }
 
-        if (driver.wasJustPressed(GamepadKeys.Button.A)) {
+        // Enable AT alignment
+        if (driver.wasJustPressed(GamepadKeys.Button.A)) { // Semi autonomous alignment mode (PD's with limelight)
             robot.limelight.setPipeline(Limelight.Pipeline.AT3);
             trajectoryAlign = false;
             alignToAT = true;
         }
-        if (driver.wasJustPressed(GamepadKeys.Button.X)) {
+        if (driver.wasJustPressed(GamepadKeys.Button.X)) { // Pure TeleOp with ability to reset pose (MT2)
             robot.limelight.setPipeline(Limelight.Pipeline.AT4);
             trajectoryAlign = false;
             alignToAT = false;
         }
-        if (driver.wasJustPressed(GamepadKeys.Button.B)) {
+        if (driver.wasJustPressed(GamepadKeys.Button.B)) { // Full autonomous alignment (Same AT pipeline as semi alignment)
             robot.limelight.setPipeline(Limelight.Pipeline.AT3);
             alignToAT = false;
             trajectoryAlign = true;
         }
 
+        // Align with Roadrunner trajectory
         if (driver.wasJustPressed(GamepadKeys.Button.Y)) {
             if (robot.limelight.isDetected()) {
-                robot.actions.schedule(trajectories.poseAlign(robot.driveTrain.getDrive(), robot.limelight.ATTargetPoseFieldSpace(robot.driveTrain.getDrive().localizer.getPose())));
+                trajectories.poseAlign(robot.drivetrain.getDrive(), robot.limelight.ATTargetPoseFieldSpace(robot.drivetrain.getDrive().localizer.getPose()));
             }
         }
 
+        // Reset robot pose with MT2
         if (driver.wasJustPressed(GamepadKeys.Button.START)) {
             if (robot.limelight.isDetected() && !alignToAT && !trajectoryAlign) {
-                robot.driveTrain.getDrive().localizer.setPose(robot.limelight.ATRobotPoseFieldSpace());
+                robot.drivetrain.getDrive().localizer.setPose(robot.limelight.ATRobotPoseFieldSpace());
             }
-        }
-
-        // Reset orientation for FC drive
-        if (driver.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
-            Vector2d current = robot.driveTrain.getDrive().localizer.getPose().position;
-            robot.driveTrain.getDrive().localizer.setPose(new Pose2d(current, 0));
         }
 
         // --- Operator inputs ---
@@ -103,28 +101,33 @@ public class MainF extends OpMode {
             ));
         }
 
+        // Add if left bumper = green, right bumper = purple
+
         // --- Periodic calls ---
-        if (!robot.driveTrain.getDrive().isBusy) {
+        if (!robot.drivetrain.getDrive().isBusy) { // Ensure drive isn't called during trajectory
             if (alignToAT) {
                 if (robot.limelight.isDetected()) {
-                    robot.driveTrain.drive(x, y, robot.limelight.degreeOffset(), true);
+                    // Align heading by passing Tx value to drive
+                    robot.drivetrain.drive(x, y, robot.limelight.degreeOffset(), true);
                 } else {
-                    robot.driveTrain.drive(x, y, trajectories.rotation(robot.driveTrain, 72), false);
+                    // Rotate to the general direction of the target with 30 inch threshold
+                    robot.drivetrain.drive(x, y, trajectories.rotation(robot.drivetrain, 72), false);
                 }
             } else {
-                robot.driveTrain.drive(x, y, rx, false);
+                // Pure drive
+                robot.drivetrain.drive(x, y, rx, false);
             }
         }
-        robot.driveTrain.periodic();
+        robot.drivetrain.periodic(); // Update position
 
         driver.readButtons();
         operator.readButtons();
 
-        robot.turretBase.setHeadings(robot.driveTrain.getDrive(), robot.limelight.degreeOffset(), robot.limelight.isDetected(), true);
-        robot.turretBase.periodic();
+        robot.turretBase.setHeadings(robot.drivetrain.getDrive(), robot.limelight.degreeOffset(), robot.limelight.isDetected(), true);
+        robot.turretBase.periodic(); // PD loop
 
         robot.telemetryControl.update();
-        robot.actions.run();
+        robot.actions.run(); // Call for scheduled actions to run
     }
 
     @Override

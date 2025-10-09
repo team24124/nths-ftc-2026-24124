@@ -19,7 +19,7 @@ public class Robot {
 
     public TurretBase turretBase;
 
-    public Drivetrain driveTrain;
+    public Drivetrain drivetrain;
 
     public Limelight limelight;
 
@@ -33,9 +33,9 @@ public class Robot {
         limelight = new Limelight(hw);
 
         if (robotCentric) {
-            driveTrain = new RobotCentricDrive(hw, PoseStorage.currentPose);
+            drivetrain = new RobotCentricDrive(hw, PoseStorage.currentPose);
         } else {
-            driveTrain = new FieldCentricDrive(hw, PoseStorage.currentPose);
+            drivetrain = new FieldCentricDrive(hw, PoseStorage.currentPose);
         }
 
         telemetryControl = new TelemetryControl(telemetry);
@@ -43,7 +43,7 @@ public class Robot {
                 .subscribe(flyWheel)
                 .subscribe(turretBase)
                 .subscribe(limelight)
-                .subscribe(driveTrain)
+                .subscribe(drivetrain)
                 .subscribe(actions); // Display on telemetry
     }
 

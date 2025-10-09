@@ -43,7 +43,8 @@ public class FieldCentricDriveOnly extends OpMode {
             hub.clearBulkCache();
         }
 
-        Pose2d current = drivetrain.getPosition();
+        Vector2d current = drivetrain.getDrive().localizer.getPose().position;
+
         double y = driver.getLeftY();
         double x = driver.getLeftX();
         double rx = driver.getRightX();
@@ -57,7 +58,7 @@ public class FieldCentricDriveOnly extends OpMode {
 
         // Reset pose
         if (driver.wasJustPressed(GamepadKeys.Button.START)) {
-            drivetrain.getDrive().localizer.setPose(new Pose2d(current.position, 0));
+            drivetrain.getDrive().localizer.setPose(new Pose2d(current, 0));
         }
 
         drivetrain.drive(x, y, rx, false);
@@ -67,9 +68,9 @@ public class FieldCentricDriveOnly extends OpMode {
 
         ActionScheduler.INSTANCE.run();
 
-        telemetry.addData("\nX", current.position.x);
-        telemetry.addData("\nY", current.position.y);
-        telemetry.addData("\nHeading", current.heading.toDouble());
+        telemetry.addData("\nX", current.x);
+        telemetry.addData("\nY", current.y);
+        telemetry.addData("\nHeading", drivetrain.getHeading());
         telemetry.update();
     }
 

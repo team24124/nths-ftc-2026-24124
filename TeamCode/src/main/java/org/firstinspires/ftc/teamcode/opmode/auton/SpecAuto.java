@@ -32,7 +32,7 @@ public class SpecAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(hardwareMap, telemetry, true); // Initialize entirety of robot with hardwaremap and telemetry
-        MecanumDrive drivebase = robot.driveTrain.getDrive(); // Get the mecanum drivebase for trajectory to work with
+        MecanumDrive drivebase = robot.drivetrain.getDrive(); // Get the mecanum drivebase for trajectory to work with
 
         VelConstraint baseVelConstraint = new MinVelConstraint(Arrays.asList(
                 new TranslationalVelConstraint(50.0),
