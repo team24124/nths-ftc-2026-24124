@@ -42,7 +42,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     public Spindexer(HardwareMap hw) {
         pidf = new PIDF();
         pidf.setPID(1, 0.2, 0.2, 0.01, 0.8);
-        spindexer= hw.get(DcMotorEx.class, "arm");
+        spindexer = hw.get(DcMotorEx.class, "arm");
         spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import java.util.List;
 
 @Config
-@TeleOp(name = "Field Centric Drive", group = "test")
+@TeleOp(name = "FCD", group = "test")
 public class FieldCentricDriveOnly extends OpMode {
     private Drivetrain drivetrain;
     private ActionScheduler actions;

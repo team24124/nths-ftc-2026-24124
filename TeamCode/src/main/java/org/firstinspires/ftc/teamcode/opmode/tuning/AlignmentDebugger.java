@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
 import java.util.List;
 
 @Config
-@TeleOp(name = "AlignmentDebugger", group = "tuning")
+@TeleOp(name = "Align LL", group = "tuning")
 public class AlignmentDebugger extends OpMode {
     private List<LynxModule> hubs;
     private VoltageSensor voltageSensor;
@@ -30,9 +30,9 @@ public class AlignmentDebugger extends OpMode {
     private GamepadEx driver;
 
     // --- Tune theta PD ---
-    public static double Kp = 0.0000001;
-    public static double Kd = 0.0000001;
-    public static double a = 0.0000001;
+    public static double Kp = 3;
+    public static double Kd = 0.1;
+    public static double sf = 0.7;
 
     // --- PD ---
     private boolean alignToAT = false;
@@ -51,7 +51,7 @@ public class AlignmentDebugger extends OpMode {
         driver = new GamepadEx(gamepad1);
         limelight = new Limelight(hardwareMap);
 
-        thetaPD.setPD(Kp, Kd, a);
+        thetaPD.setPD(Kp, Kd, sf);
     }
 
     @Override
@@ -60,14 +60,14 @@ public class AlignmentDebugger extends OpMode {
             hub.clearBulkCache();
         }
 
-        thetaPD.setPD(Kp, Kd, a);
+        thetaPD.setPD(Kp, Kd, sf);
 
         double y = driver.getLeftY();
         double x = driver.getLeftX();
         double rx = driver.getRightX();
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            limelight.setPipeline(Limelight.Pipeline.AT2);
+            limelight.setPipeline(Limelight.Pipeline.AT1);
             alignToAT = true;
         }
         if (driver.wasJustPressed(GamepadKeys.Button.X)) {
@@ -76,9 +76,9 @@ public class AlignmentDebugger extends OpMode {
 
         if (alignToAT) {
             if (limelight.isDetected()) {
-                align(x, y, limelight.degreeOffset()); // Private align method to avoid using DriveTrain PD loop
+                drivetrain.drive(x, y, -thetaPD.calculate(Math.toRadians(limelight.degreeOffset()), 0, voltageSensor.getVoltage()), false);
             } else {
-                drivetrain.drive(x, y, trajectories.rotation(drivetrain, -72), false);
+                drivetrain.drive(x, y, -thetaPD.calculate(trajectories.theta(drivetrain, 72, 72), 0, voltageSensor.getVoltage()), false);
             }
         } else {
             drivetrain.drive(x, y, rx, false);
@@ -88,34 +88,10 @@ public class AlignmentDebugger extends OpMode {
         driver.readButtons();
 
         telemetry.addData("\nAlign", alignToAT);
-        telemetry.addData("\nDetected", limelight.isDetected());
-        telemetry.addData("\nTurn", trajectories.rotation(drivetrain, -72));
-        telemetry.addData("\nPose", drivetrain.getPosition());
+        telemetry.addData("\nIs Detected", limelight.isDetected());
+        telemetry.addData("\nX", "%.1f", drivetrain.getPosition().component1().x);
+        telemetry.addData("Y", "%.1f", drivetrain.getPosition().component1().y);
+        telemetry.addData("Heading", "%.1f", drivetrain.getPosition().heading.toDouble());
         telemetry.update();
-    }
-
-    public void align(double x, double y, double theta) {
-        double voltage = voltageSensor.getVoltage();
-        double botHeading = (drivetrain.getHeading() + Math.PI/2) % (Math.PI*2);
-
-        double rotX = -y * Math.cos(botHeading) + x * Math.sin(botHeading);
-        double rotY = y * Math.sin(botHeading) + x * Math.cos(botHeading);
-        rotX = rotX * 1.1;
-
-        double rx = thetaPD.calculate(theta, 0, voltage);
-
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        double frontLeftPower = (rotY + rotX + rx) / denominator;
-        double backLeftPower = (rotY - rotX + rx) / denominator;
-        double frontRightPower = (rotY - rotX - rx) / denominator;
-        double backRightPower = (rotY + rotX - rx) / denominator;
-
-        ArraySelect<Double> speeds = drivetrain.getSpeeds();
-        drivetrain.setDrivePowers(
-                frontLeftPower * speeds.getSelected(),
-                frontRightPower * speeds.getSelected(),
-                backLeftPower * speeds.getSelected(),
-                backRightPower * speeds.getSelected()
-        );
     }
 }

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.opmode.tuning;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -8,35 +7,26 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
-import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
-import org.firstinspires.ftc.teamcode.util.ArraySelect;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
 import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
-import org.firstinspires.ftc.teamcode.util.controllers.SquID;
 
 import java.util.List;
 
-@Config
-@TeleOp(name = "Align SquID", group = "tuning")
-public class SquidAlignmentDebugger extends OpMode {
+@TeleOp(name = "track", group = "tuning")
+public class track extends OpMode {
     private List<LynxModule> hubs;
     private VoltageSensor voltageSensor;
     private Drivetrain drivetrain;
-    private TeleOpTrajectories trajectories;
+    private Limelight limelight;
     private GamepadEx driver;
 
-    public static double sf = 1.65;
-    public static double targetX = 24; // X is vertical axis
-    public static double targetY = 24; // Y is lateral axis reversed
     private boolean alignToAT = false;
-    private SquID squid = new SquID(sf, 0.01);
+    private PIDF thetaPD = new PIDF();
+    private PIDF distPD = new PIDF();
 
     @Override
     public void init() {
@@ -46,9 +36,12 @@ public class SquidAlignmentDebugger extends OpMode {
         }
 
         voltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
-        drivetrain = new FieldCentricDrive(hardwareMap, new Pose2d(new Vector2d(0, 0), Math.toRadians(0)));
-        trajectories = TeleOpTrajectories.INSTANCE;
+        drivetrain = new RobotCentricDrive(hardwareMap, new Pose2d(new Vector2d(0, 0), Math.toRadians(0)));
         driver = new GamepadEx(gamepad1);
+        limelight = new Limelight(hardwareMap);
+
+        thetaPD.setPD(3, 0.1, 0.7);
+        distPD.setPD(0.08, 0.00009, 0.7);
     }
 
     @Override
@@ -57,13 +50,12 @@ public class SquidAlignmentDebugger extends OpMode {
             hub.clearBulkCache();
         }
 
-        squid.setSquID(sf, 0.01);
-
         double y = driver.getLeftY();
         double x = driver.getLeftX();
         double rx = driver.getRightX();
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
+            limelight.setPipeline(Limelight.Pipeline.AT1);
             alignToAT = true;
         }
         if (driver.wasJustPressed(GamepadKeys.Button.X)) {
@@ -71,8 +63,11 @@ public class SquidAlignmentDebugger extends OpMode {
         }
 
         if (alignToAT) {
-            double rotation = squid.calculate(-trajectories.theta(drivetrain, targetX, targetY), 0, voltageSensor.getVoltage());
-            drivetrain.drive(x, y, rotation, false);
+            if (limelight.isDetected()) {
+                drivetrain.drive(0, -distPD.calculate(limelight.distance() - 40, 0, voltageSensor.getVoltage()), -thetaPD.calculate(Math.toRadians(limelight.degreeOffset()), 0, voltageSensor.getVoltage()), false);
+            } else {
+                drivetrain.drive(x, y, rx, false);
+            }
         } else {
             drivetrain.drive(x, y, rx, false);
         }
@@ -81,13 +76,10 @@ public class SquidAlignmentDebugger extends OpMode {
         driver.readButtons();
 
         telemetry.addData("\nAlign", alignToAT);
+        telemetry.addData("\nIs Detected", limelight.isDetected());
         telemetry.addData("\nX", "%.1f", drivetrain.getPosition().component1().x);
         telemetry.addData("Y", "%.1f", drivetrain.getPosition().component1().y);
         telemetry.addData("Heading", "%.1f", drivetrain.getPosition().heading.toDouble());
-        telemetry.addData("\nTheta to target", "%.2f", trajectories.theta(drivetrain, targetX, targetY));
-        telemetry.addLine("Radians");
-        telemetry.addData("\nSquid value", "%.2f", squid.calculate(-trajectories.theta(drivetrain, targetX, targetY), 0, voltageSensor.getVoltage()));
-        telemetry.addLine("Power level");
         telemetry.update();
     }
 }

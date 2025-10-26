@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import java.util.List;
 
 @Config
-@TeleOp(name = "Robot Centric Drive", group = "test")
+@TeleOp(name = "RCD", group = "test")
 public class RobotCentricDriveOnly extends OpMode {
     private Drivetrain drivetrain;
     private ActionScheduler actions;

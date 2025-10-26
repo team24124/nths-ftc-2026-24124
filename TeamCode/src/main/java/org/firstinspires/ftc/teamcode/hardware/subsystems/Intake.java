@@ -1,5 +1,74 @@
 package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
-public class Intake {
-    // nothing here yet
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
+import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
+import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
+
+public class Intake implements SubsystemBase, TelemetryObservable {
+    private final DcMotorEx intake;
+    public boolean powered = false;
+    private double targetVel = 0;
+
+    public Intake(HardwareMap hw) {
+        intake = hw.get(DcMotorEx.class, "intake");
+        intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+    }
+
+    @Override
+    public void periodic() {
+        intake.setVelocity(targetVel * (537.6/360));
+    }
+
+    public Action runIntake() {
+        return (TelemetryPacket packet) -> {
+            targetVel = -((double) 312 /60)*360; // 1872 degrees per second
+            powered = true;
+
+            return false;
+        };
+    }
+
+    public Action stopIntake() {
+        return (TelemetryPacket packet) -> {
+            targetVel = 0;
+            powered = false;
+
+            return false;
+        };
+    }
+
+    public double velocity() {
+        return intake.getVelocity();
+    }
+
+    public Action autonPeriodic() {
+        return (TelemetryPacket packet) -> {
+            periodic();
+
+            return true;
+        };
+    }
+
+    @Override
+    public void updateTelemetry(Telemetry telemetry) {
+        telemetry.addData("Moving", powered);
+        telemetry.addData("Target Velocity", targetVel);
+        telemetry.addData("Intake Velocity", intake.getVelocity(AngleUnit.DEGREES));
+    }
+
+    @Override
+    public String getName() {
+        return "Intake";
+    }
 }

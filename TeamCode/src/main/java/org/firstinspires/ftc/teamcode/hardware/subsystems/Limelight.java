@@ -56,14 +56,14 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
 
     // Switch pipeline if input is not the same as pipeline
     public void setPipeline(Pipeline pipeline) {
-        this.pipeline = pipeline;
-
-        setPipeline(pipeline.pipelineNum);
+        if (pipeline != this.pipeline) {
+            this.pipeline = pipeline;
+            setPipeline(pipeline.pipelineNum);
+        }
     }
 
-    // Only use in limelight tester
     public void setPipeline(int pipeline) {
-        if (pipeline != this.pipeline.pipelineNum) {
+        if (pipeline != limelight.getStatus().getPipelineIndex()) {
             limelight.pipelineSwitch(pipeline);
         }
     }
@@ -95,7 +95,12 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
 
     // Distance in inches, AT height / tan of forward to angle to target
     public double distance() {
-        return 8 + 29.5 / Math.tan(Math.toRadians(Math.max(0.00001, cameraAngle + getResult().getTyNC()))); // +8 to center limelight to center of robot
+        // 19 is height of obelisk (temporary)
+        return 7 / Math.tan(Math.toRadians(cameraAngle + getResult().getTyNC()));
+    }
+
+    public double offset() {
+        return 3 + distance() * Math.tan(Math.toRadians(getResult().getTxNC()));
     }
 
     //---------------------------------- target position returners ----------------------------------

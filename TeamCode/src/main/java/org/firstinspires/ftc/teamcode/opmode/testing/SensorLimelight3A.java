@@ -66,33 +66,32 @@ import java.util.List;
  */
 
 @Config
-@TeleOp(name = "Sensor: Limelight3A", group = "test")
+@TeleOp(name = "Limelight3A", group = "test")
 public class SensorLimelight3A extends LinearOpMode {
     private Limelight limelight;
-    public static int pipeline = 0;
-    private List<LynxModule> hubs = hardwareMap.getAll(LynxModule.class);
+    public static int pipeline = 2;
+    private List<LynxModule> hubs;
 
     @Override
     public void runOpMode() throws InterruptedException {
+        hubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule hub : hubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
         limelight = new Limelight(hardwareMap);
+        limelight.setPipeline(pipeline);
 
         telemetry.setMsTransmissionInterval(11);
 
-        limelight.setPipeline(pipeline);
-
-
-        telemetry.addData(">", "Robot Ready.  Press Play.");
-        telemetry.update();
         waitForStart();
 
         while (opModeIsActive()) {
             for (LynxModule hub : hubs) {
                 hub.clearBulkCache();
             }
+
+            limelight.setPipeline(pipeline);
 
             LLStatus status = limelight.status();
             telemetry.addData("\nName", "%s", status.getName());
@@ -123,12 +122,13 @@ public class SensorLimelight3A extends LinearOpMode {
                     telemetry.addData("\nFiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
                 }
 
-                telemetry.addData("\nDistance", limelight.distance());
-                telemetry.addData("Degree offset", limelight.degreeOffset());
-                telemetry.addData("\nTarget Vector", limelight.targetVectorFieldSpace(new Pose2d(0, 0, 0)).toString());
-                telemetry.addData("\nTarget Vector AT", limelight.ATTargetVectorFieldSpace(new Pose2d(0, 0, 0)).toString());
-                telemetry.addData("\nTarget Pose AT", limelight.ATTargetPoseFieldSpace(new Pose2d(0, 0, 0)).toString());
-
+                if (!fiducialResults.isEmpty()) {
+                    telemetry.addData("\nDistance", limelight.distance());
+                    telemetry.addData("Degree offset", limelight.degreeOffset());
+                    telemetry.addData("\nTarget Vector", limelight.targetVectorFieldSpace(new Pose2d(0, 0, 0)).toString());
+                    telemetry.addData("\nTarget Vector AT", limelight.ATTargetVectorFieldSpace(new Pose2d(0, 0, 0)).toString());
+                    telemetry.addData("\nTarget Pose AT", limelight.ATTargetPoseFieldSpace(new Pose2d(0, 0, 0)).toString());
+                }
             } else {
                 telemetry.addData("Limelight", "No data available");
             }

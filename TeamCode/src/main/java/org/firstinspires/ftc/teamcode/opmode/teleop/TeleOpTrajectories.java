@@ -25,33 +25,20 @@ public enum TeleOpTrajectories {
                         .build();
     }
 
-    // Calculates whether to turn right or left to align with the corners of the field
-    public double rotation(Drivetrain drivetrain, double X) {
+    public double theta(Drivetrain drivetrain, double X, double Y) {
         double heading = (drivetrain.getHeading() + Math.PI/2) % (Math.PI*2);
         double botX = drivetrain.getPosition().position.x;
         double botY = drivetrain.getPosition().position.y;
 
-        double theta = Math.atan2(72 - botY, X - botX); // Calculate angle to target (0 being east CCW)
-        if (theta < 0) theta += Math.PI*2; // Normalize to 0 - 360
-
-        if (Utilities.isBetween(heading, theta - Math.toRadians(15), theta + Math.toRadians(15))) { // Potential flickers may cause unnecessary rotation, a threshold is necessary
-            return 0;
-        } else if (
-                Utilities.isBetween(heading, theta, Math.PI + theta) // Between angle to target from 0 = east & opposite
-        ) {
-            return 0.8; // Turn right
-        } else {
-            return -0.8; // Turn left
-        }
-    }
-
-    public double theta(Drivetrain drivetrain, double X) { // TODO FIX COORDINATE SYSTEM
-        double heading = (drivetrain.getHeading() + Math.PI/2) % (Math.PI*2);
-        double botX = drivetrain.getPosition().position.x;
-        double botY = drivetrain.getPosition().position.y;
-
-        double theta = Math.atan2(72 - botY, X - botX);
+        double theta = Math.atan2(X - botX, -Y + botY); // Similar to (y, x) -> x is vertical, y is lateral +left (reversed to accommodate atan2)
         if (theta < 0) theta += Math.PI*2;
+
+        if ((heading - theta) > Math.PI) {
+            return -Math.PI + ((heading - theta) % Math.PI);
+        }
+        if (Math.abs(heading - theta) > Math.PI) {
+            return Math.PI + ((heading - theta) % Math.PI);
+        } // Normalizing
 
         return heading - theta;
     }

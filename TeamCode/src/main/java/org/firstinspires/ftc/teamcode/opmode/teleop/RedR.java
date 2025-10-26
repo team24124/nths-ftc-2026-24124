@@ -92,13 +92,9 @@ public class RedR extends OpMode {
 
         // --- Operator inputs ---
         if (operator.isDown(GamepadKeys.Button.A)) {
-            robot.actions.schedule(new InstantAction(() ->
-                    robot.flyWheel.runFlyWheel(robot.limelight.distance())
-            ));
+            robot.actions.schedule(robot.flyWheel.runFlyWheel(robot.limelight.distance()));
         } else if (robot.flyWheel.powered) {
-            robot.actions.schedule(new InstantAction(() ->
-                    robot.flyWheel.stopFlyWheel()
-            ));
+            robot.actions.schedule(robot.flyWheel.stopFlyWheel());
         }
 
         // Add if left bumper = green, right bumper = purple
@@ -111,7 +107,7 @@ public class RedR extends OpMode {
                     robot.drivetrain.drive(x, y, robot.limelight.degreeOffset(), true);
                 } else {
                     // Rotate to the general direction of the target with 30 inch threshold
-                    robot.drivetrain.drive(x, y, trajectories.rotation(robot.drivetrain, 72), false);
+                    robot.drivetrain.drive(x, y, trajectories.theta(robot.drivetrain, 72, 72), false);
                 }
             } else {
                 // Pure drive
@@ -122,9 +118,6 @@ public class RedR extends OpMode {
 
         driver.readButtons();
         operator.readButtons();
-
-        robot.turretBase.setHeadings(robot.drivetrain.getDrive(), robot.limelight.degreeOffset(), robot.limelight.isDetected(), true);
-        robot.turretBase.periodic(); // PD loop
 
         robot.telemetryControl.update();
         robot.actions.run(); // Call for scheduled actions to run

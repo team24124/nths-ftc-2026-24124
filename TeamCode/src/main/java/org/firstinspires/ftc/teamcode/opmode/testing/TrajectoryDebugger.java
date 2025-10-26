@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.testing;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -19,7 +18,7 @@ import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import java.util.List;
 
 @Config
-@TeleOp(name = "Trajectory Debugger", group = "test")
+@TeleOp(name = "Trajectories", group = "test")
 public class TrajectoryDebugger extends OpMode {
     public static boolean robotCentric = true;
     private boolean t = true;
@@ -30,7 +29,7 @@ public class TrajectoryDebugger extends OpMode {
     private List<LynxModule> hubs;
     private double xPos = 0;
     private double yPos = 0;
-    private boolean debugX = true;
+    private double heading = 0;
 
     @Override
     public void init() {
@@ -57,41 +56,33 @@ public class TrajectoryDebugger extends OpMode {
         double rx = driver.getRightX();
 
         if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-            actions.schedule(new InstantAction(drivetrain.getSpeeds()::previous));
-        }
-        if (driver.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-            actions.schedule(new InstantAction(drivetrain.getSpeeds()::next));
-        }
-
-        if (driver.wasJustPressed(GamepadKeys.Button.A)) {
             Vector2d targetPose = new Vector2d(xPos, yPos);
             actions.schedule(trajectories.vectorAlign(drivetrain.getDrive(), targetPose));
         }
-
-        // Switch between adjusting x and y
-        if (driver.wasJustPressed(GamepadKeys.Button.X)) {
-            debugX = true;
-        } else if (driver.wasJustPressed(GamepadKeys.Button.Y)) {
-            debugX = false;
+        if (driver.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+            Pose2d targetPose = new Pose2d(xPos, yPos, heading);
+            actions.schedule(trajectories.poseAlign(drivetrain.getDrive(), targetPose));
         }
 
         // Adjust x and y
-        if (debugX) {
-            if (driver.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-                xPos += 1;
-            } else if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-                xPos -= 1;
-            }
-        } else {
-            if (driver.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-                yPos += 1;
-            } else if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-                yPos -= 1;
-            }
+        if (driver.isDown(GamepadKeys.Button.DPAD_RIGHT)) {
+            yPos -= 0.08;
+        } else if (driver.isDown(GamepadKeys.Button.DPAD_LEFT)) {
+            yPos += 0.08;
+        }
+        if (driver.isDown(GamepadKeys.Button.DPAD_UP)) {
+            xPos += 0.08;
+        } else if (driver.isDown(GamepadKeys.Button.DPAD_DOWN)) {
+            xPos -= 0.08;
+        }
+        if (driver.isDown(GamepadKeys.Button.Y)) {
+            heading += 0.04;
+        } else if (driver.isDown(GamepadKeys.Button.A)) {
+            heading -= 0.04;
         }
 
         // Checks if drivetrain has been switched and switches drivetrain type
-        if (t != robotCentric) {
+        if (driver.wasJustPressed(GamepadKeys.Button.B) && t != robotCentric) {
             switchDrive();
             t = robotCentric;
         }
@@ -105,20 +96,14 @@ public class TrajectoryDebugger extends OpMode {
 
         ActionScheduler.INSTANCE.run();
 
-        Pose2d current = drivetrain.getPosition();
         telemetry.addData("\nBusy", drivetrain.getDrive().isBusy);
         telemetry.addData("\nX", drivetrain.getPosition().position.x);
         telemetry.addData("\nY", drivetrain.getPosition().position.y);
         telemetry.addData("\nHeading", drivetrain.getHeading());
 
-        // Show on telemetry what is being edited
-        if (debugX) {
-            telemetry.addData("\n\n> Targeted X", xPos);
-            telemetry.addData("Targeted Y", yPos);
-        } else {
-            telemetry.addData("\n\nTargeted X", xPos);
-            telemetry.addData("> Targeted Y", yPos);
-        }
+        telemetry.addData("\n\nTargeted X", xPos);
+        telemetry.addData("Targeted Y", yPos);
+        telemetry.addData("Targeted Heading", heading);
 
         telemetry.update();
     }

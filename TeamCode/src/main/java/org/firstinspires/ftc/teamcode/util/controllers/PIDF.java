@@ -17,13 +17,12 @@ public class PIDF {
     private double prevError = 0;
     private double previousFilterEstimate = 0;
     private double currentFilterEstimate = 0;
-    private double motorTPR = 0;
+    private double motorTPR = 1;
 
     private ElapsedTime timer = new ElapsedTime();
 
     // Feedback and feedforward
     public void setPIDG(double Kp, double Ki, double Kd, double Kg, double smoothingFactor, double integralSumLimit, double motorTPR) {
-        timer.reset();
         this.Kp = Kp;
         this.Ki = Ki;
         this.Kd = Kd;
@@ -35,7 +34,6 @@ public class PIDF {
 
     // Feedback only
     public void setPID(double Kp, double Ki, double Kd, double smoothingFactor, double integralSumLimit) {
-        timer.reset();
         this.Kp = Kp;
         this.Ki = Ki;
         this.Kd = Kd;
@@ -45,7 +43,6 @@ public class PIDF {
 
     // Removed integral for uncertain error
     public void setPD(double Kp, double Kd, double smoothingFactor) {
-        timer.reset();
         this.Kp = Kp;
         this.Kd = Kd;
         this.smoothingFactor = smoothingFactor;

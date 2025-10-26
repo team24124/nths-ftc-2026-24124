@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
 import com.acmerobotics.roadrunner.InstantAction;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -86,13 +87,9 @@ public class BlueR extends OpMode {
 
         // --- Operator inputs ---
         if (operator.isDown(GamepadKeys.Button.A)) {
-            robot.actions.schedule(new InstantAction(() ->
-                    robot.flyWheel.runFlyWheel(robot.limelight.distance())
-            ));
+            robot.actions.schedule(robot.flyWheel.runFlyWheel(robot.limelight.distance()));
         } else if (robot.flyWheel.powered) {
-            robot.actions.schedule(new InstantAction(() ->
-                    robot.flyWheel.stopFlyWheel()
-            ));
+            robot.actions.schedule(robot.flyWheel.stopFlyWheel());
         }
 
         // --- Periodic calls ---
@@ -101,7 +98,7 @@ public class BlueR extends OpMode {
                 if (robot.limelight.isDetected()) {
                     robot.drivetrain.drive(x, y, robot.limelight.degreeOffset(), true);
                 } else {
-                    robot.drivetrain.drive(x, y, trajectories.rotation(robot.drivetrain, -72), false);
+                    robot.drivetrain.drive(x, y, trajectories.theta(robot.drivetrain, 72, 72), false);
                 }
             } else {
                 robot.drivetrain.drive(x, y, rx, false);
@@ -111,9 +108,6 @@ public class BlueR extends OpMode {
 
         driver.readButtons();
         operator.readButtons();
-
-        robot.turretBase.setHeadings(robot.drivetrain.getDrive(), robot.limelight.degreeOffset(), robot.limelight.isDetected(), false);
-        robot.turretBase.periodic();
 
         robot.telemetryControl.update();
         robot.actions.run();
