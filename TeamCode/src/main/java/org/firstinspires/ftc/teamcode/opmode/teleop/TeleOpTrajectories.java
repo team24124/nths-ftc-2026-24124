@@ -6,7 +6,6 @@ import com.acmerobotics.roadrunner.Vector2d;
 
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
-import org.firstinspires.ftc.teamcode.util.Utilities;
 
 public enum TeleOpTrajectories {
     INSTANCE;

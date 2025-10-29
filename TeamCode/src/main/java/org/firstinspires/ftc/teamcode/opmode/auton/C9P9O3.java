@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.opmode.auton;
 
 import com.acmerobotics.roadrunner.AccelConstraint;
 import com.acmerobotics.roadrunner.AngularVelConstraint;
-import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.MinVelConstraint;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -62,10 +61,7 @@ public class C9P9O3 extends LinearOpMode {
                 new SequentialAction(
                         drivebase.actionBuilder(initialPose, true)
                                 .splineToConstantHeading(new Vector2d(9, 9), 0)
-                                .build(),
-
-                        new InstantAction(() -> robot.turretBase.periodic())
-
+                                .build()
                 )
         );
 

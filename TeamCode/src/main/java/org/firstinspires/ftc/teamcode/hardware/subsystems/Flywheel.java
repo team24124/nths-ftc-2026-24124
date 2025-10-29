@@ -88,7 +88,8 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     }
 
     public void power(double vel) {
-        velPD.calculate(wheel1.getVelocity(), vel, voltageSensor.getVoltage());
+        // 2800 = max tps
+        wheel1.setPower(((double) 1 /2800) * velPD.calculate(wheel1.getVelocity(), vel, voltageSensor.getVoltage()));
     }
 
     public void setVls(double distance) {

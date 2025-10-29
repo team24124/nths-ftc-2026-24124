@@ -12,20 +12,22 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
-import org.firstinspires.ftc.teamcode.util.PoseStorage;
+import org.firstinspires.ftc.teamcode.util.ActionScheduler;
+import org.firstinspires.ftc.teamcode.util.TelemetryControl;
 
 import java.util.List;
 
 @Config
-@TeleOp(name = "FlyWheel Debugger", group = "tuning")
+@TeleOp(name = "FlyWheel", group = "tuning")
 public class FlywheelDebugger extends OpMode {
     private GamepadEx driver;
     private List<LynxModule> hubs;
     private Flywheel flywheel;
     private TeleOpTrajectories trajectories;
     private Drivetrain drivetrain;
+    private ActionScheduler actions;
+    private TelemetryControl telemetryControl;
     public static double Kp, Kd, Ks = 0;
 
     @Override
@@ -35,11 +37,14 @@ public class FlywheelDebugger extends OpMode {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
+        actions = ActionScheduler.INSTANCE;
+        actions.init();
         driver = new GamepadEx(gamepad1);
         flywheel = new Flywheel(hardwareMap);
-
         trajectories = TeleOpTrajectories.INSTANCE;
         drivetrain = new FieldCentricDrive(hardwareMap, new Pose2d(new Vector2d(0, 0), 0));
+        telemetryControl = new TelemetryControl(telemetry);
+        telemetryControl.subscribe(flywheel);
     }
 
     @Override
@@ -54,15 +59,17 @@ public class FlywheelDebugger extends OpMode {
             flywheel.adjustFlap(trajectories.distanceToTarget(drivetrain, true));
         }
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            flywheel.runFlywheel();
+            actions.schedule(flywheel.runFlywheel());
         }
         if (driver.wasJustPressed(GamepadKeys.Button.B)) {
-            flywheel.stopFlywheel();
+            actions.schedule(flywheel.stopFlywheel());
         }
 
         flywheel.setVls(trajectories.distanceToTarget(drivetrain, true));
         flywheel.periodic();
         drivetrain.periodic();
         driver.readButtons();
+        actions.run();
+        telemetryControl.update();
     }
 }

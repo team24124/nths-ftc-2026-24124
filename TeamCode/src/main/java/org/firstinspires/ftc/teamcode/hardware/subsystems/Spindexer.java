@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -62,22 +61,24 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     // A periodic function is necessary as balls are always rolling in and shifting the indexer
     @Override
     public void periodic() {
-        double target = states.getSelected().position;
-        double position = spindexer.getCurrentPosition() % TPR; // Normalize to [0, 537.6)
-        if (position < 0) position += TPR;
+        if (!isMoving) {
+            double target = states.getSelected().position;
+            double position = spindexer.getCurrentPosition() % TPR; // Normalize to [0, 537.6)
+            if (position < 0) position += TPR;
 
-        // Compute raw difference
-        double error = target - position;
+            // Compute raw difference
+            double error = target - position;
 
-        // Wrap error into (-TPR/2, +TPR/2]
-        if (error > TPR / 2) error -= TPR;
-        else if (error < -TPR / 2) error += TPR;
+            // Wrap error into (-TPR/2, +TPR/2]
+            if (error > TPR / 2) error -= TPR;
+            else if (error < -TPR / 2) error += TPR;
 
-        // Reconstruct adjusted position for PIDF (if it takes position, not error)
-        double adjustedPosition = target - error;
+            // Reconstruct adjusted position for PIDF (if it takes position, not error)
+            double adjustedPosition = target - error;
 
-        double power = pidf.calculate(adjustedPosition, target, voltageSensor.getVoltage());
-        spindexer.setPower(power);
+            double power = pidf.calculate(adjustedPosition, target, voltageSensor.getVoltage());
+            spindexer.setPower(power);
+        }
     }
 
     public Action autonPeriodic() {

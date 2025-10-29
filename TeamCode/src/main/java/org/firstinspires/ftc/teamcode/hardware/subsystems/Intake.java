@@ -4,15 +4,11 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
 import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
-import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
 
 public class Intake implements SubsystemBase, TelemetryObservable {
     private final DcMotorEx intake;

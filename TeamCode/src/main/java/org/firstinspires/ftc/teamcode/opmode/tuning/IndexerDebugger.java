@@ -1,40 +1,26 @@
 package org.firstinspires.ftc.teamcode.opmode.tuning;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Spindexer;
-import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
-import org.firstinspires.ftc.teamcode.util.ArraySelect;
-import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
-import org.firstinspires.ftc.teamcode.util.controllers.SquID;
+import org.firstinspires.ftc.teamcode.util.TelemetryControl;
 
 import java.util.List;
 
 @Config
-@TeleOp(name = "Indexer Debugger", group = "tuning")
+@TeleOp(name = "Indexer", group = "tuning")
 public class IndexerDebugger extends OpMode {
     private List<LynxModule> hubs;
     private GamepadEx driver;
     private ActionScheduler actions;
     private Spindexer spindexer;
+    private TelemetryControl telemetryControl;
     public static double Ks, Kp, Ki, Kd = 0;
 
     @Override
@@ -47,8 +33,9 @@ public class IndexerDebugger extends OpMode {
         driver = new GamepadEx(gamepad1);
         actions = ActionScheduler.INSTANCE;
         actions.init();
-
         spindexer = new Spindexer(hardwareMap);
+        telemetryControl = new TelemetryControl(telemetry);
+        telemetryControl.subscribe(spindexer);
     }
 
     @Override
@@ -57,7 +44,7 @@ public class IndexerDebugger extends OpMode {
             hub.clearBulkCache();
         }
 
-        spindexer.setPIDF(0.002, 0.001, 0.00006, Ks, 0.7, 0.7);
+        spindexer.setPIDF(Kp, Ki, Kd, Ks, 0.7, 0.7);
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
             actions.schedule(spindexer.shootAll());
         }
@@ -70,9 +57,6 @@ public class IndexerDebugger extends OpMode {
         if (driver.wasJustPressed(GamepadKeys.Button.Y)) {
             actions.schedule(spindexer.sortTo("empty"));
         }
-        if (!spindexer.isMoving) {
-            spindexer.periodic();
-        }
         if (driver.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
             spindexer.states.previous();
         }
@@ -80,8 +64,10 @@ public class IndexerDebugger extends OpMode {
             spindexer.states.next();
         }
 
+        spindexer.periodic();
         driver.readButtons();
         actions.run();
-        spindexer.updateTelemetry(telemetry);
+        telemetryControl.getTelemetry().addLine("A to shoot all\nB to shoot nearest\nX to move to an empty slot\nY to sort to colour\nPad left & right to move 1 slot");
+        telemetryControl.update();
     }
 }

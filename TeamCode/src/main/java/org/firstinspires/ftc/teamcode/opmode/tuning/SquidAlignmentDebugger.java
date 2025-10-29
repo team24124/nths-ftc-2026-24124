@@ -8,23 +8,17 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
-import org.firstinspires.ftc.teamcode.util.ArraySelect;
-import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
 import org.firstinspires.ftc.teamcode.util.controllers.SquID;
 
 import java.util.List;
 
 @Config
-@TeleOp(name = "Align SquID", group = "tuning")
+@TeleOp(name = "Align Sq", group = "tuning")
 public class SquidAlignmentDebugger extends OpMode {
     private List<LynxModule> hubs;
     private VoltageSensor voltageSensor;

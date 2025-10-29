@@ -9,15 +9,12 @@ import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
-import org.firstinspires.ftc.teamcode.hidden.TurretBase;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.util.TelemetryControl;
 
 public class Robot {
     public Flywheel flyWheel;
-
-    public TurretBase turretBase;
 
     public Drivetrain drivetrain;
 
@@ -29,7 +26,6 @@ public class Robot {
 
     public Robot(HardwareMap hw, Telemetry telemetry, boolean robotCentric) {
         flyWheel = new Flywheel(hw);
-        turretBase = new TurretBase(hw);
         limelight = new Limelight(hw);
 
         if (robotCentric) {
@@ -41,7 +37,6 @@ public class Robot {
         telemetryControl = new TelemetryControl(telemetry);
         telemetryControl
                 .subscribe(flyWheel)
-                .subscribe(turretBase)
                 .subscribe(limelight)
                 .subscribe(drivetrain)
                 .subscribe(actions); // Display on telemetry

@@ -14,13 +14,12 @@ import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
-import org.firstinspires.ftc.teamcode.util.ArraySelect;
 import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
 
 import java.util.List;
 
 @Config
-@TeleOp(name = "Align LL", group = "tuning")
+@TeleOp(name = "Align 3A", group = "tuning")
 public class AlignmentDebugger extends OpMode {
     private List<LynxModule> hubs;
     private VoltageSensor voltageSensor;

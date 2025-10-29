@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 
 import java.util.List;
 
-@TeleOp(name = "Intake Debugger", group = "test")
+@TeleOp(name = "Intake", group = "test")
 public class IntakeDebugger extends OpMode {
     private List<LynxModule> hubs;
     private GamepadEx driver;

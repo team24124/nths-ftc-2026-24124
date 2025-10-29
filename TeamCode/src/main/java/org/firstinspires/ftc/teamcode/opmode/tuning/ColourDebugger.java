@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmode.testing;
+package org.firstinspires.ftc.teamcode.opmode.tuning;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.hardware.subsystems.REVColourV3;
 
 import java.util.List;
 
-@TeleOp(name = "REVColourV3", group = "test")
+@TeleOp(name = "Colour", group = "test")
 public class ColourDebugger extends OpMode {
     private List<LynxModule> hubs;
     private GamepadEx driver;

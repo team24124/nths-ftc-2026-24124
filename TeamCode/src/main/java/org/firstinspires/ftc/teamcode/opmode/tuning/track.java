@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
 
 import java.util.List;
 
-@TeleOp(name = "track", group = "tuning")
+@TeleOp(name = "track", group = "MI BOMBO")
 public class track extends OpMode {
     private List<LynxModule> hubs;
     private VoltageSensor voltageSensor;

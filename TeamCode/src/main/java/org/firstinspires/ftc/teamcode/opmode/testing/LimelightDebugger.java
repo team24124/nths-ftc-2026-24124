@@ -66,8 +66,8 @@ import java.util.List;
  */
 
 @Config
-@TeleOp(name = "Limelight3A", group = "test")
-public class SensorLimelight3A extends LinearOpMode {
+@TeleOp(name = "Limelight", group = "test")
+public class LimelightDebugger extends LinearOpMode {
     private Limelight limelight;
     public static int pipeline = 2;
     private List<LynxModule> hubs;
