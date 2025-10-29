@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmode.tuning;
+package org.firstinspires.ftc.teamcode.opmode.debug.tune;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -28,7 +28,7 @@ public class FlywheelDebugger extends OpMode {
     private Drivetrain drivetrain;
     private ActionScheduler actions;
     private TelemetryControl telemetryControl;
-    public static double Kp, Kd, Ks = 0;
+    public static double Kp, Kv = 0;
 
     @Override
     public void init() {
@@ -53,7 +53,7 @@ public class FlywheelDebugger extends OpMode {
             hub.clearBulkCache();
         }
 
-        flywheel.setVelPD(Kp, Kd, Ks);
+        flywheel.setVelPID(Kp, Kv);
 
         if (driver.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
             flywheel.adjustFlap(trajectories.distanceToTarget(drivetrain, true));

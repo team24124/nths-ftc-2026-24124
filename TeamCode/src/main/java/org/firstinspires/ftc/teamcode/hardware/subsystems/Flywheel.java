@@ -20,7 +20,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     public boolean powered = false;
     private double targetVel = 0;
     private double distance = 0;
-    private PIDF velPD = new PIDF();
+    private PIDF velP = new PIDF();
     private final VoltageSensor voltageSensor;
 
     public Flywheel(HardwareMap hw) {
@@ -37,7 +37,8 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
 
         voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
 
-        velPD.setPD(0, 0, 0); // PD chosen due to potential accumulation of integral while moving and adjusting power w distance
+        velP.resetIntegral(false);
+        velP.setPIDF(99, 0, 0, 99, 0, 0);
     }
 
     /**
@@ -89,15 +90,15 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
 
     public void power(double vel) {
         // 2800 = max tps
-        wheel1.setPower(((double) 1 /2800) * velPD.calculate(wheel1.getVelocity(), vel, voltageSensor.getVoltage()));
+        wheel1.setPower(velP.calculate(wheel1.getVelocity(), vel, voltageSensor.getVoltage()));
     }
 
     public void setVls(double distance) {
         this.distance = distance;
     }
 
-    public void setVelPD(double Kp, double Kd, double sf) {
-        velPD.setPD(Kp, Kd, sf);
+    public void setVelPID(double Kp, double Kv) {
+        velP.setPIDF(Kp, 0, 0, Kv, 0, 0);
     }
 
     @Override

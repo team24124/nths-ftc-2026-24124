@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmode.tuning;
+package org.firstinspires.ftc.teamcode.opmode.debug.tune;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -13,26 +13,24 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
-import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
+import org.firstinspires.ftc.teamcode.util.controllers.SquID;
 
 import java.util.List;
 
 @Config
-@TeleOp(name = "Align PD", group = "tuning")
-public class PDAlignmentDebugger extends OpMode {
+@TeleOp(name = "Align Sq", group = "tuning")
+public class SquidAlignmentDebugger extends OpMode {
     private List<LynxModule> hubs;
     private VoltageSensor voltageSensor;
     private Drivetrain drivetrain;
     private TeleOpTrajectories trajectories;
     private GamepadEx driver;
 
-    public static double Kp = 7;
-    public static double Kd = 0.7;
-    public static double sf = 0.7;
-    public static double targetX = 72; // X is vertical axis
-    public static double targetY = -72; // Y is lateral axis reversed
+    public static double sf = 1.65;
+    public static double targetX = 24; // X is vertical axis
+    public static double targetY = 24; // Y is lateral axis reversed
     private boolean alignToAT = false;
-    private PIDF pd = new PIDF();
+    private SquID squid = new SquID(sf, 0.01);
 
     @Override
     public void init() {
@@ -53,7 +51,7 @@ public class PDAlignmentDebugger extends OpMode {
             hub.clearBulkCache();
         }
 
-        pd.setPD(Kp, Kd, sf);
+        squid.setSquID(sf, 0.01);
 
         double y = driver.getLeftY();
         double x = driver.getLeftX();
@@ -67,7 +65,7 @@ public class PDAlignmentDebugger extends OpMode {
         }
 
         if (alignToAT) {
-            double rotation = pd.calculate(-trajectories.theta(drivetrain, targetX, targetY), 0, voltageSensor.getVoltage());
+            double rotation = squid.calculate(-trajectories.theta(drivetrain, targetX, targetY), 0, voltageSensor.getVoltage());
             drivetrain.drive(x, y, rotation, false);
         } else {
             drivetrain.drive(x, y, rx, false);
@@ -82,7 +80,7 @@ public class PDAlignmentDebugger extends OpMode {
         telemetry.addData("Heading", "%.1f", drivetrain.getPosition().heading.toDouble());
         telemetry.addData("\nTheta to target", "%.2f", trajectories.theta(drivetrain, targetX, targetY));
         telemetry.addLine("Radians");
-        telemetry.addData("\nPD value", "%.2f", pd.calculate(-trajectories.theta(drivetrain, targetX, targetY), 0, voltageSensor.getVoltage()));
+        telemetry.addData("\nSquid value", "%.2f", squid.calculate(-trajectories.theta(drivetrain, targetX, targetY), 0, voltageSensor.getVoltage()));
         telemetry.addLine("Power level");
         telemetry.update();
     }

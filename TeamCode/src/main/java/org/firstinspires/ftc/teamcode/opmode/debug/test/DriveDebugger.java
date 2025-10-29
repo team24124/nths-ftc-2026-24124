@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmode.testing;
+package org.firstinspires.ftc.teamcode.opmode.debug.test;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.InstantAction;
@@ -11,18 +11,21 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 
 import java.util.List;
 
 @Config
-@TeleOp(name = "RCD", group = "test")
-public class RobotCentricDriveOnly extends OpMode {
+@TeleOp(name = "Drive", group = "test")
+public class DriveDebugger extends OpMode {
     private Drivetrain drivetrain;
     private ActionScheduler actions;
     private GamepadEx driver;
     private List<LynxModule> hubs;
+    public static boolean robotCentric = true;
+    private boolean state = true;
 
     @Override
     public void init() {
@@ -31,7 +34,7 @@ public class RobotCentricDriveOnly extends OpMode {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
-        drivetrain = new RobotCentricDrive(hardwareMap, new Pose2d(new Vector2d(0, 0), Math.toRadians(0)));
+        drivetrain = new FieldCentricDrive(hardwareMap, new Pose2d(new Vector2d(0, 0), Math.toRadians(0)));
         actions = ActionScheduler.INSTANCE;
         actions.init();
         driver = new GamepadEx(gamepad1);
@@ -42,6 +45,8 @@ public class RobotCentricDriveOnly extends OpMode {
         for (LynxModule hub : hubs) {
             hub.clearBulkCache();
         }
+
+        Vector2d current = drivetrain.getDrive().localizer.getPose().position;
 
         double y = driver.getLeftY();
         double x = driver.getLeftX();
@@ -54,15 +59,37 @@ public class RobotCentricDriveOnly extends OpMode {
             actions.schedule(new InstantAction(drivetrain.getSpeeds()::next));
         }
 
-        drivetrain.drive(x, y, rx, false);
+        // Reset pose
+        if (driver.wasJustPressed(GamepadKeys.Button.START)) {
+            drivetrain.getDrive().localizer.setPose(new Pose2d(0, 0, 0));
+        }
+
+        if (driver.wasJustPressed(GamepadKeys.Button.B) && state != robotCentric) {
+            switchDrive();
+            state = robotCentric;
+        }
 
         driver.readButtons();
-
+        drivetrain.drive(x, y, rx, false);
+        drivetrain.periodic();
         ActionScheduler.INSTANCE.run();
+
+        telemetry.addData("\nX", current.x);
+        telemetry.addData("\nY", current.y);
+        telemetry.addData("\nHeading", drivetrain.getHeading());
+        telemetry.update();
     }
 
     @Override
     public void stop() {
         actions.stop();
+    }
+
+    public void switchDrive() {
+        if (robotCentric) {
+            drivetrain = new RobotCentricDrive(hardwareMap, drivetrain.getPosition());
+        } else {
+            drivetrain = new FieldCentricDrive(hardwareMap, drivetrain.getPosition());
+        }
     }
 }

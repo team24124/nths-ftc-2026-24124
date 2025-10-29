@@ -23,7 +23,7 @@ import java.util.List;
 public class Spindexer implements SubsystemBase, TelemetryObservable {
     private final DcMotorEx spindexer;
     private final double TPR = 537.6;
-    private PIDF pidf;
+    private PIDF pd;
     private final VoltageSensor voltageSensor;
 
     public enum State {
@@ -47,8 +47,8 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     public boolean isMoving = false;
 
     public Spindexer(HardwareMap hw) {
-        pidf = new PIDF();
-        pidf.setPIDF(0, 0, 0, 0, 0, 0);
+        pd = new PIDF();
+        pd.setPD(0, 0, 0);
         spindexer = hw.get(DcMotorEx.class, "spindexer");
         spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -76,7 +76,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
             // Reconstruct adjusted position for PIDF (if it takes position, not error)
             double adjustedPosition = target - error;
 
-            double power = pidf.calculate(adjustedPosition, target, voltageSensor.getVoltage());
+            double power = pd.calculate(adjustedPosition, target, voltageSensor.getVoltage());
             spindexer.setPower(power);
         }
     }
@@ -103,7 +103,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
             int tolerance = 10;
 
-            double power = pidf.calculate(position, target, voltageSensor.getVoltage());
+            double power = pd.calculate(position, target, voltageSensor.getVoltage());
             spindexer.setPower(power);
 
             if (Utilities.isBetween(position % TPR, target - tolerance, target + tolerance)) {
@@ -129,7 +129,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
             int tolerance = 10;
 
-            double power = pidf.calculate(position, target, voltageSensor.getVoltage());
+            double power = pd.calculate(position, target, voltageSensor.getVoltage());
             spindexer.setPower(power);
 
             if (Utilities.isBetween(position % TPR, target - tolerance, target + tolerance)) {
@@ -187,8 +187,8 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
         return spindexer.getPower();
     }
 
-    public void setPIDF(double Kp, double Ki, double Kd, double Ks, double sf, double isl) {
-        pidf.setPIDF(Kp, Ki, Kd, Ks, sf, isl);
+    public void setPD(double Kp, double Kd, double sf) {
+        pd.setPD(Kp, Kd, sf);
     }
 
     @Override

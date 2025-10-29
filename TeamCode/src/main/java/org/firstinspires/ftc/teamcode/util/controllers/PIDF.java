@@ -3,12 +3,13 @@ package org.firstinspires.ftc.teamcode.util.controllers;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class PIDF {
-    private double Kp, Ki, Kd, Kg, Ks = 0; // Proportional, integral, derivative, gravitational correction (feedforward), friction compensation
+    private double Kp, Ki, Kd, Kg, Kv = 0; // Proportional, integral, derivative, gravitational correction (feedforward), velocity feedforward
     private double smoothingFactor = 0; // sf can be any value from 0 < sf < 1. Heavier smoothing but less responsiveness towards 1
     private double integralSumLimit = 0; // Integral cap to prevent unnecessary accumulation
 
     private double lastTarget, integralSum, prevError, previousFilterEstimate = 0;
     private double motorTPR = 1;
+    private boolean resetIntegral;
 
     private ElapsedTime timer = new ElapsedTime();
 
@@ -24,11 +25,11 @@ public class PIDF {
     }
 
     // Feedback and feedforward (friction)
-    public void setPIDF(double Kp, double Ki, double Kd, double Ks, double smoothingFactor, double integralSumLimit) {
+    public void setPIDF(double Kp, double Ki, double Kd, double Kv, double smoothingFactor, double integralSumLimit) {
         this.Kp = Kp;
         this.Ki = Ki;
         this.Kd = Kd;
-        this.Ks = Ks;
+        this.Kv = Kv;
         this.smoothingFactor = smoothingFactor;
         this.integralSumLimit = integralSumLimit;
     }
@@ -49,6 +50,10 @@ public class PIDF {
         this.smoothingFactor = smoothingFactor;
     }
 
+    public void resetIntegral(boolean reset) {
+        resetIntegral = reset;
+    }
+
     // Outputs processed power
     public double calculate(double position, double target, double voltage) {
         // Time
@@ -59,8 +64,8 @@ public class PIDF {
         // Error
         double error = target - position;
 
-        // Integral setters & limiters
-        if (lastTarget != target) {
+        // Integral setters & limiters (optional resetting)
+        if (resetIntegral && lastTarget != target) {
             integralSum = 0;
             lastTarget = target;
         }
@@ -77,10 +82,11 @@ public class PIDF {
         // Angle getter
         double radians = 2 * Math.PI * (position / motorTPR); // Assumes an arm is initialized horizontally, TPR is gear ratio * 28, goBILDA 312rpm 5203 yellowjacket motor
 
-        double staticFriction = (Math.abs(error) > 2) ? Ks * Math.signum(error) : 0; // Give value to friction compensation if error is above tolerance of 2 encoder ticks
+        // Velocity feedforward
+        double feedforward = Kv * target; // Kv * target velocity
 
         // Output calculator
-        double out = ((Kp * error) + (Ki * integralSum) + (Kd * derivative) + (Math.cos(radians) * Kg) + staticFriction) * (12.0 / Math.max(voltage, 8.0));
+        double out = ((Kp * error) + (Ki * integralSum) + (Kd * derivative) + (Math.cos(radians) * Kg) + feedforward) * (12.0 / Math.max(voltage, 8.0));
         out = Math.max(-1, Math.min(1, out));
 
         // Output & error setter

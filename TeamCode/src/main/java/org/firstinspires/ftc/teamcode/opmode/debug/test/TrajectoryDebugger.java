@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmode.testing;
+package org.firstinspires.ftc.teamcode.opmode.debug.test;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -21,7 +21,7 @@ import java.util.List;
 @TeleOp(name = "Trajectories", group = "test")
 public class TrajectoryDebugger extends OpMode {
     public static boolean robotCentric = true;
-    private boolean t = true;
+    private boolean state = true;
     private Drivetrain drivetrain;
     private ActionScheduler actions;
     private GamepadEx driver;
@@ -82,9 +82,9 @@ public class TrajectoryDebugger extends OpMode {
         }
 
         // Checks if drivetrain has been switched and switches drivetrain type
-        if (driver.wasJustPressed(GamepadKeys.Button.B) && t != robotCentric) {
+        if (driver.wasJustPressed(GamepadKeys.Button.B) && state != robotCentric) {
             switchDrive();
-            t = robotCentric;
+            state = robotCentric;
         }
 
         if (!drivetrain.getDrive().isBusy) {

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmode.tuning;
+package org.firstinspires.ftc.teamcode.opmode.debug.tune;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -21,7 +21,7 @@ public class IndexerDebugger extends OpMode {
     private ActionScheduler actions;
     private Spindexer spindexer;
     private TelemetryControl telemetryControl;
-    public static double Ks, Kp, Ki, Kd = 0;
+    public static double Kp, Kd = 0;
 
     @Override
     public void init() {
@@ -44,7 +44,7 @@ public class IndexerDebugger extends OpMode {
             hub.clearBulkCache();
         }
 
-        spindexer.setPIDF(Kp, Ki, Kd, Ks, 0.7, 0.7);
+        spindexer.setPD(Kp, Kd, 0.7);
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
             actions.schedule(spindexer.shootAll());
         }
