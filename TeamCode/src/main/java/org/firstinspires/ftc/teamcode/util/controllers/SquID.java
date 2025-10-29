@@ -15,8 +15,7 @@ public class SquID {
      * Increasing stretch -> less power and overshoot
      * Recommended for a decrease in power: 0.112
      */
-    private double stretchFactor;
-    private double tolerance;
+    private double stretchFactor, tolerance;
 
     public SquID(double stretchFactor, double tolerance) {
         this.stretchFactor = stretchFactor;

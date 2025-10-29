@@ -25,6 +25,7 @@ public class TelemetryControl {
             telemetry.addLine(subject.getName().toUpperCase());
             subject.updateTelemetry(telemetry);
             telemetry.addLine();
+            telemetry.update();
         }
     }
 

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.hidden.roadrunnerNoTouch;
+package org.firstinspires.ftc.teamcode.roadrunner;
 
 import androidx.annotation.NonNull;
 
@@ -22,12 +22,8 @@ import com.acmerobotics.roadrunner.ftc.LazyImu;
 import com.acmerobotics.roadrunner.ftc.LynxQuadratureEncoderGroup;
 import com.acmerobotics.roadrunner.ftc.ManualFeedforwardTuner;
 import com.acmerobotics.roadrunner.ftc.MecanumMotorDirectionDebugger;
-import com.acmerobotics.roadrunner.ftc.OTOSAngularScalarTuner;
 import com.acmerobotics.roadrunner.ftc.OTOSEncoderGroup;
-import com.acmerobotics.roadrunner.ftc.OTOSHeadingOffsetTuner;
 import com.acmerobotics.roadrunner.ftc.OTOSIMU;
-import com.acmerobotics.roadrunner.ftc.OTOSLinearScalarTuner;
-import com.acmerobotics.roadrunner.ftc.OTOSPositionOffsetTuner;
 import com.acmerobotics.roadrunner.ftc.PinpointEncoderGroup;
 import com.acmerobotics.roadrunner.ftc.PinpointIMU;
 import com.acmerobotics.roadrunner.ftc.PinpointView;
@@ -40,8 +36,13 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
-import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
-import org.firstinspires.ftc.teamcode.roadrunner.PinpointLocalizer;
+import org.firstinspires.ftc.teamcode.hidden.roadrunnerNoTouch.LocalizationTest;
+import org.firstinspires.ftc.teamcode.hidden.roadrunnerNoTouch.ManualFeedbackTuner;
+import org.firstinspires.ftc.teamcode.hidden.roadrunnerNoTouch.OTOSLocalizer;
+import org.firstinspires.ftc.teamcode.hidden.roadrunnerNoTouch.SplineTest;
+import org.firstinspires.ftc.teamcode.hidden.roadrunnerNoTouch.TankDrive;
+import org.firstinspires.ftc.teamcode.hidden.roadrunnerNoTouch.ThreeDeadWheelLocalizer;
+import org.firstinspires.ftc.teamcode.hidden.roadrunnerNoTouch.TwoDeadWheelLocalizer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -283,10 +284,12 @@ public final class TuningOpModes {
             throw new RuntimeException();
         }
 
+        // Uncomment to enable/disable OpModes
+
         manager.register(metaForClass(AngularRampLogger.class), new AngularRampLogger(dvf));
         manager.register(metaForClass(ForwardPushTest.class), new ForwardPushTest(dvf));
         manager.register(metaForClass(ForwardRampLogger.class), new ForwardRampLogger(dvf));
-        manager.register(metaForClass(LateralPushTest.class), new LateralPushTest(dvf));
+        //manager.register(metaForClass(LateralPushTest.class), new LateralPushTest(dvf));
         manager.register(metaForClass(LateralRampLogger.class), new LateralRampLogger(dvf));
         manager.register(metaForClass(ManualFeedforwardTuner.class), new ManualFeedforwardTuner(dvf));
         manager.register(metaForClass(MecanumMotorDirectionDebugger.class), new MecanumMotorDirectionDebugger(dvf));
@@ -296,10 +299,10 @@ public final class TuningOpModes {
         manager.register(metaForClass(SplineTest.class), SplineTest.class);
         manager.register(metaForClass(LocalizationTest.class), LocalizationTest.class);
 
-        manager.register(metaForClass(OTOSAngularScalarTuner.class), new OTOSAngularScalarTuner(dvf));
-        manager.register(metaForClass(OTOSLinearScalarTuner.class), new OTOSLinearScalarTuner(dvf));
-        manager.register(metaForClass(OTOSHeadingOffsetTuner.class), new OTOSHeadingOffsetTuner(dvf));
-        manager.register(metaForClass(OTOSPositionOffsetTuner.class), new OTOSPositionOffsetTuner(dvf));
+        //manager.register(metaForClass(OTOSAngularScalarTuner.class), new OTOSAngularScalarTuner(dvf));
+        //manager.register(metaForClass(OTOSLinearScalarTuner.class), new OTOSLinearScalarTuner(dvf));
+        //manager.register(metaForClass(OTOSHeadingOffsetTuner.class), new OTOSHeadingOffsetTuner(dvf));
+        //manager.register(metaForClass(OTOSPositionOffsetTuner.class), new OTOSPositionOffsetTuner(dvf));
 
         FtcDashboard.getInstance().withConfigRoot(configRoot -> {
             for (Class<?> c : Arrays.asList(

@@ -7,22 +7,23 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
 import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
 
-public class FlyWheel implements SubsystemBase, TelemetryObservable {
-    private final DcMotorEx wheel1;
-    private final DcMotorEx wheel2;
+public class Flywheel implements SubsystemBase, TelemetryObservable {
+    private final DcMotorEx wheel1, wheel2;
     private final Servo flap;
     public boolean powered = false;
     private double targetVel = 0;
+    private double distance = 0;
     private PIDF velPD = new PIDF();
+    private final VoltageSensor voltageSensor;
 
-    public FlyWheel(HardwareMap hw) {
+    public Flywheel(HardwareMap hw) {
         wheel1 = hw.get(DcMotorEx.class, "wheel1");
         wheel1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         wheel1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -34,33 +35,27 @@ public class FlyWheel implements SubsystemBase, TelemetryObservable {
 
         flap = hw.get(Servo.class, "flap");
 
+        voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
+
         velPD.setPD(0, 0, 0); // PD chosen due to potential accumulation of integral while moving and adjusting power w distance
     }
 
+    /**
+     * Distance(feet) = Distance in inches / 12
+     * Theta(Degrees from horizontal) = 45 - 4(Distance - 8.5)
+     * Velocity(ft/s) = 11 + 1.15 * Distance + 0.023 * Distance^2
+     * (ft/s) * 56.596 = tps of 5203 YellowJacket 6k rpm motor (1:1 GR, 1 x 28 tpr)
+     */
     @Override
     public void periodic(){
-        power(targetVel);
-    }
+        if (powered) {
+            distance /= 12;
+            targetVel = 11 + 1.15 * distance + 0.023 * Math.pow(distance, 2); // ft/s
+            targetVel *= 56.596; // Ticks/s
 
-    public Action runFlyWheel(double distance) {
-        return (TelemetryPacket packet) -> {
-            //targetVel = math; // Distance in inches / 80 (should give around max power in the small launch zone and half around the center)
-            powered = true;
-
-            // 29.5 is height of AT
             adjustFlap(distance);
-
-            return false;
-        };
-    }
-
-    public Action stopFlyWheel() {
-        return (TelemetryPacket packet) -> {
-            targetVel = 0;
-            powered = false;
-
-            return false;
-        };
+            power(targetVel);
+        }
     }
 
     public Action autonPeriodic() {
@@ -71,25 +66,49 @@ public class FlyWheel implements SubsystemBase, TelemetryObservable {
         };
     }
 
-    public void adjustFlap(double distance) {
-        flap.setPosition(Math.atan2(29.5, distance)/100); // / 100 to reduce to decimal
+    public Action runFlywheel() {
+        return (TelemetryPacket packet) -> {
+            powered = true;
+
+            return false;
+        };
     }
 
-    private void power(double targetPower) {
-        wheel1.setPower(targetPower);
-        wheel2.setPower(targetPower);
+    public Action stopFlywheel() {
+        return (TelemetryPacket packet) -> {
+            powered = false;
+
+            return false;
+        };
+    }
+
+    public void adjustFlap(double distance) {
+        double theta = 45 - 4 * (distance - 8.5);
+        flap.setPosition((theta - 45)/300); // Desired angle - servo pose 0 angle from horizontal / 300 to get servo normalized position [0, 1]
+    }
+
+    public void power(double vel) {
+        velPD.calculate(wheel1.getVelocity(), vel, voltageSensor.getVoltage());
+    }
+
+    public void setVls(double distance) {
+        this.distance = distance;
+    }
+
+    public void setVelPD(double Kp, double Kd, double sf) {
+        velPD.setPD(Kp, Kd, sf);
     }
 
     @Override
     public void updateTelemetry(Telemetry telemetry) {
         telemetry.addData("Moving", powered);
         telemetry.addData("Target Velocity", targetVel);
-        telemetry.addData("Wheel 1 Velocity", wheel1.getVelocity(AngleUnit.DEGREES));
-        telemetry.addData("Wheel 2 Velocity", wheel2.getVelocity(AngleUnit.DEGREES));
+        telemetry.addData("Wheel 1 Velocity", wheel1.getVelocity());
+        telemetry.addData("Wheel 2 Velocity", wheel2.getVelocity());
     }
 
     @Override
     public String getName() {
-        return "FlyWheel";
+        return "Flywheel";
     }
 }

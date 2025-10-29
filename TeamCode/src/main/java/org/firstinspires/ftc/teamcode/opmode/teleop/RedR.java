@@ -92,9 +92,9 @@ public class RedR extends OpMode {
 
         // --- Operator inputs ---
         if (operator.isDown(GamepadKeys.Button.A)) {
-            robot.actions.schedule(robot.flyWheel.runFlyWheel(robot.limelight.distance()));
+            robot.actions.schedule(robot.flyWheel.runFlywheel());
         } else if (robot.flyWheel.powered) {
-            robot.actions.schedule(robot.flyWheel.stopFlyWheel());
+            robot.actions.schedule(robot.flyWheel.stopFlywheel());
         }
 
         // Add if left bumper = green, right bumper = purple

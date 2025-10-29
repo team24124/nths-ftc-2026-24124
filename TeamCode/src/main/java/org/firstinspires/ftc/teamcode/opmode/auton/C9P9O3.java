@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import java.util.Arrays;
 
 @Autonomous(name = "Specimen Auto")
-public class SpecAuto extends LinearOpMode {
+public class C9P9O3 extends LinearOpMode {
     Robot robot;
 
     // Field error variables

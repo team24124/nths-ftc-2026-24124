@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmode.testing;
 
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -11,21 +13,19 @@ import java.util.List;
 @TeleOp(name = "REVColourV3", group = "test")
 public class ColourDebugger extends OpMode {
     private List<LynxModule> hubs;
-
+    private GamepadEx driver;
     private REVColourV3 colorSensor;
 
     @Override
     public void init() {
-        // Get all hubs (Control Hub internal + any Expansion Hubs)
         hubs = hardwareMap.getAll(LynxModule.class);
-
-        // Set bulk caching mode MANUAl
         for (LynxModule hub : hubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
+        driver = new GamepadEx(gamepad1);
+
         colorSensor = new REVColourV3(hardwareMap);
-        colorSensor.colorSensor.setGain(15f);
     }
 
     @Override
@@ -35,12 +35,16 @@ public class ColourDebugger extends OpMode {
             hub.clearBulkCache();
         }
 
-        telemetry.addData("red", "%.3f", colorSensor.colorSensor.getNormalizedColors().red / colorSensor.colorSensor.getNormalizedColors().alpha);
-        telemetry.addData("green", "%.3f", colorSensor.colorSensor.getNormalizedColors().green / colorSensor.colorSensor.getNormalizedColors().alpha);
-        telemetry.addData("blue", "%.3f", colorSensor.colorSensor.getNormalizedColors().blue / colorSensor.colorSensor.getNormalizedColors().alpha);
-        telemetry.addData("Is Green", colorSensor.isColorGreen());
-        telemetry.addData("Is Purple", colorSensor.isColorPurple());
-        telemetry.addData("HSV Value:", colorSensor.getHSVColors()[0]);
-        telemetry.addData("Normalized G:", colorSensor.colorSensor.getNormalizedColors().green * 255);
+        if (driver.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+            colorSensor.gain += 1;
+        }
+        if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+            colorSensor.gain -= 1;
+        }
+
+        driver.readButtons();
+
+        telemetry.addLine(colorSensor.getColour());
+        colorSensor.updateTelemetry(telemetry);
     }
 }

@@ -35,6 +35,10 @@ public class ArraySelect<T> {
         return options[currentIndex];
     }
 
+    public int getSelectedIndex() {
+        return currentIndex;
+    }
+
     public T[] getAllOptions() {
         return options;
     }

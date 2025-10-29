@@ -25,14 +25,10 @@ public class Intake implements SubsystemBase, TelemetryObservable {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 
-    @Override
-    public void periodic() {
-        intake.setVelocity(targetVel * (537.6/360));
-    }
-
     public Action runIntake() {
         return (TelemetryPacket packet) -> {
             targetVel = -((double) 312 /60)*360; // 1872 degrees per second
+            intake.setVelocity(targetVel * (537.6/360)); // Degree to tick conversion
             powered = true;
 
             return false;
@@ -42,6 +38,7 @@ public class Intake implements SubsystemBase, TelemetryObservable {
     public Action stopIntake() {
         return (TelemetryPacket packet) -> {
             targetVel = 0;
+            intake.setVelocity(0);
             powered = false;
 
             return false;
@@ -52,19 +49,11 @@ public class Intake implements SubsystemBase, TelemetryObservable {
         return intake.getVelocity();
     }
 
-    public Action autonPeriodic() {
-        return (TelemetryPacket packet) -> {
-            periodic();
-
-            return true;
-        };
-    }
-
     @Override
     public void updateTelemetry(Telemetry telemetry) {
         telemetry.addData("Moving", powered);
-        telemetry.addData("Target Velocity", targetVel);
-        telemetry.addData("Intake Velocity", intake.getVelocity(AngleUnit.DEGREES));
+        telemetry.addData("Target Velocity (tps)", targetVel * (537.6/360));
+        telemetry.addData("Intake Velocity (tps)", velocity());
     }
 
     @Override

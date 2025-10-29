@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.FlyWheel;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
 import org.firstinspires.ftc.teamcode.hidden.TurretBase;
@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.util.TelemetryControl;
 
 public class Robot {
-    public FlyWheel flyWheel;
+    public Flywheel flyWheel;
 
     public TurretBase turretBase;
 
@@ -28,7 +28,7 @@ public class Robot {
     public TelemetryControl telemetryControl;
 
     public Robot(HardwareMap hw, Telemetry telemetry, boolean robotCentric) {
-        flyWheel = new FlyWheel(hw);
+        flyWheel = new Flywheel(hw);
         turretBase = new TurretBase(hw);
         limelight = new Limelight(hw);
 

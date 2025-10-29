@@ -29,7 +29,7 @@ public enum ActionScheduler implements TelemetryObservable {
         TelemetryPacket packet = new TelemetryPacket();
 
         List<Action> runningActions = new ArrayList<>();
-        for (Action action : requestedActions) { // Every action in requestedActions is previewed, run, and added to runningActions
+        for (Action action : requestedActions) { // Every action in requestedActions is previewed, ran, and added to runningActions
             action.preview(packet.fieldOverlay());
             if (action.run(packet) && !isStopRequested) {
                 runningActions.add(action);

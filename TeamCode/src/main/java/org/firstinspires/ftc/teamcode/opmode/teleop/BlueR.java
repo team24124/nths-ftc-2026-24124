@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
 import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -87,9 +86,9 @@ public class BlueR extends OpMode {
 
         // --- Operator inputs ---
         if (operator.isDown(GamepadKeys.Button.A)) {
-            robot.actions.schedule(robot.flyWheel.runFlyWheel(robot.limelight.distance()));
+            robot.actions.schedule(robot.flyWheel.runFlywheel());
         } else if (robot.flyWheel.powered) {
-            robot.actions.schedule(robot.flyWheel.stopFlyWheel());
+            robot.actions.schedule(robot.flyWheel.stopFlywheel());
         }
 
         // --- Periodic calls ---

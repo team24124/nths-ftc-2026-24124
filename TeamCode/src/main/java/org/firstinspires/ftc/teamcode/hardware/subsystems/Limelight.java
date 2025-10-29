@@ -18,7 +18,7 @@ import java.util.List;
 public class Limelight implements SubsystemBase, TelemetryObservable {
     private final Limelight3A limelight;
     public enum Pipeline {
-        PSS1(0), // First python snapscript
+        PSS1(0), // Python snapscript
         AT1(1), // Obelisk detection
         AT2(2), // Full 3D goal detection BLUE
         AT3(3), // Full 3D goal detection RED
@@ -183,7 +183,6 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
                 telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getTargetPoseRobotSpace(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
             }
         }
-        telemetry.update();
     }
 
     @Override

@@ -42,4 +42,18 @@ public enum TeleOpTrajectories {
 
         return heading - theta;
     }
+
+    public double distanceToTarget(Drivetrain drivetrain, boolean redAlign) {
+        double botX = drivetrain.getPosition().position.x;
+        double botY = drivetrain.getPosition().position.y;
+
+        botX = Math.abs(botX - 72);
+        if (redAlign) {
+            botY = Math.abs(botY - 72);
+        } else {
+            botY = Math.abs(botY + 72);
+        }
+
+        return Math.hypot(botX, botY);
+    }
 }
