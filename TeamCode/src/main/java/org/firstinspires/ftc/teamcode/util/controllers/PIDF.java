@@ -3,17 +3,16 @@ package org.firstinspires.ftc.teamcode.util.controllers;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class PIDF {
-    private double Kp, Ki, Kd, Kg, Kv = 0; // Proportional, integral, derivative, gravitational correction (feedforward), velocity feedforward
+    private double Kp, Ki, Kd, Kg, Kv, Ka, Ks = 0; // Proportional, integral, derivative, gravitational correction ff, velocity ff, acceleration ff,
     private double smoothingFactor = 0; // sf can be any value from 0 < sf < 1. Heavier smoothing but less responsiveness towards 1
     private double integralSumLimit = 0; // Integral cap to prevent unnecessary accumulation
 
     private double lastTarget, integralSum, prevError, previousFilterEstimate = 0;
     private double motorTPR = 1;
-    private boolean resetIntegral;
+    private boolean resetIntegral = false;
 
     private ElapsedTime timer = new ElapsedTime();
 
-    // Feedback and feedforward (gravity)
     public void setPIDG(double Kp, double Ki, double Kd, double Kg, double smoothingFactor, double integralSumLimit, double motorTPR) {
         this.Kp = Kp;
         this.Ki = Ki;
@@ -23,9 +22,7 @@ public class PIDF {
         this.integralSumLimit = integralSumLimit;
         this.motorTPR = motorTPR;
     }
-
-    // Feedback and feedforward (friction)
-    public void setPIDF(double Kp, double Ki, double Kd, double Kv, double smoothingFactor, double integralSumLimit) {
+    public void setPIDV(double Kp, double Ki, double Kd, double Kv, double smoothingFactor, double integralSumLimit) {
         this.Kp = Kp;
         this.Ki = Ki;
         this.Kd = Kd;
@@ -33,8 +30,6 @@ public class PIDF {
         this.smoothingFactor = smoothingFactor;
         this.integralSumLimit = integralSumLimit;
     }
-
-    // Feedback only
     public void setPID(double Kp, double Ki, double Kd, double smoothingFactor, double integralSumLimit) {
         this.Kp = Kp;
         this.Ki = Ki;
@@ -42,16 +37,18 @@ public class PIDF {
         this.smoothingFactor = smoothingFactor;
         this.integralSumLimit = integralSumLimit;
     }
-
-    // Removed integral from feedback for unstable error
     public void setPD(double Kp, double Kd, double smoothingFactor) {
         this.Kp = Kp;
         this.Kd = Kd;
         this.smoothingFactor = smoothingFactor;
     }
+    public void setPV(double Kp, double Kv) {
+        this.Kp = Kp;
+        this.Kv = Kv;
+    }
 
-    public void resetIntegral(boolean reset) {
-        resetIntegral = reset;
+    public void enableFilters(boolean resetIntegral) {
+        this.resetIntegral = resetIntegral;
     }
 
     // Outputs processed power
@@ -82,11 +79,8 @@ public class PIDF {
         // Angle getter
         double radians = 2 * Math.PI * (position / motorTPR); // Assumes an arm is initialized horizontally, TPR is gear ratio * 28, goBILDA 312rpm 5203 yellowjacket motor
 
-        // Velocity feedforward
-        double feedforward = Kv * target; // Kv * target velocity
-
         // Output calculator
-        double out = ((Kp * error) + (Ki * integralSum) + (Kd * derivative) + (Math.cos(radians) * Kg) + feedforward) * (12.0 / Math.max(voltage, 8.0));
+        double out = ((Kp * error) + (Ki * integralSum) + (Kd * derivative) + (Kg * Math.cos(radians)) + (Kv * target)) * (12.0 / Math.max(voltage, 8.0));
         out = Math.max(-1, Math.min(1, out));
 
         // Output & error setter

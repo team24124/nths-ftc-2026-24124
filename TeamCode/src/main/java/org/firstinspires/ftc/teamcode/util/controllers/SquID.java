@@ -13,7 +13,6 @@ public class SquID {
      * Tune this for responsiveness.
      * Lower stretch -> more power and responsiveness
      * Increasing stretch -> less power and overshoot
-     * Recommended for a decrease in power: 0.112
      */
     private double stretchFactor, tolerance;
 
@@ -38,17 +37,13 @@ public class SquID {
     public double calculate(double position, double target, double voltage) {
         // Remaining distance to target
         double error = target - position;
-
-        // Using a small tolerance to prevent jitter
         if (Math.abs(error) < tolerance) {
             return 0.0;
         }
 
         // The core of the controller: power is proportional to the square root of the absolute error
-        // Non-linear function where power is y (inverted below x = 0) and error is x
+        // Radical function where power is y (inverted below x = 0) and error is x
         double power = stretchFactor * Math.sqrt(Math.abs(error)) * Math.signum(error);
-
-        // Clip the final power to the valid motor range of [-1.0, 1.0]
         power = Range.clip(power, -1.0, 1.0);
 
         // Voltage compensation. A lower bound of 8.0V prevents excessive scaling if the voltage reading is abnormal.

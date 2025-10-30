@@ -64,7 +64,7 @@ public class DriveDebugger extends OpMode {
             drivetrain.getDrive().localizer.setPose(new Pose2d(0, 0, 0));
         }
 
-        if (driver.wasJustPressed(GamepadKeys.Button.B) && state != robotCentric) {
+        if (state != robotCentric) {
             switchDrive();
             state = robotCentric;
         }
