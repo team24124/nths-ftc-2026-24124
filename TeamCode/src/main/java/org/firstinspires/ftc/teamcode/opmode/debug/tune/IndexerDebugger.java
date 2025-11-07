@@ -46,10 +46,7 @@ public class IndexerDebugger extends OpMode {
 
         spindexer.setPD(Kp, Kd, 0.7);
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            actions.schedule(spindexer.shootAll());
-        }
-        if (driver.wasJustPressed(GamepadKeys.Button.B)) {
-            actions.schedule(spindexer.shootNearest());
+            actions.schedule(spindexer.shootOne());
         }
         if (driver.wasJustPressed(GamepadKeys.Button.X)) {
             actions.schedule(spindexer.intakeToEmpty());
@@ -67,7 +64,7 @@ public class IndexerDebugger extends OpMode {
         spindexer.periodic();
         driver.readButtons();
         actions.run();
-        telemetryControl.getTelemetry().addLine("A to shoot all\nB to shoot nearest\nX to move to an empty slot\nY to sort to colour\nPad left & right to move 1 slot");
+        telemetryControl.getTelemetry().addLine("A to shoot all\nX to move to an empty slot\nY to sort to colour\nPad left & right to move 1 slot");
         telemetryControl.update();
     }
 }

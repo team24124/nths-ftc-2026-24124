@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
 
 public class Flywheel implements SubsystemBase, TelemetryObservable {
-    private final DcMotorEx wheel1, wheel2;
+    public final DcMotorEx wheel1, wheel2;
     private final Servo flap;
     public boolean powered = false;
     private double targetVel = 0;
@@ -27,6 +27,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
         wheel1 = hw.get(DcMotorEx.class, "wheel1");
         wheel1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         wheel1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        wheel1.setDirection(DcMotorSimple.Direction.REVERSE);
 
         wheel2 = hw.get(DcMotorEx.class, "wheel2");
         wheel2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -38,7 +39,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
         voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
 
         pv.enableFilters(false);
-        pv.setPV(99, 0);
+        pv.setPV(0.0005, 0.00042);
     }
 
     /**
@@ -54,8 +55,10 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
             targetVel = 11 + 1.15 * distance + 0.023 * Math.pow(distance, 2); // ft/s
             targetVel *= 56.596; // Ticks/s
 
-            adjustFlap(distance);
+            //adjustFlap(distance);
             power(targetVel);
+        } else {
+            power(0);
         }
     }
 
@@ -91,6 +94,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     public void power(double vel) {
         // 2800 = max tps
         wheel1.setPower(pv.calculate(wheel1.getVelocity(), vel, voltageSensor.getVoltage()));
+        wheel2.setPower(pv.calculate(wheel1.getVelocity(), vel, voltageSensor.getVoltage()));
     }
 
     public void setVls(double distance) {

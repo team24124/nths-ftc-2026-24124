@@ -15,6 +15,8 @@ import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
 import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import org.firstinspires.ftc.teamcode.util.TelemetryControl;
+import org.firstinspires.ftc.teamcode.util.plotting.InterpHermiteLUT;
+import org.firstinspires.ftc.teamcode.util.plotting.InterpLUT;
 
 import java.util.List;
 
@@ -24,11 +26,11 @@ public class FlywheelDebugger extends OpMode {
     private GamepadEx driver;
     private List<LynxModule> hubs;
     private Flywheel flywheel;
-    private TeleOpTrajectories trajectories;
-    private Drivetrain drivetrain;
     private ActionScheduler actions;
     private TelemetryControl telemetryControl;
-    public static double Kp, Kv = 0;
+    public static double Kp = 0.0005;
+    public static double Kv = 0.00042;
+    public static double distance = 10;
 
     @Override
     public void init() {
@@ -41,8 +43,6 @@ public class FlywheelDebugger extends OpMode {
         actions.init();
         driver = new GamepadEx(gamepad1);
         flywheel = new Flywheel(hardwareMap);
-        trajectories = TeleOpTrajectories.INSTANCE;
-        drivetrain = new FieldCentricDrive(hardwareMap, new Pose2d(new Vector2d(0, 0), 0));
         telemetryControl = new TelemetryControl(telemetry);
         telemetryControl.subscribe(flywheel);
     }
@@ -55,19 +55,30 @@ public class FlywheelDebugger extends OpMode {
 
         flywheel.setVelPID(Kp, Kv);
 
-        if (driver.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
-            flywheel.adjustFlap(trajectories.distanceToTarget(drivetrain, true));
-        }
+        //if (driver.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+        //    flywheel.adjustFlap(distance);
+        //}
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
             actions.schedule(flywheel.runFlywheel());
         }
         if (driver.wasJustPressed(GamepadKeys.Button.B)) {
             actions.schedule(flywheel.stopFlywheel());
         }
+        if (driver.wasJustPressed(GamepadKeys.Button.X)) {
+            flywheel.wheel1.setPower(0.3);
+        }
+        if (driver.wasJustPressed(GamepadKeys.Button.Y)) {
+            flywheel.wheel2.setPower(0.3);
+        }
+        if (driver.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+            flywheel.wheel1.setPower(0);
+            flywheel.wheel2.setPower(0);
+        }
 
-        flywheel.setVls(trajectories.distanceToTarget(drivetrain, true));
-        flywheel.periodic();
-        drivetrain.periodic();
+        flywheel.setVls(distance);
+        if (!driver.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+            flywheel.periodic();
+        }
         driver.readButtons();
         actions.run();
         telemetryControl.update();
