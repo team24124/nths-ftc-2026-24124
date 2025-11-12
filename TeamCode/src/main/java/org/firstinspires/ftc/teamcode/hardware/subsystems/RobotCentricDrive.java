@@ -23,7 +23,7 @@ public class RobotCentricDrive extends Drivetrain implements TelemetryObservable
     public void drive(double x, double y, double rx, boolean align) {
         double voltage = voltageSensor.getVoltage();
         if (align) {
-            rx = thetaPD.calculate(rx, 0, voltage);
+            rx = -thetaPD.calculate(rx, 0, voltage);
         }
 
         double theta = Math.atan2(y, x);

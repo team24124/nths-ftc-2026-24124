@@ -30,7 +30,7 @@ public class FlywheelDebugger extends OpMode {
     private TelemetryControl telemetryControl;
     public static double Kp = 0.0005;
     public static double Kv = 0.00042;
-    public static double distance = 10;
+    public static double distance = 1;
 
     @Override
     public void init() {

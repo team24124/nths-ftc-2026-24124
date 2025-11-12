@@ -28,7 +28,7 @@ public abstract class Drivetrain implements SubsystemBase, TelemetryObservable {
         drivetrain = new MecanumDrive(hw, start);
         speeds = new ArraySelect<>(new Double[]{0.5, 1.0});
 
-        thetaPD.setPD(1,1,0);
+        thetaPD.setPD(3,0.1,0.7);
 
         voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
     }
@@ -50,13 +50,17 @@ public abstract class Drivetrain implements SubsystemBase, TelemetryObservable {
         return speeds;
     }
 
+    /** If speed is 1 -> set to abs 1 - 1 (0). If speed is 0 -> set to abs 0 - 1 (1) **/
+    public void toggleSpeeds() {
+        speeds.setSelected(Math.abs(speeds.getSelectedIndex() - 1));
+    }
+
+    /** Raw position, not normalized **/
     public Pose2d getPosition() {
         return drivetrain.localizer.getPose();
     }
 
-    //but y is -1 left 1 right while it is actually 0 up and increasing both ways to down 1
-    //28.5 is max
-
+    /** Normalized heading **/
     public double getHeading() {
         return (drivetrain.localizer.getPose().heading.toDouble() + Math.PI * 2) % (Math.PI*2);
     }

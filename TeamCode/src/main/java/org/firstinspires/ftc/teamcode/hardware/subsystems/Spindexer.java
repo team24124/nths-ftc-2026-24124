@@ -26,15 +26,15 @@ import java.util.Objects;
 
 public class Spindexer implements SubsystemBase, TelemetryObservable {
     private final DcMotorEx spindexer;
-    private final Servo kicker;
+    public final Servo kicker;
     private final double TPR = 537.6;
     private PIDF pd;
     private final VoltageSensor voltageSensor;
 
     public enum State {
-        SLOT1(264), // Slots are shoot positions
+        SLOT1(267), // Slots are shoot positions
         SLOT2(90), // Slots increase CCW, IN1 is referencing the same slot as SLOT1
-        SLOT3(448),
+        SLOT3(449),
         IN1(0), // Ins are slots facing towards the intake
         IN2(358), // Ins increase CCW. Since moving CCW results in a positive increase, the second slot CCW from the first one is on the rear left of the robot, making its position -178 + 537.6
         IN3(179);
@@ -50,10 +50,11 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     public List<String> slots = new ArrayList<>(Arrays.asList("empty", "empty", "empty"));
 
     public boolean isMoving;
+    private int shotCount = 0;
 
     public Spindexer(HardwareMap hw) {
         pd = new PIDF();
-        pd.setPD(0, 0, 0);
+        pd.setPD(0.0032, 0.000001, 0.7);
         spindexer = hw.get(DcMotorEx.class, "spindexer");
         spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -110,15 +111,21 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
             double power = pd.calculate(adjustedPosition, target, voltageSensor.getVoltage());
             spindexer.setPower(power);
 
-            isMoving = !Utilities.isBetween(getPower(), -0.05, 0.05);
-            return !isMoving;
+
+            if (Utilities.isBetween(position, target - 10, target + 10)) {
+                isMoving = false;
+                return false;
+            } else {
+                isMoving = true;
+                return true;
+            }
         };
     }
 
     // Sort to the first specified colour in the array of slots
     public Action sortTo(String colour) {
-        int firstColour = slots.indexOf(colour);
-        if (firstColour != -1 && states.getSelectedIndex() != firstColour) {
+        int firstColour = slots.indexOf(colour) + 3;
+        if (firstColour != 2 && states.getSelectedIndex() != firstColour) {
             states.moveSelection(firstColour - states.getSelectedIndex());
         }
 
@@ -140,30 +147,46 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
         return moveToState();
     }
 
-    public Action shootOne() {
+    public Action kick() {
         ElapsedTime timer = new ElapsedTime();
-        kicker.setPosition(0.3);
 
         return (TelemetryPacket packet) -> {
-            if (timer.seconds() < 0.3) {
+            if (timer.seconds() < 0.18) {
+                isMoving = true;
+                return true;
+            }
+            kicker.setPosition(0.35);
+
+            if (timer.seconds() < 0.77) {
+                isMoving = true;
                 return true;
             }
 
-            kicker.setPosition(0);
-            return timer.seconds() < 0.4;
+            kicker.setPosition(0.76);
+            if (timer.seconds() < 1.05) {
+                isMoving = true;
+                return true;
+            }
+            isMoving = false;
+            return false;
         };
     }
 
-    public Action shootAllNoSort() {
-        return new SequentialAction(
-                sortTo(3),
-                shootOne(),
-                sortTo(4),
-                shootOne(),
-                sortTo(5),
-                shootOne(),
-                intakeToEmpty()
-        );
+    public Action shootOne() {
+        if (!isMoving) {
+            shotCount += 1;
+            if (shotCount == 3) {
+                shotCount = 0;
+            }
+            slots.remove(shotCount);
+            slots.add(shotCount, "empty");
+            return new SequentialAction(
+                    sortTo(shotCount),
+                    kick()
+            );
+        } else {
+            return (TelemetryPacket packet) -> false;
+        }
     }
 
     public void stopAndResetEncoders() {
@@ -193,6 +216,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
         telemetry.addData("Est. Motor Position", position);
         telemetry.addData("Adjusted Position", adjustedPosition);
         telemetry.addData("Est. target",  target);
+        telemetry.addData("Slots",  slots.toString());
         telemetry.addData("Moving", isMoving);
     }
 

@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
+import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
 
 public enum TeleOpTrajectories {
     INSTANCE;
@@ -42,12 +43,12 @@ public enum TeleOpTrajectories {
         return heading - theta;
     }
 
-    public double distanceToTarget(Drivetrain drivetrain, boolean redAlign) {
+    public double distanceToTarget(Drivetrain drivetrain, boolean blueAlign) {
         double botX = drivetrain.getPosition().position.x;
         double botY = drivetrain.getPosition().position.y;
 
         botX = Math.abs(botX - 72);
-        if (redAlign) {
+        if (blueAlign) {
             botY = Math.abs(botY - 72);
         } else {
             botY = Math.abs(botY + 72);

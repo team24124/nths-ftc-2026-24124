@@ -117,7 +117,7 @@ public class InterpLUT {
         return y0 + t * (y1 - y0);
     }
 
-    // --- Helpers useful for debugging / telemetry ---
+    // --- debugging / telemetry ---
     public double getKey(int index) { return xs.get(index); }
     public double getValue(int index) { return ys.get(index); }
 

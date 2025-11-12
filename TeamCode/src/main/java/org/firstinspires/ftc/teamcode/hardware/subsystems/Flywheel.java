@@ -8,28 +8,33 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
 import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
+import org.firstinspires.ftc.teamcode.util.Utilities;
 import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
+import org.firstinspires.ftc.teamcode.util.plotting.InterpLUT;
 
 public class Flywheel implements SubsystemBase, TelemetryObservable {
     public final DcMotorEx wheel1, wheel2;
     private final Servo flap;
     public boolean powered = false;
+    public boolean primed = false;
     private double targetVel = 0;
-    private double distance = 0;
+    private double distance = 35;
     private PIDF pv = new PIDF();
+    private InterpLUT LUT = new InterpLUT();
     private final VoltageSensor voltageSensor;
 
     public Flywheel(HardwareMap hw) {
-        wheel1 = hw.get(DcMotorEx.class, "wheel1");
+        wheel1 = hw.get(DcMotorEx.class, "wheel1"); // Connected Ehub 3
         wheel1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         wheel1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         wheel1.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        wheel2 = hw.get(DcMotorEx.class, "wheel2");
+        wheel2 = hw.get(DcMotorEx.class, "wheel2"); // Connected Ehub 2
         wheel2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         wheel2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         wheel2.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -38,7 +43,6 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
 
         voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
 
-        pv.enableFilters(false);
         pv.setPV(0.0005, 0.00042);
     }
 
@@ -57,6 +61,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
 
             //adjustFlap(distance);
             power(targetVel);
+            primed = Utilities.isBetween(wheel1.getVelocity(), targetVel - 20, targetVel + 50);
         } else {
             power(0);
         }
@@ -81,6 +86,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     public Action stopFlywheel() {
         return (TelemetryPacket packet) -> {
             powered = false;
+            primed = false;
 
             return false;
         };
@@ -88,7 +94,8 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
 
     public void adjustFlap(double distance) {
         double theta = 45 - 4 * (distance - 8.5);
-        flap.setPosition((theta - 45)/300); // Desired angle - servo pose 0 angle from horizontal / 300 to get servo normalized position [0, 1]
+        Range.clip(theta, 40, 80);
+        flap.setPosition(1 - (theta - 40)/300); // Desired angle - servo pose 0 angle from horizontal / 300 to get servo normalized position [0, 1]
     }
 
     public void power(double vel) {
@@ -111,6 +118,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
         telemetry.addData("Target Velocity", targetVel);
         telemetry.addData("Wheel 1 Velocity", wheel1.getVelocity());
         telemetry.addData("Wheel 2 Velocity", wheel2.getVelocity());
+        telemetry.addData("Primed", primed);
     }
 
     @Override

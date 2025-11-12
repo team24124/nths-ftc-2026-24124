@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmode.debug.tune;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Spindexer;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import org.firstinspires.ftc.teamcode.util.TelemetryControl;
+import org.firstinspires.ftc.teamcode.util.plotting.Oscillator;
 
 import java.util.List;
 
@@ -21,7 +23,9 @@ public class IndexerDebugger extends OpMode {
     private ActionScheduler actions;
     private Spindexer spindexer;
     private TelemetryControl telemetryControl;
-    public static double Kp, Kd = 0;
+    private Oscillator os;
+    public static double Kp = 0.0027;
+    public static double Kd = 0.000001;
 
     @Override
     public void init() {
@@ -36,6 +40,8 @@ public class IndexerDebugger extends OpMode {
         spindexer = new Spindexer(hardwareMap);
         telemetryControl = new TelemetryControl(telemetry);
         telemetryControl.subscribe(spindexer);
+        os = new Oscillator(new Double[]{1.0, 2.0}, 1);
+        os.enableOscillation(true);
     }
 
     @Override
@@ -48,6 +54,9 @@ public class IndexerDebugger extends OpMode {
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
             actions.schedule(spindexer.shootOne());
         }
+        if (driver.wasJustPressed(GamepadKeys.Button.B)) {
+            actions.schedule(spindexer.kick());
+        }
         if (driver.wasJustPressed(GamepadKeys.Button.X)) {
             actions.schedule(spindexer.intakeToEmpty());
         }
@@ -56,15 +65,22 @@ public class IndexerDebugger extends OpMode {
         }
         if (driver.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
             spindexer.states.previous();
+            os.enableOscillation(false);
         }
         if (driver.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
             spindexer.states.next();
+            os.enableOscillation(true);
         }
+//        if (os.returnSetpoint() == 1.0) {
+//            spindexer.states.setSelected(4);
+//        } else if (os.returnSetpoint() == 2.0) {
+//            spindexer.states.setSelected(5);
+//        }
 
         spindexer.periodic();
         driver.readButtons();
         actions.run();
-        telemetryControl.getTelemetry().addLine("A to shoot all\nX to move to an empty slot\nY to sort to colour\nPad left & right to move 1 slot");
+        telemetryControl.getTelemetry().addData("Servo Pos", spindexer.kicker.getPosition());
         telemetryControl.update();
     }
 }

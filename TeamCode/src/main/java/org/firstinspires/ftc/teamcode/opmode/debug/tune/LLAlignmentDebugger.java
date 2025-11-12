@@ -73,6 +73,11 @@ public class LLAlignmentDebugger extends OpMode {
             alignToAT = false;
         }
 
+        if (driver.wasJustPressed(GamepadKeys.Button.START)) {
+            Vector2d current = drivetrain.getDrive().localizer.getPose().position;
+            drivetrain.getDrive().localizer.setPose(new Pose2d(current, 0));
+        }
+
         if (alignToAT) {
             if (limelight.isDetected()) {
                 drivetrain.drive(x, y, -thetaPD.calculate(Math.toRadians(limelight.degreeOffset()), 0, voltageSensor.getVoltage()), false);

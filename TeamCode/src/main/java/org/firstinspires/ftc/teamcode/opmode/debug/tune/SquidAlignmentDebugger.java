@@ -64,6 +64,11 @@ public class SquidAlignmentDebugger extends OpMode {
             alignToAT = false;
         }
 
+        if (driver.wasJustPressed(GamepadKeys.Button.START)) {
+            Vector2d current = drivetrain.getDrive().localizer.getPose().position;
+            drivetrain.getDrive().localizer.setPose(new Pose2d(current, 0));
+        }
+
         if (alignToAT) {
             double rotation = squid.calculate(-trajectories.theta(drivetrain, targetX, targetY), 0, voltageSensor.getVoltage());
             drivetrain.drive(x, y, rotation, false);

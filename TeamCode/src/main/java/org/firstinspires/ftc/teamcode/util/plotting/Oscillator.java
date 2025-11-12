@@ -8,7 +8,7 @@ public class Oscillator {
     private final ArraySelect<Double> setpoints;
     private double seconds;
     private boolean oscillate = false;
-    private ElapsedTime timer;
+    private final ElapsedTime timer;
 
     public Oscillator(Double[] setpoints, double oscillationPeriodSeconds) {
         timer = new ElapsedTime();
