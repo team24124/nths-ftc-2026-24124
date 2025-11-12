@@ -104,6 +104,7 @@ public class ComponentDebugger extends OpMode {
         drivetrain.drive(x, y, rx, false);
         drivetrain.periodic();
         spindexer.periodic();
+        flywheel.setVls(20);
         flywheel.periodic();
         driver.readButtons();
         actions.run();

@@ -519,13 +519,30 @@ public final class MecanumDrive {
         );
     }
 
+    public TrajectoryActionBuilder mirroredActionBuilder(Pose2d beginPose, boolean enableTrajectoryExtraCorrection) {
+        return new TrajectoryActionBuilder(
+                TurnAction::new,
+                t -> new FollowTrajectoryAction(t, enableTrajectoryExtraCorrection),
+                new TrajectoryBuilderParams(
+                        1e-6,
+                        new ProfileParams(
+                                0.25, 0.1, 1e-2
+                        )
+                ),
+                beginPose, 0.0,
+                defaultTurnConstraints,
+                defaultVelConstraint, defaultAccelConstraint,
+                pose -> new Pose2dDual<>(
+                        pose.position.x, pose.position.y.unaryMinus(), pose.heading.inverse())
+        );
+    }
+
 
     // EXPERIMENTAL
     // Alternate trajectory follower for roadrunner using displacement trajectories (distance instead of time)
     // to use, put at the bottom of RR 1.0's MecanumDrive file, and change actionBuilder to use it instead of FollowTrajectoryAction
     // Created by j5155 from team 12087 based on https://rr.brott.dev/docs/v1-0/guides/path-following/
     // Licensed under the BSD 3-Clause Clear License
-    // If you use this, I would love to know how it goes/what issues you encounter, I'm @j5155 on discord
 //    public final class FollowTrajectoryAsPathAction implements Action {
 //        public final DisplacementTrajectory dispTraj;
 //        public final HolonomicController contr;

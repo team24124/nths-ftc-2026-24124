@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import java.util.Arrays;
 
 @Autonomous(name = "Auton RED")
-public class C9P9O3 extends LinearOpMode {
+public class C9P9BLUE extends LinearOpMode {
     Robot robot;
 
     @Override
@@ -95,7 +95,7 @@ public class C9P9O3 extends LinearOpMode {
                 )
         );
 
-        PoseStorage.currentAlliance = PoseStorage.Alliance.RED;
+        PoseStorage.currentAlliance = PoseStorage.Alliance.BLUE;
         PoseStorage.currentPose = drivebase.localizer.getPose(); // Set global pose value for TeleOp to utilize
     }
 }

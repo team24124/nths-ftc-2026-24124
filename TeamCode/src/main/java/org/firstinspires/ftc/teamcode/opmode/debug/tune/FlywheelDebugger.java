@@ -30,7 +30,7 @@ public class FlywheelDebugger extends OpMode {
     private TelemetryControl telemetryControl;
     public static double Kp = 0.0005;
     public static double Kv = 0.00042;
-    public static double distance = 1;
+    public static double velocity = 1;
 
     @Override
     public void init() {
@@ -75,10 +75,13 @@ public class FlywheelDebugger extends OpMode {
             flywheel.wheel2.setPower(0);
         }
 
-        flywheel.setVls(distance);
-        if (!driver.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
-            flywheel.periodic();
+        if (flywheel.powered) {
+            flywheel.power(velocity); // Enter ticks/second
+        } else {
+            flywheel.power(0);
         }
+
+
         driver.readButtons();
         actions.run();
         telemetryControl.update();

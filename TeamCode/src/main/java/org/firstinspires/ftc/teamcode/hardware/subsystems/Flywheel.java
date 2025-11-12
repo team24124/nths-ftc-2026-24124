@@ -23,7 +23,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     public boolean powered = false;
     public boolean primed = false;
     private double targetVel = 0;
-    private double distance = 35;
+    private double distance = 0;
     private PIDF pv = new PIDF();
     private InterpLUT LUT = new InterpLUT();
     private final VoltageSensor voltageSensor;
@@ -44,20 +44,22 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
         voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
 
         pv.setPV(0.0005, 0.00042);
+
+        double[] dists = {5, 6, 7, 8}; // Inches
+        double[] vels = {600, 601, 602, 603}; // Ticks/second
+        LUT = new InterpLUT(dists, vels);
+        LUT.setExtrapolation(InterpLUT.Extrapolation.LINEAR);
     }
 
     /**
-     * Distance(feet) = Distance in inches / 12
-     * Theta(Degrees from horizontal) = 45 - 4(Distance - 8.5)
-     * Velocity(ft/s) = 11 + 1.15 * Distance + 0.023 * Distance^2
-     * (ft/s) * 56.596 = tps of 5203 YellowJacket 6k rpm motor (1:1 GR, 1 x 28 tpr)
+     * Distance(Inches) = Distance to goal
+     * Theta(Degrees from horizontal) = 45 - 4((Distance/12) - 8.5), Clamped to 40 - 80
+     * Velocity(ticks/s) = tps of 5203 YellowJacket 6k rpm motor (1:1 GR, 1 x 28 tpr)
      */
     @Override
     public void periodic(){
         if (powered) {
-            distance /= 12;
-            targetVel = 11 + 1.15 * distance + 0.023 * Math.pow(distance, 2); // ft/s
-            targetVel *= 56.596; // Ticks/s
+            targetVel = LUT.get(distance);
 
             //adjustFlap(distance);
             power(targetVel);
@@ -93,8 +95,8 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     }
 
     public void adjustFlap(double distance) {
-        double theta = 45 - 4 * (distance - 8.5);
-        Range.clip(theta, 40, 80);
+        double theta = 45 - 4 * ((distance/12) - 8.5);
+        theta = Range.clip(theta, 40, 80);
         flap.setPosition(1 - (theta - 40)/300); // Desired angle - servo pose 0 angle from horizontal / 300 to get servo normalized position [0, 1]
     }
 
