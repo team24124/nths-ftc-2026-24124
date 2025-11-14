@@ -55,17 +55,21 @@ public class Robot {
     }
 
     public Action intakePeriodic() {
-        if (spindexer.isMoving || !spindexer.slots.contains("empty")) {
-            return intake.stopIntake();
-        } else {
-            if (spindexer.states.getSelectedIndex() > 2 && Objects.equals(spindexer.slots.get(spindexer.states.getSelectedIndex() - 3), "empty")) {
-                spindexer.slots.remove(spindexer.states.getSelectedIndex() - 3);
-                spindexer.slots.add(spindexer.states.getSelectedIndex() - 3, colorSensor.getColour());
+        if (intake.toggled) {
+            if (spindexer.isMoving || !spindexer.slots.contains("empty")) {
+                return intake.stopIntake();
+            } else {
+                if (spindexer.states.getSelectedIndex() > 2 && Objects.equals(spindexer.slots.get(spindexer.states.getSelectedIndex() - 3), "empty")) {
+                    spindexer.slots.remove(spindexer.states.getSelectedIndex() - 3);
+                    spindexer.slots.add(spindexer.states.getSelectedIndex() - 3, colorSensor.getColour());
+                }
+                return new SequentialAction(
+                        spindexer.intakeToEmpty(),
+                        intake.runIntake()
+                );
             }
-            return new SequentialAction(
-                    spindexer.intakeToEmpty(),
-                    intake.runIntake()
-            );
+        } else {
+            return (TelemetryPacket packet) -> false;
         }
     }
 

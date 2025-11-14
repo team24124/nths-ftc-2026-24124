@@ -11,6 +11,7 @@ public class SetBLUE extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         PoseStorage.currentAlliance = PoseStorage.Alliance.BLUE;
-
+        telemetry.addLine("Alliance successfully set to BLUE");
+        telemetry.update();
     }
 }

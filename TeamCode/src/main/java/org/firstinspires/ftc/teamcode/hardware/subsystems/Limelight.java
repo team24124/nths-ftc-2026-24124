@@ -13,6 +13,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
 import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Limelight implements SubsystemBase, TelemetryObservable {
@@ -85,6 +87,16 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
     }
 
     public LLResult getResult() { return limelight.getLatestResult(); }
+
+    public List<String> getPattern() {
+        if (ATType() == 21) {
+            return new ArrayList<>(Arrays.asList("green", "purple", "purple"));
+        } else if (ATType() == 22) {
+            return new ArrayList<>(Arrays.asList("purple", "green", "purple"));
+        } else {
+            return new ArrayList<>(Arrays.asList("purple", "purple", "green"));
+        }
+    }
 
     //---------------------------------- values for PIDF ----------------------------------
 

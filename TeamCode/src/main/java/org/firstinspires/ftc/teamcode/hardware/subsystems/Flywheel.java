@@ -106,8 +106,9 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
         wheel2.setPower(pv.calculate(wheel1.getVelocity(), vel, voltageSensor.getVoltage()));
     }
 
-    public void setVls(double distance) {
+    public Action setVls(double distance) {
         this.distance = distance;
+        return (TelemetryPacket packet) -> false;
     }
 
     public void setVelPID(double Kp, double Kv) {

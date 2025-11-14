@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 public class Intake implements SubsystemBase, TelemetryObservable {
     private final DcMotorEx intake;
     public boolean powered = false;
+    public boolean toggled = true;
     private double targetVel = 0;
 
     public Intake(HardwareMap hw) {
@@ -36,6 +37,14 @@ public class Intake implements SubsystemBase, TelemetryObservable {
             targetVel = 0;
             intake.setVelocity(0);
             powered = false;
+
+            return false;
+        };
+    }
+
+    public Action toggleIntake() {
+        return (TelemetryPacket packet) -> {
+            toggled = !toggled;
 
             return false;
         };

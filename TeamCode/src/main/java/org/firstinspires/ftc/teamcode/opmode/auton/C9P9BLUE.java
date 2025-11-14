@@ -15,12 +15,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.Robot;
+import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-@Autonomous(name = "Auton RED")
+@Autonomous(name = "Auton BLUE")
 public class C9P9BLUE extends LinearOpMode {
     Robot robot;
 
@@ -46,7 +49,7 @@ public class C9P9BLUE extends LinearOpMode {
         // Autonomous sequence
 
         // Actions called during init
-        Actions.runBlocking(new ParallelAction());
+        Actions.runBlocking(new ParallelAction(robot.intake.toggleIntake()));
 
         waitForStart();
 
@@ -54,44 +57,50 @@ public class C9P9BLUE extends LinearOpMode {
 
         // Main sequence
         Actions.runBlocking(
-                new SequentialAction(
-                        drivebase.actionBuilder(new Pose2d(60, -20, Math.toRadians(180)), false)
-                                .strafeToSplineHeading(new Vector2d(57, -20), Math.toRadians(195))
-                                .stopAndAdd(new SequentialAction(
-                                        robot.spindexer.sortTo(robot.spindexer.slots.indexOf("green")),
-                                        robot.spindexer.kick())
-                                )
+                new ParallelAction(
+                        new SequentialAction(
+                                drivebase.actionBuilder(new Pose2d(60, -20, Math.toRadians(180)), false)
+                                        .strafeToSplineHeading(new Vector2d(57, -20), Math.toRadians(195))
+                                        .stopAndAdd(new SequentialAction(
+                                                robot.flywheel.setVls(95),
+                                                robot.flywheel.runFlywheel(),
+                                                robot.spindexer.
+                                        ))
 
-                                .afterTime(0, robot.intake.runIntake())
-                                .strafeToSplineHeading(new Vector2d(44.5, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
-                                        new TranslationalVelConstraint(40),
-                                        new AngularVelConstraint(Math.PI / 2))))
-                                .splineToConstantHeading(new Vector2d(35.5, -52), Math.toRadians(270), new TranslationalVelConstraint(8))
+                                        .afterTime(0, robot.intake.toggleIntake())
+                                        .strafeToSplineHeading(new Vector2d(44.5, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
+                                                new TranslationalVelConstraint(40),
+                                                new AngularVelConstraint(Math.PI / 2))))
+                                        .splineToConstantHeading(new Vector2d(35.5, -52), Math.toRadians(270), new TranslationalVelConstraint(8))
+                                        .afterTime(0, robot.intake.toggleIntake())
 
-                                .afterTime(0, robot.intake.stopIntake())
-                                .strafeToSplineHeading(new Vector2d(28, -30), Math.toRadians(220))
-                                .splineToConstantHeading(new Vector2d(-5, -15), Math.toRadians(180))
+                                        .strafeToSplineHeading(new Vector2d(28, -30), Math.toRadians(220))
+                                        .splineToConstantHeading(new Vector2d(-5, -15), Math.toRadians(180))
 
-                                .afterTime(0, robot.intake.runIntake())
-                                .strafeToSplineHeading(new Vector2d(5, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
-                                        new TranslationalVelConstraint(40),
-                                        new AngularVelConstraint(Math.PI / 2))))
-                                .splineToConstantHeading(new Vector2d(12, -50), Math.toRadians(270), new TranslationalVelConstraint(10))
+                                        .afterTime(0, robot.intake.toggleIntake())
+                                        .strafeToSplineHeading(new Vector2d(5, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
+                                                new TranslationalVelConstraint(40),
+                                                new AngularVelConstraint(Math.PI / 2))))
+                                        .splineToConstantHeading(new Vector2d(12, -50), Math.toRadians(270), new TranslationalVelConstraint(10))
+                                        .afterTime(0, robot.intake.toggleIntake())
 
-                                .afterTime(0, robot.intake.stopIntake())
-                                .strafeToSplineHeading(new Vector2d(5, -33), Math.toRadians(220))
-                                .splineToConstantHeading(new Vector2d(-10, -18), Math.toRadians(180))
+                                        .strafeToSplineHeading(new Vector2d(5, -33), Math.toRadians(220))
+                                        .splineToConstantHeading(new Vector2d(-10, -18), Math.toRadians(180))
 
-                                .afterTime(0, robot.intake.runIntake())
-                                .strafeToSplineHeading(new Vector2d(-10.5, -30), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
-                                        new TranslationalVelConstraint(40),
-                                        new AngularVelConstraint(Math.PI / 2))))
-                                .splineToConstantHeading(new Vector2d(-12, -48), Math.toRadians(270), new TranslationalVelConstraint(9))
+                                        .afterTime(0, robot.intake.toggleIntake())
+                                        .strafeToSplineHeading(new Vector2d(-10.5, -30), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
+                                                new TranslationalVelConstraint(40),
+                                                new AngularVelConstraint(Math.PI / 2))))
+                                        .splineToConstantHeading(new Vector2d(-12, -48), Math.toRadians(270), new TranslationalVelConstraint(9))
+                                        .afterTime(0, robot.intake.toggleIntake())
 
-                                .afterTime(0, robot.intake.stopIntake())
-                                .strafeToSplineHeading(new Vector2d(-29, -24), Math.toRadians(220))
-                                .strafeTo(new Vector2d(0, -24))
-                                .build()
+                                        .strafeToSplineHeading(new Vector2d(-29, -24), Math.toRadians(220))
+                                        .strafeTo(new Vector2d(0, -24))
+                                        .build()
+                        ),
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        robot.intakePeriodic()
                 )
         );
 

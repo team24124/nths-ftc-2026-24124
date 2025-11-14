@@ -39,6 +39,8 @@ public class RobotCentricTeleOp extends OpMode {
         robot = new Robot(hardwareMap, telemetry, true);
         robot.actions = ActionScheduler.INSTANCE;
         robot.actions.init();
+        robot.actions.schedule(robot.intake.toggleIntake());
+        robot.actions.run();
     }
 
     @Override
