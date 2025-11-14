@@ -71,6 +71,10 @@ public class ComponentDebugger extends OpMode {
         double x = driver.getLeftX();
         double rx = driver.getRightX();
 
+        if (driver.wasJustPressed(GamepadKeys.Button.B)) {
+            drivetrain.toggleSpeeds();
+        }
+
         if (driver.isDown(GamepadKeys.Button.A)) {
             actions.schedule(flywheel.runFlywheel());
         } else {
