@@ -73,20 +73,12 @@ public class Robot {
         }
     }
 
-    public Action shootGreen() {
+    public Action shootColor(String str) {
        return new SequentialAction(
-                spindexer.sortTo(spindexer.slots.indexOf("green")),
+                spindexer.sortTo(spindexer.slots.indexOf(str)),
                 spindexer.kick(),
                 removeIndexed()
        );
-    }
-
-    public Action shootPurple() {
-        return new SequentialAction(
-                spindexer.sortTo(spindexer.slots.indexOf("purple")),
-                spindexer.kick(),
-                removeIndexed()
-        );
     }
 
     public Action removeIndexed() {

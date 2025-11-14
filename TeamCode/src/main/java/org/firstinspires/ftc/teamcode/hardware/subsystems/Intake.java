@@ -50,6 +50,14 @@ public class Intake implements SubsystemBase, TelemetryObservable {
         };
     }
 
+    public Action toggleIntake(boolean tog) {
+        return (TelemetryPacket packet) -> {
+            toggled = tog;
+
+            return false;
+        };
+    }
+
     public double velocity() {
         return intake.getVelocity();
     }

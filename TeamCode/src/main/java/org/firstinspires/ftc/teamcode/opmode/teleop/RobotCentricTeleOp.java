@@ -39,8 +39,9 @@ public class RobotCentricTeleOp extends OpMode {
         robot = new Robot(hardwareMap, telemetry, true);
         robot.actions = ActionScheduler.INSTANCE;
         robot.actions.init();
-        robot.actions.schedule(robot.intake.toggleIntake());
-        robot.actions.run();
+        if (!robot.intake.toggled) {
+            robot.intake.toggled = true;
+        }
     }
 
     @Override
@@ -113,10 +114,10 @@ public class RobotCentricTeleOp extends OpMode {
             robot.actions.schedule(robot.spindexer.shootOne());
         }
         if (operator.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) && robot.flywheel.primed && robot.spindexer.slots.contains("purple")) {
-            robot.actions.schedule(robot.shootPurple());
+            robot.actions.schedule(robot.shootColor("purple"));
         }
         if (operator.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && robot.flywheel.primed && robot.spindexer.slots.contains("green")) {
-            robot.actions.schedule(robot.shootGreen());
+            robot.actions.schedule(robot.shootColor("green"));
         }
 
         // --- Periodic calls ---

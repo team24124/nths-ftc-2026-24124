@@ -14,6 +14,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.Robot;
 import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
@@ -26,11 +27,13 @@ import java.util.List;
 @Autonomous(name = "Auton BLUE")
 public class C9P9BLUE extends LinearOpMode {
     Robot robot;
+    private TeleOpTrajectories trajectories;
 
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(hardwareMap, telemetry, true); // Initialize entirety of robot with hardwareMap and telemetry
         MecanumDrive drivebase = robot.drivetrain.getDrive(); // Get the mecanum drivebase for trajectory to work with
+        trajectories = TeleOpTrajectories.INSTANCE;
 
         VelConstraint baseVelConstraint = new MinVelConstraint(Arrays.asList(
                 new TranslationalVelConstraint(50.0),
@@ -51,6 +54,8 @@ public class C9P9BLUE extends LinearOpMode {
         // Actions called during init
         Actions.runBlocking(new ParallelAction(robot.intake.toggleIntake()));
 
+        List<String> pattern = new ArrayList<>(robot.limelight.getPattern());
+
         waitForStart();
 
         if (isStopRequested()) return;
@@ -62,12 +67,15 @@ public class C9P9BLUE extends LinearOpMode {
                                 drivebase.actionBuilder(new Pose2d(60, -20, Math.toRadians(180)), false)
                                         .strafeToSplineHeading(new Vector2d(57, -20), Math.toRadians(195))
                                         .stopAndAdd(new SequentialAction(
-                                                robot.flywheel.setVls(95),
                                                 robot.flywheel.runFlywheel(),
-                                                robot.spindexer.
+                                                robot.shootColor(pattern.get(0)),
+                                                robot.shootColor(pattern.get(1)),
+                                                robot.shootColor(pattern.get(2))
                                         ))
 
-                                        .afterTime(0, robot.intake.toggleIntake())
+                                        .afterTime(0.5, new ParallelAction(
+                                                robot.intake.toggleIntake(),
+                                                robot.flywheel.stopFlywheel()))
                                         .strafeToSplineHeading(new Vector2d(44.5, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
                                                 new TranslationalVelConstraint(40),
                                                 new AngularVelConstraint(Math.PI / 2))))
@@ -100,6 +108,7 @@ public class C9P9BLUE extends LinearOpMode {
                         ),
                         robot.spindexer.autonPeriodic(),
                         robot.flywheel.autonPeriodic(),
+                        robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, true)),
                         robot.intakePeriodic()
                 )
         );

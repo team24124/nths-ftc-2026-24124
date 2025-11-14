@@ -81,7 +81,6 @@ public class FlywheelDebugger extends OpMode {
             flywheel.power(0);
         }
 
-
         driver.readButtons();
         actions.run();
         telemetryControl.update();
