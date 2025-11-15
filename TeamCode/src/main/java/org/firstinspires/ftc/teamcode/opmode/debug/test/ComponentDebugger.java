@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Spindexer;
 import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.util.TelemetryControl;
 
 import java.util.List;
@@ -28,7 +29,7 @@ import java.util.Objects;
 @TeleOp(name = "Components", group = "test")
 public class ComponentDebugger extends OpMode {
     private List<LynxModule> hubs;
-    private GamepadEx driver;
+    private GamepadEx driver, operator;
     private ActionScheduler actions;
     private Drivetrain drivetrain;
     public Flywheel flywheel;
@@ -45,9 +46,10 @@ public class ComponentDebugger extends OpMode {
         }
 
         driver = new GamepadEx(gamepad1);
+        operator = new GamepadEx(gamepad2);
         actions = ActionScheduler.INSTANCE;
         actions.init();
-        drivetrain = new FieldCentricDrive(hardwareMap, new Pose2d(new Vector2d(0, 0), Math.toRadians(0)));
+        drivetrain = new FieldCentricDrive(hardwareMap, PoseStorage.currentPose);
         spindexer = new Spindexer(hardwareMap);
         flywheel = new Flywheel(hardwareMap);
         intake = new Intake(hardwareMap);
@@ -76,22 +78,22 @@ public class ComponentDebugger extends OpMode {
             drivetrain.toggleSpeeds();
         }
 
-        if (driver.isDown(GamepadKeys.Button.A)) {
+        if (operator.isDown(GamepadKeys.Button.A)) {
             actions.schedule(flywheel.runFlywheel());
         } else {
             actions.schedule(flywheel.stopFlywheel());
         }
 
-        if (driver.isDown(GamepadKeys.Button.X)) {
+        if (driver.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
             actions.schedule(intakePeriodic());
         } else {
             actions.schedule(intake.stopIntake());
         }
 
-        if (driver.wasJustPressed(GamepadKeys.Button.Y) && flywheel.primed) {
+        if (operator.wasJustPressed(GamepadKeys.Button.Y) && flywheel.primed) {
             actions.schedule(spindexer.shootOne());
         }
-        if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) && flywheel.primed && spindexer.slots.contains("purple")) {
+        if (operator.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) && flywheel.primed && spindexer.slots.contains("purple")) {
             actions.schedule(new SequentialAction(
                     spindexer.sortTo(spindexer.slots.indexOf("purple")),
                     spindexer.kick()
@@ -99,7 +101,7 @@ public class ComponentDebugger extends OpMode {
             spindexer.slots.remove(spindexer.states.getSelectedIndex());
             spindexer.slots.add(spindexer.states.getSelectedIndex(), "empty");
         }
-        if (driver.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && flywheel.primed && spindexer.slots.contains("green")) {
+        if (operator.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && flywheel.primed && spindexer.slots.contains("green")) {
             actions.schedule(new SequentialAction(
                     spindexer.sortTo(spindexer.slots.indexOf("green")),
                     spindexer.kick()
@@ -112,6 +114,7 @@ public class ComponentDebugger extends OpMode {
         flywheel.targetVel = 1300;
         flywheel.periodic();
         driver.readButtons();
+        operator.readButtons();
         actions.run();
         telemetryControl.update();
     }

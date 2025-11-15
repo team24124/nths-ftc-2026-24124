@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 import org.firstinspires.ftc.teamcode.util.ArraySelect;
 import org.firstinspires.ftc.teamcode.util.Utilities;
 import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
+import org.firstinspires.ftc.teamcode.util.plotting.Oscillator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +31,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     private final double TPR = 537.6;
     private PIDF pd;
     private final VoltageSensor voltageSensor;
+    private Oscillator os;
 
     public enum State {
         SLOT1(267), // Slots are shoot positions
@@ -53,6 +55,8 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     private int shotCount = 0;
 
     public Spindexer(HardwareMap hw) {
+        os = new Oscillator(new Double[]{-6.0, 6.0}, 0.2);
+        os.enableOscillation(true);
         pd = new PIDF();
         pd.setPD(0.0032, 0.000001, 0.7);
         spindexer = hw.get(DcMotorEx.class, "spindexer");
@@ -69,6 +73,9 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     @Override
     public void periodic() {
         double target = states.getSelected().position;
+        if (!isMoving && states.getSelectedIndex() > 2) {
+            target = states.getSelected().position - os.returnSetpoint();
+        }
         double position = spindexer.getCurrentPosition() % TPR; // Normalize to [0, 537.6)
         if (position < 0) position += TPR;
 

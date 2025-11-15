@@ -26,15 +26,15 @@ import java.util.Arrays;
 import java.util.List;
 
 @Autonomous(name = "tempblue")
-public class temp extends LinearOpMode {
+public class tempred extends LinearOpMode {
     private Drivetrain drivetrain;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        drivetrain = new RobotCentricDrive(hardwareMap, new Pose2d(60, -20, 180));
+        drivetrain = new RobotCentricDrive(hardwareMap, new Pose2d(60, 20, 180));
         MecanumDrive drivebase = drivetrain.getDrive();
 
-        Pose2d initialPose = new Pose2d(60, -20, Math.toRadians(180));
+        Pose2d initialPose = new Pose2d(60, 20, Math.toRadians(180));
         drivebase.localizer.setPose(initialPose);
         PoseStorage.currentPose = initialPose;
 
@@ -47,14 +47,14 @@ public class temp extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        drivebase.actionBuilder(new Pose2d(60, -20, Math.toRadians(180)), false)
-                                .strafeToSplineHeading(new Vector2d(30, -20), Math.toRadians(270))
+                        drivebase.actionBuilder(new Pose2d(60, 20, Math.toRadians(180)), false)
+                                .strafeToSplineHeading(new Vector2d(30, 20), Math.toRadians(90))
                                 .build()
                 )
 
         );
 
         PoseStorage.currentPose = new Pose2d(drivetrain.getPosition().position, 0);
-        PoseStorage.currentAlliance = PoseStorage.Alliance.BLUE;
+        PoseStorage.currentAlliance = PoseStorage.Alliance.RED;
     }
 }
