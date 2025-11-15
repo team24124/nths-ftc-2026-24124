@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.REVColourV3;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Spindexer;
+import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import org.firstinspires.ftc.teamcode.util.TelemetryControl;
 
@@ -46,7 +47,7 @@ public class ComponentDebugger extends OpMode {
         driver = new GamepadEx(gamepad1);
         actions = ActionScheduler.INSTANCE;
         actions.init();
-        drivetrain = new RobotCentricDrive(hardwareMap, new Pose2d(new Vector2d(0, 0), Math.toRadians(0)));
+        drivetrain = new FieldCentricDrive(hardwareMap, new Pose2d(new Vector2d(0, 0), Math.toRadians(0)));
         spindexer = new Spindexer(hardwareMap);
         flywheel = new Flywheel(hardwareMap);
         intake = new Intake(hardwareMap);
@@ -108,7 +109,7 @@ public class ComponentDebugger extends OpMode {
         drivetrain.drive(x, y, rx, false);
         drivetrain.periodic();
         spindexer.periodic();
-        flywheel.setVls(20);
+        flywheel.targetVel = 1300;
         flywheel.periodic();
         driver.readButtons();
         actions.run();

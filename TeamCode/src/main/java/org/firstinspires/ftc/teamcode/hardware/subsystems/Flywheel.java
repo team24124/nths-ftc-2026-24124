@@ -22,7 +22,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     private final Servo flap;
     public boolean powered = false;
     public boolean primed = false;
-    private double targetVel = 0;
+    public double targetVel = 0;
     private double distance = 0;
     private PIDF pv = new PIDF();
     private InterpLUT LUT = new InterpLUT();
@@ -59,7 +59,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     @Override
     public void periodic(){
         if (powered) {
-            targetVel = LUT.get(distance);
+            //targetVel = LUT.get(distance);
 
             //adjustFlap(distance);
             power(targetVel);

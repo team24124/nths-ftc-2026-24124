@@ -68,6 +68,7 @@ public class FieldCentricDrive extends Drivetrain implements TelemetryObservable
 
         telemetry.addData("X", current.position.x);
         telemetry.addData("Y", current.position.y);
+        telemetry.addData("Speed", getSpeeds().getSelected());
         telemetry.addData("Heading (rad)", current.heading.toDouble());
         telemetry.addData("Heading (°)", Math.toDegrees(current.heading.toDouble()));
     }
