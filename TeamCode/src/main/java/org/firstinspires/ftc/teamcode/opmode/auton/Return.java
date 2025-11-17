@@ -26,14 +26,8 @@ public class Return extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robot = new Robot(hardwareMap, telemetry, true); // Initialize entirety of robot with hardwareMap and telemetry
-        MecanumDrive drivebase = robot.drivetrain.getDrive(); // Get the mecanum drivebase for trajectory to work with
-
-        VelConstraint baseVelConstraint = new MinVelConstraint(Arrays.asList(
-                new TranslationalVelConstraint(65.0),
-                new AngularVelConstraint(Math.PI / 2)
-        ));
-        AccelConstraint baseAccelConstraint = new ProfileAccelConstraint(-10.0, 20.0); // Optional constraints to change from constraints in MecanumDrive
+        robot = new Robot(hardwareMap, telemetry, true);
+        MecanumDrive drivebase = robot.drivetrain.getDrive();
 
         Pose2d initialPose = PoseStorage.currentPose; // Initialize position and heading of robot to global pose
         drivebase.localizer.setPose(initialPose); // Set the localizer start position to initialPose

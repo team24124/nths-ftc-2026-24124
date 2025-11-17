@@ -19,19 +19,26 @@ public class Oscillator {
 
     public double returnSetpoint() {
         double time = timer.seconds();
-        if (time >= seconds && oscillate) {
-            timer.reset();
-            if (setpoints.getSelectedIndex() + 1 == getSetpoints().length) {
-                return setpoints.moveSelection(-getSetpoints().length + 1).getSelected();
+        if (oscillate) {
+            if (time >= seconds) {
+                timer.reset();
+                if (setpoints.getSelectedIndex() + 1 == getSetpoints().length) {
+                    return setpoints.moveSelection(-getSetpoints().length + 1).getSelected();
+                }
+                return setpoints.moveSelection(1).getSelected();
+            } else {
+                return setpoints.getSelected();
             }
-            return setpoints.moveSelection(1).getSelected();
         } else {
-            return setpoints.getSelected();
+            return -1;
         }
     }
 
     public Double[] getSetpoints() {
         return setpoints.getAllOptions();
+    }
+    public boolean enabled() {
+        return oscillate;
     }
 
     public void setOscillationPeriod(double seconds) {

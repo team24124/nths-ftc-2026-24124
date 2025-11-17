@@ -31,15 +31,11 @@ public class temp extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        drivetrain = new RobotCentricDrive(hardwareMap, new Pose2d(60, -20, 180));
+        Pose2d initialPose = new Pose2d(60, -20, Math.toRadians(0));
+        drivetrain = new RobotCentricDrive(hardwareMap, initialPose);
         MecanumDrive drivebase = drivetrain.getDrive();
 
-        Pose2d initialPose = new Pose2d(60, -20, Math.toRadians(180));
         drivebase.localizer.setPose(initialPose);
-        PoseStorage.currentPose = initialPose;
-
-
-
 
         waitForStart();
 
@@ -48,13 +44,13 @@ public class temp extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         drivebase.actionBuilder(new Pose2d(60, -20, Math.toRadians(180)), false)
-                                .strafeToSplineHeading(new Vector2d(30, -20), Math.toRadians(270))
+                                .strafeToSplineHeading(new Vector2d(30, -20), Math.toRadians(180))
                                 .build()
                 )
 
         );
 
-        PoseStorage.currentPose = new Pose2d(drivetrain.getPosition().position, 0);
+        PoseStorage.currentPose = drivetrain.getPosition();
         PoseStorage.currentAlliance = PoseStorage.Alliance.BLUE;
     }
 }

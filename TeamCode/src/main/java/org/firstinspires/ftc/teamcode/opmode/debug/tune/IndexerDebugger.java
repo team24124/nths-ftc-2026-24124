@@ -65,17 +65,19 @@ public class IndexerDebugger extends OpMode {
         }
         if (driver.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
             spindexer.states.previous();
-            os.enableOscillation(false);
         }
         if (driver.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
             spindexer.states.next();
-            os.enableOscillation(true);
         }
-//        if (os.returnSetpoint() == 1.0) {
-//            spindexer.states.setSelected(4);
-//        } else if (os.returnSetpoint() == 2.0) {
-//            spindexer.states.setSelected(5);
-//        }
+
+        if (driver.wasJustPressed(GamepadKeys.Button.START)) {
+            os.enableOscillation(!os.enabled());
+        }
+        if (os.returnSetpoint() == 1.0) {
+            spindexer.states.setSelected(4);
+        } else if (os.returnSetpoint() == 2.0) {
+            spindexer.states.setSelected(5);
+        }
 
         spindexer.periodic();
         driver.readButtons();

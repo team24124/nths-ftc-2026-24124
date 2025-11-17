@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
 import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 import java.util.List;
 
@@ -100,6 +101,7 @@ public class TrajectoryDebugger extends OpMode {
         telemetry.addData("\nX", drivetrain.getPosition().position.x);
         telemetry.addData("\nY", drivetrain.getPosition().position.y);
         telemetry.addData("\nHeading", drivetrain.getHeading());
+        telemetry.addData("\nStored Pose", PoseStorage.currentPose.toString());
 
         telemetry.addData("\n\nTargeted X", xPos);
         telemetry.addData("Targeted Y", yPos);
