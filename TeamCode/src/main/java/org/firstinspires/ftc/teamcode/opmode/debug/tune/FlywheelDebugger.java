@@ -72,6 +72,12 @@ public class FlywheelDebugger extends OpMode {
             if (driver.isDown(GamepadKeys.Button.X)) {
                 flywheel.adjustFlap(trajectories.distanceToTarget(drivetrain, true));
             }
+            if (driver.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+                flywheel.flap.setPosition(flywheel.flap.getPosition()+0.02);
+            }
+            if (driver.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+                flywheel.flap.setPosition(flywheel.flap.getPosition()-0.02);
+            }
         } else {
             if (driver.wasJustPressed(GamepadKeys.Button.A)) {
                 actions.schedule(flywheel.runFlywheel());

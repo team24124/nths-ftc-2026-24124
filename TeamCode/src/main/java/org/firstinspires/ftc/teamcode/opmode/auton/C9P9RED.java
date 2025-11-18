@@ -26,24 +26,12 @@ public class C9P9RED extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robot = new Robot(hardwareMap, telemetry, true); // Initialize entirety of robot with hardwareMap and telemetry
-        MecanumDrive drivebase = robot.drivetrain.getDrive(); // Get the mecanum drivebase for trajectory to work with
+        robot = new Robot(hardwareMap, telemetry, true);
+        MecanumDrive drivebase = robot.drivetrain.getDrive();
 
-        VelConstraint baseVelConstraint = new MinVelConstraint(Arrays.asList(
-                new TranslationalVelConstraint(50.0),
-                new AngularVelConstraint(Math.PI / 2)
-        ));
-        AccelConstraint baseAccelConstraint = new ProfileAccelConstraint(-10.0, 20.0); // Optional constraints to change from constraints in MecanumDrive
-
-        Pose2d initialPose = new Pose2d(60, -20, Math.toRadians(180)); // Initialize position and heading of robot. Position is grid of -72, 0, 72 from left to right and bottom to top, heading is 0 - 360, CCW, 0 = north
-        drivebase.localizer.setPose(initialPose); // Set the localizer start position to initialPose
-        PoseStorage.currentPose = initialPose; // Set global pose value
-
-
-
-
-
-        // Autonomous sequence
+        Pose2d initialPose = new Pose2d(60, -20, Math.toRadians(180));
+        drivebase.localizer.setPose(initialPose);
+        PoseStorage.currentPose = initialPose;
 
         // Actions called during init
         Actions.runBlocking(new ParallelAction());

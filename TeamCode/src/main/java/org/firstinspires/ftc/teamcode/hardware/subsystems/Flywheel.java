@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.util.plotting.InterpLUT;
 
 public class Flywheel implements SubsystemBase, TelemetryObservable {
     public final DcMotorEx wheel1, wheel2;
-    private final Servo flap;
+    public final Servo flap;
     public boolean powered = false;
     public boolean primed = false;
     public double targetVel = 0;
@@ -122,6 +122,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
         telemetry.addData("Wheel 1 Velocity", wheel1.getVelocity());
         telemetry.addData("Wheel 2 Velocity", wheel2.getVelocity());
         telemetry.addData("Primed", primed);
+        telemetry.addData("Flap Position", flap.getPosition());
     }
 
     @Override
