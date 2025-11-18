@@ -14,8 +14,8 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.Robot;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
@@ -45,7 +45,7 @@ public class C9P9BLUE extends LinearOpMode {
         drivebase.localizer.setPose(initialPose); // Set the localizer start position to initialPose
         PoseStorage.currentPose = initialPose; // Set global pose value
 
-
+        List<String> pattern = new ArrayList<>();
 
 
 
@@ -54,7 +54,12 @@ public class C9P9BLUE extends LinearOpMode {
         // Actions called during init
         Actions.runBlocking(new ParallelAction(robot.intake.toggleIntake()));
 
-        List<String> pattern = new ArrayList<>(robot.limelight.getPattern());
+        do {
+            robot.limelight.setPipeline(Limelight.Pipeline.AT1);
+            if (robot.limelight.isDetected()) {
+                pattern.addAll(robot.limelight.getPattern());
+            }
+        } while (pattern.isEmpty());
 
         waitForStart();
 
@@ -68,9 +73,7 @@ public class C9P9BLUE extends LinearOpMode {
                                         .strafeToSplineHeading(new Vector2d(57, -20), Math.toRadians(195))
                                         .stopAndAdd(new SequentialAction(
                                                 robot.flywheel.runFlywheel(),
-                                                robot.shootColor(pattern.get(0)),
-                                                robot.shootColor(pattern.get(1)),
-                                                robot.shootColor(pattern.get(2))
+                                                robot.orderedShot(pattern) // TODO: work on this
                                         ))
 
                                         .afterTime(0.5, new ParallelAction(

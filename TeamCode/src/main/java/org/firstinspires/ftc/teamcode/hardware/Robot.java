@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.util.TelemetryControl;
 
+import java.util.List;
 import java.util.Objects;
 
 public class Robot {
@@ -74,11 +75,18 @@ public class Robot {
     }
 
     public Action shootColor(String str) {
-       return new SequentialAction(
+        return new SequentialAction(
                 spindexer.sortTo(spindexer.slots.indexOf(str)),
                 spindexer.kick(),
                 removeIndexed()
-       );
+        );
+    }
+
+    public Action orderedShot(List<String> pattern) {
+        while (!flywheel.primed) {
+
+        }
+        return spindexer.shootAll(pattern);
     }
 
     public Action removeIndexed() {

@@ -52,6 +52,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     public List<String> slots = new ArrayList<>(Arrays.asList("empty", "empty", "empty"));
 
     public boolean isMoving;
+    public boolean kickScheduled = false;
     private int shotCount = 0;
 
     public Spindexer(HardwareMap hw) {
@@ -120,7 +121,10 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
 
             if (Utilities.isBetween(position, target - 10, target + 10)) {
-                isMoving = false;
+                if (kickScheduled) {
+                    isMoving = true;
+                }
+
                 return false;
             } else {
                 isMoving = true;
@@ -174,6 +178,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
                 isMoving = true;
                 return true;
             }
+            kickScheduled = false;
             isMoving = false;
             return false;
         };
@@ -187,6 +192,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
             }
             slots.remove(shotCount);
             slots.add(shotCount, "empty");
+            kickScheduled = true;
             return new SequentialAction(
                     sortTo(shotCount),
                     kick()
@@ -194,6 +200,19 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
         } else {
             return (TelemetryPacket packet) -> false;
         }
+    }
+
+    public Action shootAll(List<String> pattern) {
+        return (TelemetryPacket packet) -> {
+            int i = slots.indexOf(pattern.get(0));
+            slots.remove(i);
+            slots.add(i, "empty");
+            new SequentialAction(sortTo(i),
+            kick()); //TODO fix pls
+
+            return false;
+
+        };
     }
 
     public void stopAndResetEncoders() {
