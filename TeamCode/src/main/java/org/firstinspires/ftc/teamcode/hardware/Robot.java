@@ -83,16 +83,36 @@ public class Robot {
     }
 
     public Action orderedShot(List<String> pattern) {
-        while (!flywheel.primed) {
-
-        }
-        return spindexer.shootAll(pattern);
+        while (!flywheel.primed) {} // Im not sorry for this.....
+        return new SequentialAction(
+                new SequentialAction(
+                        spindexer.sortTo(pattern.get(0)),
+                        removeIndexed(spindexer.slots.indexOf(pattern.get(0))),
+                        spindexer.kick()),
+                new SequentialAction(
+                        spindexer.sortTo(pattern.get(1)),
+                        removeIndexed(spindexer.slots.indexOf(pattern.get(1))),
+                        spindexer.kick()),
+                new SequentialAction(
+                        spindexer.sortTo(pattern.get(2)),
+                        removeIndexed(spindexer.slots.indexOf(pattern.get(2))),
+                        spindexer.kick())
+        );
     }
 
     public Action removeIndexed() {
         return (TelemetryPacket packet) -> {
             spindexer.slots.remove(spindexer.states.getSelectedIndex());
             spindexer.slots.add(spindexer.states.getSelectedIndex(), "empty");
+
+            return false;
+        };
+    }
+
+    public Action removeIndexed(int i) {
+        return (TelemetryPacket packet) -> {
+            spindexer.slots.remove(i);
+            spindexer.slots.add(i, "empty");
 
             return false;
         };

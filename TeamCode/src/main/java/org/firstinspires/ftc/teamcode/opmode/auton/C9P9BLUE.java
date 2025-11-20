@@ -73,7 +73,7 @@ public class C9P9BLUE extends LinearOpMode {
                                         .strafeToSplineHeading(new Vector2d(57, -20), Math.toRadians(195))
                                         .stopAndAdd(new SequentialAction(
                                                 robot.flywheel.runFlywheel(),
-                                                robot.orderedShot(pattern) // TODO: work on this
+                                                robot.orderedShot(pattern)
                                         ))
 
                                         .afterTime(0.5, new ParallelAction(
@@ -87,8 +87,14 @@ public class C9P9BLUE extends LinearOpMode {
 
                                         .strafeToSplineHeading(new Vector2d(28, -30), Math.toRadians(220))
                                         .splineToConstantHeading(new Vector2d(-5, -15), Math.toRadians(180))
+                                        .stopAndAdd(new SequentialAction(
+                                                robot.flywheel.runFlywheel(),
+                                                robot.orderedShot(pattern)
+                                        ))
 
-                                        .afterTime(0, robot.intake.toggleIntake())
+                                        .afterTime(0.5, new ParallelAction(
+                                                robot.intake.toggleIntake(),
+                                                robot.flywheel.stopFlywheel()))
                                         .strafeToSplineHeading(new Vector2d(5, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
                                                 new TranslationalVelConstraint(40),
                                                 new AngularVelConstraint(Math.PI / 2))))
@@ -97,8 +103,14 @@ public class C9P9BLUE extends LinearOpMode {
 
                                         .strafeToSplineHeading(new Vector2d(5, -33), Math.toRadians(220))
                                         .splineToConstantHeading(new Vector2d(-10, -18), Math.toRadians(180))
+                                        .stopAndAdd(new SequentialAction(
+                                                robot.flywheel.runFlywheel(),
+                                                robot.orderedShot(pattern)
+                                        ))
 
-                                        .afterTime(0, robot.intake.toggleIntake())
+                                        .afterTime(0.5, new ParallelAction(
+                                                robot.intake.toggleIntake(),
+                                                robot.flywheel.stopFlywheel()))
                                         .strafeToSplineHeading(new Vector2d(-10.5, -30), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
                                                 new TranslationalVelConstraint(40),
                                                 new AngularVelConstraint(Math.PI / 2))))
@@ -106,6 +118,10 @@ public class C9P9BLUE extends LinearOpMode {
                                         .afterTime(0, robot.intake.toggleIntake())
 
                                         .strafeToSplineHeading(new Vector2d(-29, -24), Math.toRadians(220))
+                                        .stopAndAdd(new SequentialAction(
+                                                robot.flywheel.runFlywheel(),
+                                                robot.orderedShot(pattern)
+                                        ))
                                         .strafeTo(new Vector2d(0, -24))
                                         .build()
                         ),

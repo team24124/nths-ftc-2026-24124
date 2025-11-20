@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -22,7 +21,6 @@ import org.firstinspires.ftc.teamcode.util.plotting.Oscillator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 
 public class Spindexer implements SubsystemBase, TelemetryObservable {
@@ -119,12 +117,8 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
             double power = pd.calculate(adjustedPosition, target, voltageSensor.getVoltage());
             spindexer.setPower(power);
 
-
             if (Utilities.isBetween(position, target - 10, target + 10)) {
-                if (kickScheduled) {
-                    isMoving = true;
-                }
-
+                isMoving = kickScheduled;
                 return false;
             } else {
                 isMoving = true;
@@ -134,7 +128,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     }
 
     // Sort to the first specified colour in the array of slots
-    public Action sortTo(String colour) {
+    public Action inTo(String colour) {
         int firstColour = slots.indexOf(colour) + 3;
         if (firstColour != 2 && states.getSelectedIndex() != firstColour) {
             states.moveSelection(firstColour - states.getSelectedIndex());
@@ -145,6 +139,15 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
     public Action sortTo(int slot) {
         states.setSelected(slot);
+
+        return moveToState();
+    }
+
+    public Action sortTo(String colour) {
+        int firstColour = slots.indexOf(colour);
+        if (firstColour != -1 && states.getSelectedIndex() != firstColour) {
+            states.moveSelection(firstColour - states.getSelectedIndex());
+        }
 
         return moveToState();
     }
@@ -163,19 +166,16 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
         return (TelemetryPacket packet) -> {
             if (timer.seconds() < 0.18) {
-                isMoving = true;
                 return true;
             }
             kicker.setPosition(0.35);
 
             if (timer.seconds() < 0.77) {
-                isMoving = true;
                 return true;
             }
 
             kicker.setPosition(0.76);
             if (timer.seconds() < 1.05) {
-                isMoving = true;
                 return true;
             }
             kickScheduled = false;
@@ -200,19 +200,6 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
         } else {
             return (TelemetryPacket packet) -> false;
         }
-    }
-
-    public Action shootAll(List<String> pattern) {
-        return (TelemetryPacket packet) -> {
-            int i = slots.indexOf(pattern.get(0));
-            slots.remove(i);
-            slots.add(i, "empty");
-            new SequentialAction(sortTo(i),
-            kick()); //TODO fix pls
-
-            return false;
-
-        };
     }
 
     public void stopAndResetEncoders() {

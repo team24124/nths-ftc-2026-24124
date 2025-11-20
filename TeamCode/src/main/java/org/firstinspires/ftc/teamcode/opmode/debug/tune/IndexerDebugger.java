@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.debug.tune;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.SequentialAction;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -61,7 +60,7 @@ public class IndexerDebugger extends OpMode {
             actions.schedule(spindexer.intakeToEmpty());
         }
         if (driver.wasJustPressed(GamepadKeys.Button.Y)) {
-            actions.schedule(spindexer.sortTo("empty"));
+            actions.schedule(spindexer.inTo("empty"));
         }
         if (driver.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
             spindexer.states.previous();
