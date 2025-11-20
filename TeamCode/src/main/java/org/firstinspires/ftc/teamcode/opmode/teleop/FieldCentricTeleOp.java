@@ -48,8 +48,12 @@ public class FieldCentricTeleOp extends OpMode {
         }
 
         // --------- Driver inputs ---------
-        double y = driver.getLeftY();
-        double x = driver.getLeftX();
+        double x = -driver.getLeftY();
+        double y = driver.getLeftX();
+        if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
+            x = driver.getLeftY();
+            y = -driver.getLeftX();
+        }
         double rx = driver.getRightX();
 
         if (driver.wasJustPressed(GamepadKeys.Button.Y)) {
