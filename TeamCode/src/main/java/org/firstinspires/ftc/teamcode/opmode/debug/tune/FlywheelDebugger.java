@@ -50,10 +50,11 @@ public class FlywheelDebugger extends OpMode {
         actions.init();
         driver = new GamepadEx(gamepad1);
         flywheel = new Flywheel(hardwareMap);
+        spindexer = new Spindexer(hardwareMap);
         telemetryControl = new TelemetryControl(telemetry);
-        telemetryControl.subscribe(flywheel).subscribe(drivetrain);
-        trajectories = TeleOpTrajectories.INSTANCE;
         drivetrain = new RobotCentricDrive(hardwareMap, new Pose2d(0, 0, 0)); // Start robot at the center of the field
+        telemetryControl.subscribe(flywheel).subscribe(drivetrain).subscribe(spindexer);
+        trajectories = TeleOpTrajectories.INSTANCE;
     }
 
     @Override
@@ -64,7 +65,7 @@ public class FlywheelDebugger extends OpMode {
 
         flywheel.setVelPID(Kp, Kv);
 
-        if (driver.wasJustPressed(GamepadKeys.Button.START)) {
+        if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             debugServo = !debugServo;
         }
 
@@ -120,6 +121,7 @@ public class FlywheelDebugger extends OpMode {
         telemetryControl.getTelemetry().addData("Distance", trajectories.distanceToTarget(drivetrain, true));
         telemetryControl.getTelemetry().addData("Servo debug", debugServo);
         driver.readButtons();
+        drivetrain.periodic();
         actions.run();
         telemetryControl.update();
     }

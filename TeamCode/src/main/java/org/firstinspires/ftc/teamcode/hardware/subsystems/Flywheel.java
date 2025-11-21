@@ -97,7 +97,8 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     public void adjustFlap(double distance) {
         double theta = 45 - 4 * ((distance/12) - 8.5);
         theta = Range.clip(theta, 40, 80);
-        flap.setPosition(1 - (theta - 40)/300); // Desired angle - servo pose 0 angle from horizontal / 300 to get servo normalized position [0, 1]
+        // 0.94 is extended 0.14 is lowest
+        flap.setPosition(0.14 + (80 - theta)/50); // Desired angle - servo pose 0 angle from horizontal / 300 to get servo normalized position [0, 1]
     }
 
     public void power(double vel) {

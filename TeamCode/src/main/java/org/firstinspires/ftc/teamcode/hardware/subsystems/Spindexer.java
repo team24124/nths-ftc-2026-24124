@@ -54,7 +54,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     private int shotCount = 0;
 
     public Spindexer(HardwareMap hw) {
-        os = new Oscillator(new Double[]{-10.0, 10.0}, 0.2);
+        os = new Oscillator(new Double[]{-20.0, 20.0}, 0.2);
         os.enableOscillation(true);
         pd = new PIDF();
         pd.setPD(0.0032, 0.000001, 0.7);
@@ -117,7 +117,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
             double power = pd.calculate(adjustedPosition, target, voltageSensor.getVoltage());
             spindexer.setPower(power);
 
-            if (Utilities.isBetween(position, target - 10, target + 10)) {
+            if (Utilities.isBetween(position, target - 20, target + 20)) {
                 isMoving = kickScheduled;
                 return false;
             } else {
