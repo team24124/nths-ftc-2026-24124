@@ -83,16 +83,6 @@ public class FlywheelDebugger extends OpMode {
             if (driver.wasJustPressed(GamepadKeys.Button.B)) {
                 actions.schedule(flywheel.stopFlywheel());
             }
-            if (driver.wasJustPressed(GamepadKeys.Button.X)) {
-                flywheel.wheel1.setPower(0.3);
-            }
-            if (driver.wasJustPressed(GamepadKeys.Button.Y)) {
-                flywheel.wheel2.setPower(0.3);
-            }
-            if (driver.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
-                flywheel.wheel1.setPower(0);
-                flywheel.wheel2.setPower(0);
-            }
 
             if (Utilities.isBetween(flywheel.wheel1.getVelocity(), velocity - 20, velocity + 50)) {
                 if (driver.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
