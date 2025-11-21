@@ -35,7 +35,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
         SLOT1(267), // Slots are shoot positions
         SLOT2(90), // Slots increase CCW, IN1 is referencing the same slot as SLOT1
         SLOT3(449),
-        IN1(0), // Ins are slots facing towards the intake
+        IN1(0), // Ins are slots facing towards the intake // TODO because 0 - 20 is -20 and 536 isnt close to that, moveto cant set ismoving to false. normalize
         IN2(358), // Ins increase CCW. Since moving CCW results in a positive increase, the second slot CCW from the first one is on the rear left of the robot, making its position -178 + 537.6
         IN3(179);
 
