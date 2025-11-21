@@ -70,9 +70,6 @@ public class FlywheelDebugger extends OpMode {
         }
 
         if (debugServo) {
-            if (driver.isDown(GamepadKeys.Button.X)) {
-                flywheel.adjustFlap(trajectories.distanceToTarget(drivetrain, true));
-            }
             if (driver.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
                 flywheel.flap.setPosition(flywheel.flap.getPosition()+0.02);
             }
@@ -118,10 +115,14 @@ public class FlywheelDebugger extends OpMode {
             }
         }
 
+
+        //
         telemetryControl.getTelemetry().addData("Distance", trajectories.distanceToTarget(drivetrain, true));
         telemetryControl.getTelemetry().addData("Servo debug", debugServo);
         driver.readButtons();
         drivetrain.periodic();
+        spindexer.periodic();
+        flywheel.adjustFlap(trajectories.distanceToTarget(drivetrain, true));
         actions.run();
         telemetryControl.update();
     }
