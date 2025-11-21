@@ -37,6 +37,7 @@ public class Robot {
         intake = new Intake(hw);
         spindexer = new Spindexer(hw);
         limelight = new Limelight(hw);
+        colorSensor = new REVColourV3(hw);
 
         if (robotCentric) {
             drivetrain = new RobotCentricDrive(hw, PoseStorage.currentPose);
@@ -44,6 +45,7 @@ public class Robot {
             drivetrain = new FieldCentricDrive(hw, PoseStorage.currentPose);
         }
 
+        actions = ActionScheduler.INSTANCE;
         telemetryControl = new TelemetryControl(telemetry);
         telemetryControl
                 .subscribe(flywheel)

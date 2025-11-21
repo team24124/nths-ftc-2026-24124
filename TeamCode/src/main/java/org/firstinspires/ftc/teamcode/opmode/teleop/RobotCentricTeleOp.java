@@ -37,7 +37,6 @@ public class RobotCentricTeleOp extends OpMode {
         driver = new GamepadEx(gamepad1);
         operator = new GamepadEx(gamepad2);
         robot = new Robot(hardwareMap, telemetry, true);
-        robot.actions = ActionScheduler.INSTANCE;
         robot.actions.init();
         if (!robot.intake.toggled) {
             robot.intake.toggled = true;
