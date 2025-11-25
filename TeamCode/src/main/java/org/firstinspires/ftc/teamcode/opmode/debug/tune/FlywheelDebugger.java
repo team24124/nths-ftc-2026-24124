@@ -18,8 +18,6 @@ import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import org.firstinspires.ftc.teamcode.util.TelemetryControl;
 import org.firstinspires.ftc.teamcode.util.Utilities;
-import org.firstinspires.ftc.teamcode.util.plotting.InterpHermiteLUT;
-import org.firstinspires.ftc.teamcode.util.plotting.InterpLUT;
 
 import java.util.List;
 
@@ -63,6 +61,10 @@ public class FlywheelDebugger extends OpMode {
             hub.clearBulkCache();
         }
 
+        double y = driver.getLeftY();
+        double x = driver.getLeftX();
+        double rx = driver.getRightX();
+
         flywheel.setVelPID(Kp, Kv);
 
         if (driver.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
@@ -105,9 +107,9 @@ public class FlywheelDebugger extends OpMode {
             }
         }
 
-
-        //
+        drivetrain.drive(x, y, rx, false);
         telemetryControl.getTelemetry().addData("Distance", trajectories.distanceToTarget(drivetrain, true));
+        telemetryControl.getTelemetry().addData("vel", velocity);
         telemetryControl.getTelemetry().addData("Servo debug", debugServo);
         driver.readButtons();
         drivetrain.periodic();

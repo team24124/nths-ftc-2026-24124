@@ -11,10 +11,10 @@ import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
 import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 
 public class Intake implements SubsystemBase, TelemetryObservable {
-    private final DcMotorEx intake;
+    public final DcMotorEx intake;
     public boolean powered = false;
     public boolean toggled = true;
-    private double targetVel = 0;
+    public double targetVel = 0;
 
     public Intake(HardwareMap hw) {
         intake = hw.get(DcMotorEx.class, "intake");

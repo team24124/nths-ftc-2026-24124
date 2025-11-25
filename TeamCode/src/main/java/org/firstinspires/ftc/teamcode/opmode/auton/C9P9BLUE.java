@@ -68,67 +68,72 @@ public class C9P9BLUE extends LinearOpMode {
         // Main sequence
         Actions.runBlocking(
                 new ParallelAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        robot.intakePeriodic(),
                         new SequentialAction(
                                 drivebase.actionBuilder(new Pose2d(60, -20, Math.toRadians(180)), false)
                                         .strafeToSplineHeading(new Vector2d(57, -20), Math.toRadians(195))
                                         .stopAndAdd(new SequentialAction(
+                                                robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, true)),
                                                 robot.flywheel.runFlywheel(),
                                                 robot.orderedShot(pattern)
                                         ))
 
                                         .afterTime(0.5, new ParallelAction(
-                                                robot.intake.toggleIntake(),
+                                                robot.intake.toggleIntake(true),
+                                                robot.intakePeriodic(),
                                                 robot.flywheel.stopFlywheel()))
                                         .strafeToSplineHeading(new Vector2d(44.5, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
                                                 new TranslationalVelConstraint(40),
                                                 new AngularVelConstraint(Math.PI / 2))))
                                         .splineToConstantHeading(new Vector2d(35.5, -52), Math.toRadians(270), new TranslationalVelConstraint(8))
-                                        .afterTime(0, robot.intake.toggleIntake())
+                                        .afterTime(0, new ParallelAction(robot.intake.toggleIntake(false), robot.intakePeriodic()))
 
                                         .strafeToSplineHeading(new Vector2d(28, -30), Math.toRadians(220))
                                         .splineToConstantHeading(new Vector2d(-5, -15), Math.toRadians(180))
                                         .stopAndAdd(new SequentialAction(
-                                                robot.flywheel.runFlywheel(),
+                                                robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, true)),
+                                                //robot.flywheel.runFlywheel(),
                                                 robot.orderedShot(pattern)
                                         ))
 
                                         .afterTime(0.5, new ParallelAction(
-                                                robot.intake.toggleIntake(),
+                                                robot.intake.toggleIntake(true),
+                                                robot.intakePeriodic(),
                                                 robot.flywheel.stopFlywheel()))
                                         .strafeToSplineHeading(new Vector2d(5, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
                                                 new TranslationalVelConstraint(40),
                                                 new AngularVelConstraint(Math.PI / 2))))
                                         .splineToConstantHeading(new Vector2d(12, -50), Math.toRadians(270), new TranslationalVelConstraint(10))
-                                        .afterTime(0, robot.intake.toggleIntake())
+                                        .afterTime(0, new ParallelAction(robot.intake.toggleIntake(false), robot.intakePeriodic()))
 
                                         .strafeToSplineHeading(new Vector2d(5, -33), Math.toRadians(220))
                                         .splineToConstantHeading(new Vector2d(-10, -18), Math.toRadians(180))
                                         .stopAndAdd(new SequentialAction(
-                                                robot.flywheel.runFlywheel(),
+                                                robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, true)),
+                                                //robot.flywheel.runFlywheel(),
                                                 robot.orderedShot(pattern)
                                         ))
 
                                         .afterTime(0.5, new ParallelAction(
-                                                robot.intake.toggleIntake(),
+                                                robot.intake.toggleIntake(true),
+                                                robot.intakePeriodic(),
                                                 robot.flywheel.stopFlywheel()))
                                         .strafeToSplineHeading(new Vector2d(-10.5, -30), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
                                                 new TranslationalVelConstraint(40),
                                                 new AngularVelConstraint(Math.PI / 2))))
                                         .splineToConstantHeading(new Vector2d(-12, -48), Math.toRadians(270), new TranslationalVelConstraint(9))
-                                        .afterTime(0, robot.intake.toggleIntake())
+                                        .afterTime(0, new ParallelAction(robot.intake.toggleIntake(false), robot.intakePeriodic()))
 
                                         .strafeToSplineHeading(new Vector2d(-29, -24), Math.toRadians(220))
                                         .stopAndAdd(new SequentialAction(
-                                                robot.flywheel.runFlywheel(),
+                                                //robot.flywheel.runFlywheel(),
                                                 robot.orderedShot(pattern)
                                         ))
                                         .strafeTo(new Vector2d(0, -24))
                                         .build()
-                        ),
-                        robot.spindexer.autonPeriodic(),
-                        robot.flywheel.autonPeriodic(),
-                        robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, true)),
-                        robot.intakePeriodic()
+                        )
                 )
         );
 

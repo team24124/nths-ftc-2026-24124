@@ -48,12 +48,21 @@ public class RobotCentricDrive extends Drivetrain implements TelemetryObservable
         }
 
         ArraySelect<Double> speeds = getSpeeds();
-        super.setDrivePowers(
-                leftPower * speeds.getSelected(),
-                rightPower * speeds.getSelected(),
-                leftBackPower * speeds.getSelected(),
-                rightBackPower * speeds.getSelected()
-        );
+        if (align) {
+            super.setDrivePowers(
+                    leftPower * 0.5,
+                    rightPower * 0.5,
+                    leftBackPower * 0.5,
+                    rightBackPower * 0.5
+            );
+        } else {
+            super.setDrivePowers(
+                    leftPower * speeds.getSelected(),
+                    rightPower * speeds.getSelected(),
+                    leftBackPower * speeds.getSelected(),
+                    rightBackPower * speeds.getSelected()
+            );
+        }
     }
 
     @Override

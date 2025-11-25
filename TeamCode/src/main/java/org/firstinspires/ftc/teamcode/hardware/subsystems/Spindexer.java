@@ -24,18 +24,18 @@ import java.util.List;
 
 
 public class Spindexer implements SubsystemBase, TelemetryObservable {
-    private final DcMotorEx spindexer;
+    public final DcMotorEx spindexer;
     public final Servo kicker;
     private final double TPR = 537.6;
-    private PIDF pd;
-    private final VoltageSensor voltageSensor;
-    private Oscillator os;
+    public PIDF pd;
+    public final VoltageSensor voltageSensor;
+    public Oscillator os;
 
     public enum State {
         SLOT1(267), // Slots are shoot positions
         SLOT2(90), // Slots increase CCW, IN1 is referencing the same slot as SLOT1
         SLOT3(449),
-        IN1(0), // Ins are slots facing towards the intake // TODO because 0 - 20 is -20 and 536 isnt close to that, moveto cant set ismoving to false. normalize
+        IN1(0), // Ins are slots facing towards the intake
         IN2(358), // Ins increase CCW. Since moving CCW results in a positive increase, the second slot CCW from the first one is on the rear left of the robot, making its position -178 + 537.6
         IN3(179);
 
@@ -47,17 +47,18 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     }
 
     public final ArraySelect<State> states = new ArraySelect<>(State.values());
-    public List<String> slots = new ArrayList<>(Arrays.asList("empty", "empty", "empty"));
+    public List<String> slots = new ArrayList<>(Arrays.asList("green", "purple", "purple"));
 
     public boolean isMoving;
+    public boolean autoMoving;
     public boolean kickScheduled = false;
-    private int shotCount = 0;
+    public int shotCount = 0;
 
     public Spindexer(HardwareMap hw) {
         os = new Oscillator(new Double[]{-20.0, 20.0}, 0.2);
         os.enableOscillation(true);
         pd = new PIDF();
-        pd.setPD(0.0032, 0.000001, 0.7);
+        pd.setPD(0.0035, 0.000001, 0.7);
         spindexer = hw.get(DcMotorEx.class, "spindexer");
         spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -87,8 +88,14 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
         double adjustedPosition = target - error;
 
+        autoMoving = !(Utilities.isBetween(position, target - 20, target + 20) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, 537.6 - 20, 537.6)));
         double power = pd.calculate(adjustedPosition, target, voltageSensor.getVoltage());
-        spindexer.setPower(power);
+
+        if (!autoMoving) {
+            spindexer.setPower(0);
+        } else {
+            spindexer.setPower(power);
+        }
     }
 
     public Action autonPeriodic() {
@@ -99,7 +106,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
         };
     }
 
-    private Action moveToState() {
+    public Action moveToState() {
         return (TelemetryPacket packet) -> {
             double target = states.getSelected().position;
             double position = spindexer.getCurrentPosition() % TPR; // Normalize to [0, 537.6)
@@ -117,7 +124,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
             double power = pd.calculate(adjustedPosition, target, voltageSensor.getVoltage());
             spindexer.setPower(power);
 
-            if (Utilities.isBetween(position, target - 20, target + 20)) {
+            if (Utilities.isBetween(position, target - 20, target + 20) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, 537.6 - 20, 537.6))) {
                 isMoving = kickScheduled;
                 return false;
             } else {
@@ -200,6 +207,24 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
         } else {
             return (TelemetryPacket packet) -> false;
         }
+    }
+
+    public Action removeIndexed() {
+        return (TelemetryPacket packet) -> {
+            slots.remove(states.getSelectedIndex());
+            slots.add(states.getSelectedIndex(), "empty");
+
+            return false;
+        };
+    }
+
+    public Action removeIndexed(int i) {
+        return (TelemetryPacket packet) -> {
+            slots.remove(i);
+            slots.add(i, "empty");
+
+            return false;
+        };
     }
 
     public void stopAndResetEncoders() {

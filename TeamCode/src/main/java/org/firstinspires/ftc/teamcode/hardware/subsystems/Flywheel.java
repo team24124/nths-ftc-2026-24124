@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.arcrobotics.ftclib.util.InterpLUT;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -15,18 +16,19 @@ import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
 import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 import org.firstinspires.ftc.teamcode.util.Utilities;
 import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
-import org.firstinspires.ftc.teamcode.util.plotting.InterpLUT;
 
 public class Flywheel implements SubsystemBase, TelemetryObservable {
     public final DcMotorEx wheel1, wheel2;
     public final Servo flap;
     public boolean powered = false;
     public boolean primed = false;
-    public double targetVel = 0;
-    private double distance = 0;
+    public double targetVel = 1700;
+    private double distance = 1;
     private PIDF pv = new PIDF();
-    private InterpLUT LUT = new InterpLUT();
+    double[] dists = {36, 50, 60, 70, 80, 90, 100, 150}; // Inches
+    double[] vels = {1050, 1120, 1200, 1220, 1227, 1233, 1235, 1330}; // Ticks/second
     private final VoltageSensor voltageSensor;
+    public InterpLUT lut = new InterpLUT();
 
     public Flywheel(HardwareMap hw) {
         wheel1 = hw.get(DcMotorEx.class, "wheel1"); // Connected Ehub 3
@@ -45,27 +47,32 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
 
         pv.setPV(0.0005, 0.00042);
 
-        double[] dists = {5, 6, 7, 8}; // Inches
-        double[] vels = {600, 601, 602, 603}; // Ticks/second
-        LUT = new InterpLUT(dists, vels);
-        LUT.setExtrapolation(InterpLUT.Extrapolation.LINEAR);
+
+        lut.add(36, 1050);
+        lut.add(50, 1120);
+        lut.add(60, 1200);
+        lut.add(70, 1220);
+        lut.add(80, 1227);
+        lut.add(90, 1233);
+        lut.add(100, 1235);
+        lut.add(150, 1330);
+        lut.createLUT();
     }
 
     /**
      * Distance(Inches) = Distance to goal
-     * Theta(Degrees from horizontal) = 45 - 4((Distance/12) - 8.5), Clamped to 40 - 80
      * Velocity(ticks/s) = tps of 5203 YellowJacket 6k rpm motor (1:1 GR, 1 x 28 tpr)
      */
     @Override
     public void periodic(){
+        //adjustFlap(distance);
         if (powered) {
-            //targetVel = LUT.get(distance);
 
-            //adjustFlap(distance);
             power(targetVel);
-            primed = Utilities.isBetween(wheel1.getVelocity(), targetVel - 20, targetVel + 50);
+            primed = Utilities.isBetween(wheel1.getVelocity(), targetVel - 20, targetVel + 40);
         } else {
             power(0);
+            primed = false;
         }
     }
 
@@ -95,10 +102,8 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     }
 
     public void adjustFlap(double distance) {
-        double theta = 45 - 4 * ((distance/12) - 8.5);
-        theta = Range.clip(theta, 40, 80);
-        // 0.94 is extended 0.14 is lowest
-        flap.setPosition(0.14 + (80 - theta)/50); // Desired angle - servo pose 0 angle from horizontal / 300 to get servo normalized position [0, 1]
+        // 0.94 is extended 0.18 is lowest
+        flap.setPosition(Range.clip(0.18 + ((distance-40) * 0.0109589041), 0.18, 0.94));
     }
 
     public void power(double vel) {
@@ -107,9 +112,11 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
         wheel2.setPower(pv.calculate(wheel1.getVelocity(), vel, voltageSensor.getVoltage()));
     }
 
-    public Action setVls(double distance) {
-        this.distance = distance;
-        return (TelemetryPacket packet) -> false;
+    public Action setVls(double d) {
+        return (TelemetryPacket packet) -> {
+            distance = d;
+            return false;
+        };
     }
 
     public void setVelPID(double Kp, double Kv) {
@@ -119,6 +126,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     @Override
     public void updateTelemetry(Telemetry telemetry) {
         telemetry.addData("Moving", powered);
+        telemetry.addData("LUT Value", lut.get(distance));
         telemetry.addData("Target Velocity", targetVel);
         telemetry.addData("Wheel 1 Velocity", wheel1.getVelocity());
         telemetry.addData("Wheel 2 Velocity", wheel2.getVelocity());

@@ -39,7 +39,7 @@ public class FieldCentricDrive extends Drivetrain implements TelemetryObservable
              */
             denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
         } else {
-            rx = thetaPD.calculate(rx, 0, voltage); // rx is limelight input in this case due to different input parameters in main TeleOps
+            rx = -thetaPD.calculate(rx, 0, voltage); // rx is limelight input in this case due to different input parameters in main TeleOps
             denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1.2);
         }
 
@@ -49,12 +49,21 @@ public class FieldCentricDrive extends Drivetrain implements TelemetryObservable
         double backRightPower = (rotY + rotX - rx) / denominator;
 
         ArraySelect<Double> speeds = getSpeeds();
-        super.setDrivePowers(
-                frontLeftPower * speeds.getSelected(),
-                frontRightPower * speeds.getSelected(),
-                backLeftPower * speeds.getSelected(),
-                backRightPower * speeds.getSelected()
-        );
+        if (align) {
+            super.setDrivePowers(
+                    frontLeftPower * 0.5,
+                    frontRightPower * 0.5,
+                    backLeftPower * 0.5,
+                    backRightPower * 0.5
+            );
+        } else {
+            super.setDrivePowers(
+                    frontLeftPower * speeds.getSelected(),
+                    frontRightPower * speeds.getSelected(),
+                    backLeftPower * speeds.getSelected(),
+                    backRightPower * speeds.getSelected()
+            );
+        }
     }
 
     @Override

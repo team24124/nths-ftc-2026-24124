@@ -35,8 +35,15 @@ public class FieldCentricTeleOp extends OpMode {
         operator = new GamepadEx(gamepad2);
         robot = new Robot(hardwareMap, telemetry, false);
         robot.actions.init();
+
+        // Startup actions
         if (!robot.intake.toggled) {
             robot.intake.toggled = true;
+        }
+        if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
+            robot.limelight.setPipeline(Limelight.Pipeline.AT3);
+        } else {
+            robot.limelight.setPipeline(Limelight.Pipeline.AT2);
         }
     }
 
@@ -60,28 +67,21 @@ public class FieldCentricTeleOp extends OpMode {
         }
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
-                robot.limelight.setPipeline(Limelight.Pipeline.AT3);
-            } else {
-                robot.limelight.setPipeline(Limelight.Pipeline.AT2);
-            }
-            alignToAT = true;
-        }
-        if (driver.wasJustPressed(GamepadKeys.Button.X)) {
-            alignToAT = false;
+            alignToAT = !alignToAT;
         }
 
         if (driver.wasJustPressed(GamepadKeys.Button.B)) {
             Pose2d targetPose;
+            alignToAT = false;
             if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
-                targetPose = new Pose2d(40, -30, Math.toRadians(180));
+                targetPose = new Pose2d(-40, -30, Math.toRadians(180));
             } else {
-                targetPose = new Pose2d(40, 30, Math.toRadians(180));
+                targetPose = new Pose2d(-40, 30, Math.toRadians(180));
             }
             robot.actions.schedule(trajectories.poseAlign(robot.drivetrain.getDrive(), targetPose));
         }
 
-        if (driver.wasJustPressed(GamepadKeys.Button.START)) {
+        if (driver.wasJustPressed(GamepadKeys.Button.X)) {
             Vector2d current = robot.drivetrain.getDrive().localizer.getPose().position;
             robot.drivetrain.getDrive().localizer.setPose(new Pose2d(current, 0));
         }

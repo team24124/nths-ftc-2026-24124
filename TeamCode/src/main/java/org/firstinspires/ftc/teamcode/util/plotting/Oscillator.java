@@ -46,6 +46,6 @@ public class Oscillator {
     }
 
     public void enableOscillation(boolean enable) {
-        oscillate = true;
+        oscillate = enable;
     }
 }

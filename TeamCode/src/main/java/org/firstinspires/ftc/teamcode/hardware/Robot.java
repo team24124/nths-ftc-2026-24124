@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
@@ -16,6 +17,7 @@ import org.firstinspires.ftc.teamcode.hardware.subsystems.Spindexer;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.util.TelemetryControl;
+import org.firstinspires.ftc.teamcode.util.Utilities;
 
 import java.util.List;
 import java.util.Objects;
@@ -57,6 +59,47 @@ public class Robot {
                 .subscribe(actions); // Display on telemetry
     }
 
+    public Action intakeAutoPeriodic() {
+        ElapsedTime timer = new ElapsedTime();
+        return (TelemetryPacket packet) -> {
+            if (intake.toggled) {
+                if (spindexer.autoMoving || !spindexer.slots.contains("empty")) {
+                    intake.targetVel = 0;
+                    intake.intake.setVelocity(0);
+                    intake.powered = false;
+                    timer.reset();
+                } else {
+                    if (timer.seconds() > 1.5) {
+                        spindexer.os.enableOscillation(true);
+                        spindexer.os.setOscillationPeriod(0.1);
+                        intake.targetVel = 0;
+                        intake.intake.setVelocity(0);
+                        intake.powered = false;
+                        if (timer.seconds() > 1.8) {
+                            timer.reset();
+                        }
+                        return true;
+                    }
+                    spindexer.os.setOscillationPeriod(0.2);
+                    spindexer.os.enableOscillation(false);
+                    if (spindexer.states.getSelectedIndex() > 2 && Objects.equals(spindexer.slots.get(spindexer.states.getSelectedIndex() - 3), "empty")) {
+                        spindexer.slots.remove(spindexer.states.getSelectedIndex() - 3);
+                        spindexer.slots.add(spindexer.states.getSelectedIndex() - 3, colorSensor.getColour());
+                    }
+                    intake.targetVel = -((double) 312 /60)*360; // 1872 degrees per second
+                    intake.intake.setVelocity(intake.targetVel * (537.6/360)); // Degree to tick conversion
+                    intake.powered = true;
+
+                    int firstEmpty = spindexer.slots.indexOf("empty") + 3;
+                    if (firstEmpty != 2 && spindexer.states.getSelectedIndex() != firstEmpty) {
+                        spindexer.states.moveSelection(firstEmpty - spindexer.states.getSelectedIndex());
+                    }
+                }
+            }
+            return true;
+        };
+    }
+
     public Action intakePeriodic() {
         if (intake.toggled) {
             if (spindexer.isMoving || !spindexer.slots.contains("empty")) {
@@ -80,43 +123,81 @@ public class Robot {
         return new SequentialAction(
                 spindexer.sortTo(spindexer.slots.indexOf(str)),
                 spindexer.kick(),
-                removeIndexed()
+                spindexer.removeIndexed()
         );
     }
 
     public Action orderedShot(List<String> pattern) {
-        while (!flywheel.primed) {} // Im not sorry for this.....
-        return new SequentialAction(
-                new SequentialAction(
-                        spindexer.sortTo(pattern.get(0)),
-                        removeIndexed(spindexer.slots.indexOf(pattern.get(0))),
-                        spindexer.kick()),
-                new SequentialAction(
-                        spindexer.sortTo(pattern.get(1)),
-                        removeIndexed(spindexer.slots.indexOf(pattern.get(1))),
-                        spindexer.kick()),
-                new SequentialAction(
-                        spindexer.sortTo(pattern.get(2)),
-                        removeIndexed(spindexer.slots.indexOf(pattern.get(2))),
-                        spindexer.kick())
-        );
-    }
-
-    public Action removeIndexed() {
+        ElapsedTime timer = new ElapsedTime();
+        final int[] counter = {1};
         return (TelemetryPacket packet) -> {
-            spindexer.slots.remove(spindexer.states.getSelectedIndex());
-            spindexer.slots.add(spindexer.states.getSelectedIndex(), "empty");
+            if (counter[0] == 1) {
+                spindexer.states.setSelected(spindexer.slots.indexOf(pattern.get(0)));
+                removeIndexed(spindexer.slots.indexOf(pattern.get(0)));
+                counter[0]++;
+            }
+
+            if (timer.seconds() < 0.4) {
+                return true;
+            }
+            spindexer.kicker.setPosition(0.35);
+
+            if (timer.seconds() < 0.7) {
+                return true;
+            }
+            spindexer.kicker.setPosition(0.76);
+
+            if (timer.seconds() < 1.4) {
+                return true;
+            }
+
+            if (counter[0] == 2) {
+                spindexer.states.setSelected(spindexer.slots.indexOf(pattern.get(1)));
+                removeIndexed(spindexer.slots.indexOf(pattern.get(1)));
+                counter[0]++;
+            }
+
+            if (timer.seconds() < 1.8) {
+                return true;
+            }
+            spindexer.kicker.setPosition(0.35);
+
+            if (timer.seconds() < 2.1) {
+                return true;
+            }
+            spindexer.kicker.setPosition(0.76);
+
+            if (timer.seconds() < 2.8) {
+                return true;
+            }
+
+
+            if (counter[0] == 3) {
+                spindexer.states.setSelected(spindexer.slots.indexOf(pattern.get(2)));
+                removeIndexed(spindexer.slots.indexOf(pattern.get(2)));
+                counter[0]++;
+            }
+
+            if (timer.seconds() < 3.2) {
+                return true;
+            }
+            spindexer.kicker.setPosition(0.35);
+
+            if (timer.seconds() < 3.5) {
+                return true;
+            }
+            spindexer.kicker.setPosition(0.76);
+
+            if (timer.seconds() < 4.2) {
+                return true;
+            }
 
             return false;
         };
     }
 
-    public Action removeIndexed(int i) {
-        return (TelemetryPacket packet) -> {
-            spindexer.slots.remove(i);
-            spindexer.slots.add(i, "empty");
-
-            return false;
-        };
+    public void removeIndexed(int i) {
+        spindexer.slots.remove(i);
+        spindexer.slots.add(i, "empty");
     }
 }
