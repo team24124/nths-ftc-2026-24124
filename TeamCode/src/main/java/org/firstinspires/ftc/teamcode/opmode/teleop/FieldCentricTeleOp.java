@@ -131,9 +131,9 @@ public class FieldCentricTeleOp extends OpMode {
         robot.drivetrain.periodic();
         robot.spindexer.periodic();
         if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
-            robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, false));
+            robot.actions.schedule(robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, false)));
         } else {
-            robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, true));
+            robot.actions.schedule(robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, true)));
         }
         robot.flywheel.periodic();
         robot.telemetryControl.update();

@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.AngularVelConstraint;
 import com.acmerobotics.roadrunner.MinVelConstraint;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.RaceAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -24,13 +25,11 @@ import java.util.List;
 @Autonomous(name = "Auton RED")
 public class C9P9RED extends LinearOpMode {
     Robot robot;
-    private TeleOpTrajectories trajectories;
 
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(hardwareMap, telemetry, true);
         MecanumDrive drivebase = robot.drivetrain.getDrive();
-        trajectories = TeleOpTrajectories.INSTANCE;
 
         Pose2d initialPose = new Pose2d(-60, -20, Math.toRadians(0));
         drivebase.localizer.setPose(initialPose);
@@ -54,72 +53,249 @@ public class C9P9RED extends LinearOpMode {
 
         // Main sequence
         Actions.runBlocking(
-                new ParallelAction(
-                        robot.spindexer.autonPeriodic(),
-                        robot.flywheel.autonPeriodic(),
-                        robot.intakeAutoPeriodic(),
-                        new SequentialAction(
+                new SequentialAction(
+                        robot.flywheel.runFlywheel(),
+                        robot.flywheel.setVls(158),
+                        new RaceAction(
+                                robot.spindexer.autonPeriodic(),
+                                robot.flywheel.autonPeriodic(),
                                 drivebase.actionBuilder(new Pose2d(-60, -20, Math.toRadians(0)), false)
                                         .strafeToSplineHeading(new Vector2d(-57, -20), Math.toRadians(345))
-                                        .stopAndAdd(new SequentialAction(
-                                                robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, false)),
-                                                robot.flywheel.runFlywheel(),
-                                                robot.orderedShot(pattern)
-                                        ))
-
-                                        .afterTime(0.5, new ParallelAction(
-                                                robot.intake.toggleIntake(true),
-                                                robot.flywheel.stopFlywheel()))
-                                        .strafeToSplineHeading(new Vector2d(-36, -30), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
-                                                new TranslationalVelConstraint(40),
-                                                new AngularVelConstraint(Math.PI / 2))))
-                                        .splineToConstantHeading(new Vector2d(-35, -61), Math.toRadians(270), new TranslationalVelConstraint(5.5))
-                                        .afterTime(0, robot.intake.toggleIntake(false))
-
-                                        .strafeToSplineHeading(new Vector2d(-28, -30), Math.toRadians(320))
-                                        .splineToConstantHeading(new Vector2d(5, -15), Math.toRadians(0))
-                                        .stopAndAdd(new SequentialAction(
-                                                robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, false)),
-                                                //robot.flywheel.runFlywheel(),
-                                                robot.orderedShot(pattern)
-                                        ))
-
-                                        .afterTime(0.5, new ParallelAction(
-                                                robot.intake.toggleIntake(true),
-                                                robot.flywheel.stopFlywheel()))
-                                        .strafeToSplineHeading(new Vector2d(-5, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
-                                                new TranslationalVelConstraint(40),
-                                                new AngularVelConstraint(Math.PI / 2))))
-                                        .splineToConstantHeading(new Vector2d(-12, -59), Math.toRadians(270), new TranslationalVelConstraint(5.5))
-                                        .afterTime(0, robot.intake.toggleIntake(false))
-
-                                        .strafeToSplineHeading(new Vector2d(-5, -33), Math.toRadians(320))
-                                        .splineToConstantHeading(new Vector2d(10, -18), Math.toRadians(0))
-                                        .stopAndAdd(new SequentialAction(
-                                                robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, false)),
-                                                //robot.flywheel.runFlywheel(),
-                                                robot.orderedShot(pattern)
-                                        ))
-
-                                        .afterTime(0.5, new ParallelAction(
-                                                robot.intake.toggleIntake(true),
-                                                robot.flywheel.stopFlywheel()))
-                                        .strafeToSplineHeading(new Vector2d(10.5, -30), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
-                                                new TranslationalVelConstraint(40),
-                                                new AngularVelConstraint(Math.PI / 2))))
-                                        .splineToConstantHeading(new Vector2d(12, -48), Math.toRadians(270), new TranslationalVelConstraint(5.5))
-                                        .afterTime(0, robot.intake.toggleIntake(false))
-
-                                        .strafeToSplineHeading(new Vector2d(29, -24), Math.toRadians(320))
-                                        .stopAndAdd(new SequentialAction(
-                                                //robot.flywheel.runFlywheel(),
-                                                robot.orderedShot(pattern)
-                                        ))
-                                        .strafeTo(new Vector2d(0, -24))
                                         .build()
-
                         )
                 )
+        );
+        Actions.runBlocking(
+                new RaceAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        new SequentialAction(
+                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(pattern.get(0))),
+                                robot.spindexer.kick(),
+                                robot.spindexer.removeIndexed()
+                        )
+                )
+        );
+        Actions.runBlocking(
+                new RaceAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        new SequentialAction(
+                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(pattern.get(1))),
+                                robot.spindexer.kick(),
+                                robot.spindexer.removeIndexed()
+                        )
+                )
+        );
+        Actions.runBlocking(
+                new RaceAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        new SequentialAction(
+                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(pattern.get(2))),
+                                robot.spindexer.kick(),
+                                robot.spindexer.removeIndexed()
+                        )
+                )
+        );
+
+        // Intake one set
+        Actions.runBlocking(
+                new RaceAction(
+                        new ParallelAction(
+                                robot.spindexer.autonPeriodic(),
+                                robot.flywheel.autonPeriodic(),
+                                robot.intakeAutoPeriodic()
+                        ),
+                        drivebase.actionBuilder(drivebase.localizer.getPose(), false)
+                                .afterTime(0.5, robot.flywheel.stopFlywheel())
+
+                                .strafeToSplineHeading(new Vector2d(-36, -30), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
+                                        new TranslationalVelConstraint(40),
+                                        new AngularVelConstraint(Math.PI / 2))))
+                                .afterTime(0, robot.intake.toggleIntake(true))
+                                .splineToConstantHeading(new Vector2d(-35, -50), Math.toRadians(270), new TranslationalVelConstraint(2.6))
+                                .afterTime(0, robot.intake.toggleIntake(false))
+
+                                .strafeToSplineHeading(new Vector2d(-28, -30), Math.toRadians(310))
+                                .splineToConstantHeading(new Vector2d(10, -10), Math.toRadians(0))
+                                .build()
+                )
+        );
+        Actions.runBlocking(
+                new SequentialAction(
+                        robot.flywheel.setVls(94),
+                        robot.flywheel.runFlywheel(),
+                        new RaceAction(
+                                robot.spindexer.autonPeriodic(),
+                                robot.flywheel.autonPeriodic(),
+                                robot.flywheel.setVls(90)
+                        )
+                )
+        );
+        Actions.runBlocking(
+                new RaceAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        new SequentialAction(
+                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(pattern.get(0))),
+                                robot.spindexer.kick(),
+                                robot.spindexer.removeIndexed()
+                        )
+                )
+        );
+        Actions.runBlocking(
+                new RaceAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        new SequentialAction(
+                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(pattern.get(1))),
+                                robot.spindexer.kick(),
+                                robot.spindexer.removeIndexed()
+                        )
+                )
+        );
+        Actions.runBlocking(
+                new RaceAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        new SequentialAction(
+                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(pattern.get(2))),
+                                robot.spindexer.kick(),
+                                robot.spindexer.removeIndexed()
+                        )
+                )
+        );
+        // Intake 2
+        Actions.runBlocking(
+                new RaceAction(
+                        new ParallelAction(
+                                robot.spindexer.autonPeriodic(),
+                                robot.flywheel.autonPeriodic(),
+                                robot.intakeAutoPeriodic()
+                        ),
+                        drivebase.actionBuilder(drivebase.localizer.getPose(), false)
+                                .afterTime(0.5, new ParallelAction(
+                                        robot.intake.toggleIntake(true),
+                                        robot.flywheel.stopFlywheel()))
+                                .strafeToSplineHeading(new Vector2d(-5, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
+                                        new TranslationalVelConstraint(40),
+                                        new AngularVelConstraint(Math.PI / 2))))
+                                .splineToConstantHeading(new Vector2d(-12, -59), Math.toRadians(270), new TranslationalVelConstraint(5.5))
+                                .afterTime(0, robot.intake.toggleIntake(false))
+
+                                .strafeToSplineHeading(new Vector2d(-5, -33), Math.toRadians(320))
+                                .splineToConstantHeading(new Vector2d(10, -18), Math.toRadians(0))
+                                .build()
+                )
+        );
+        Actions.runBlocking(
+                new SequentialAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        robot.flywheel.runFlywheel()
+                )
+        );
+        Actions.runBlocking(
+                new RaceAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        new SequentialAction(
+                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(pattern.get(0))),
+                                robot.spindexer.kick(),
+                                robot.spindexer.removeIndexed()
+                        )
+                )
+        );
+        Actions.runBlocking(
+                new RaceAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        new SequentialAction(
+                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(pattern.get(1))),
+                                robot.spindexer.kick(),
+                                robot.spindexer.removeIndexed()
+                        )
+                )
+        );
+        Actions.runBlocking(
+                new RaceAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        new SequentialAction(
+                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(pattern.get(2))),
+                                robot.spindexer.kick(),
+                                robot.spindexer.removeIndexed()
+                        )
+                )
+        );
+
+        // Intake final
+        Actions.runBlocking(
+                new RaceAction(
+                        new ParallelAction(
+                                robot.spindexer.autonPeriodic(),
+                                robot.flywheel.autonPeriodic(),
+                                robot.intakeAutoPeriodic()
+                        ),
+                        drivebase.actionBuilder(drivebase.localizer.getPose(), false)
+                                .afterTime(0.5, new ParallelAction(
+                                        robot.intake.toggleIntake(true),
+                                        robot.flywheel.stopFlywheel()))
+                                .strafeToSplineHeading(new Vector2d(10.5, -30), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
+                                        new TranslationalVelConstraint(40),
+                                        new AngularVelConstraint(Math.PI / 2))))
+                                .splineToConstantHeading(new Vector2d(12, -48), Math.toRadians(270), new TranslationalVelConstraint(5.5))
+                                .afterTime(0, robot.intake.toggleIntake(false))
+
+                                .strafeToSplineHeading(new Vector2d(29, -24), Math.toRadians(320))
+                                .build()
+                )
+        );
+        Actions.runBlocking(
+                new SequentialAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        robot.flywheel.runFlywheel()
+                )
+        );
+        Actions.runBlocking(
+                new RaceAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        new SequentialAction(
+                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(pattern.get(0))),
+                                robot.spindexer.kick(),
+                                robot.spindexer.removeIndexed()
+                        )
+                )
+        );
+        Actions.runBlocking(
+                new RaceAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        new SequentialAction(
+                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(pattern.get(1))),
+                                robot.spindexer.kick(),
+                                robot.spindexer.removeIndexed()
+                        )
+                )
+        );
+        Actions.runBlocking(
+                new RaceAction(
+                        robot.spindexer.autonPeriodic(),
+                        robot.flywheel.autonPeriodic(),
+                        new SequentialAction(
+                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(pattern.get(2))),
+                                robot.spindexer.kick(),
+                                robot.spindexer.removeIndexed()
+                        )
+                )
+        );
+        Actions.runBlocking(
+                drivebase.actionBuilder(drivebase.localizer.getPose(), false)
+                        .strafeTo(new Vector2d(0, -24))
+                        .build()
         );
 
         PoseStorage.currentAlliance = PoseStorage.Alliance.RED;

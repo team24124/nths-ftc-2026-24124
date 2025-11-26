@@ -76,8 +76,7 @@ public class C9P9BLUE extends LinearOpMode {
                                         .strafeToSplineHeading(new Vector2d(57, -20), Math.toRadians(195))
                                         .stopAndAdd(new SequentialAction(
                                                 robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, true)),
-                                                robot.flywheel.runFlywheel(),
-                                                robot.orderedShot(pattern)
+                                                robot.flywheel.runFlywheel()
                                         ))
 
                                         .afterTime(0.5, new ParallelAction(
@@ -93,9 +92,8 @@ public class C9P9BLUE extends LinearOpMode {
                                         .strafeToSplineHeading(new Vector2d(28, -30), Math.toRadians(220))
                                         .splineToConstantHeading(new Vector2d(-5, -15), Math.toRadians(180))
                                         .stopAndAdd(new SequentialAction(
-                                                robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, true)),
+                                                robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, true))
                                                 //robot.flywheel.runFlywheel(),
-                                                robot.orderedShot(pattern)
                                         ))
 
                                         .afterTime(0.5, new ParallelAction(
@@ -111,9 +109,8 @@ public class C9P9BLUE extends LinearOpMode {
                                         .strafeToSplineHeading(new Vector2d(5, -33), Math.toRadians(220))
                                         .splineToConstantHeading(new Vector2d(-10, -18), Math.toRadians(180))
                                         .stopAndAdd(new SequentialAction(
-                                                robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, true)),
+                                                robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, true))
                                                 //robot.flywheel.runFlywheel(),
-                                                robot.orderedShot(pattern)
                                         ))
 
                                         .afterTime(0.5, new ParallelAction(
@@ -129,7 +126,6 @@ public class C9P9BLUE extends LinearOpMode {
                                         .strafeToSplineHeading(new Vector2d(-29, -24), Math.toRadians(220))
                                         .stopAndAdd(new SequentialAction(
                                                 //robot.flywheel.runFlywheel(),
-                                                robot.orderedShot(pattern)
                                         ))
                                         .strafeTo(new Vector2d(0, -24))
                                         .build()

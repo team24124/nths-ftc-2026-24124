@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.arcrobotics.ftclib.util.InterpLUT;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -16,19 +15,20 @@ import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
 import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 import org.firstinspires.ftc.teamcode.util.Utilities;
 import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
+import org.firstinspires.ftc.teamcode.util.plotting.InterpLUT;
 
 public class Flywheel implements SubsystemBase, TelemetryObservable {
     public final DcMotorEx wheel1, wheel2;
     public final Servo flap;
     public boolean powered = false;
     public boolean primed = false;
-    public double targetVel = 1700;
-    private double distance = 1;
     private PIDF pv = new PIDF();
     double[] dists = {36, 50, 60, 70, 80, 90, 100, 150}; // Inches
-    double[] vels = {1050, 1120, 1200, 1220, 1227, 1233, 1235, 1330}; // Ticks/second
+    double[] vels = {1050, 1120, 1200, 1220, 1227, 1233, 1235, 1700}; // Ticks/second
     private final VoltageSensor voltageSensor;
-    public InterpLUT lut = new InterpLUT();
+    public InterpLUT lut = new InterpLUT(dists, vels);
+    private double distance = 1;
+    public double targetVel = lut.get(distance);
 
     public Flywheel(HardwareMap hw) {
         wheel1 = hw.get(DcMotorEx.class, "wheel1"); // Connected Ehub 3
@@ -47,16 +47,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
 
         pv.setPV(0.0005, 0.00042);
 
-
-        lut.add(36, 1050);
-        lut.add(50, 1120);
-        lut.add(60, 1200);
-        lut.add(70, 1220);
-        lut.add(80, 1227);
-        lut.add(90, 1233);
-        lut.add(100, 1235);
-        lut.add(150, 1330);
-        lut.createLUT();
+        lut.setExtrapolation(InterpLUT.Extrapolation.LINEAR);
     }
 
     /**
@@ -65,9 +56,9 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
      */
     @Override
     public void periodic(){
-        //adjustFlap(distance);
+        adjustFlap(distance);
+        targetVel = lut.get(distance);
         if (powered) {
-
             power(targetVel);
             primed = Utilities.isBetween(wheel1.getVelocity(), targetVel - 20, targetVel + 40);
         } else {
