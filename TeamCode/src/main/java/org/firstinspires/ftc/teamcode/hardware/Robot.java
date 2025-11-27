@@ -26,11 +26,9 @@ public class Robot {
     public Flywheel flywheel;
     public Intake intake;
     public Spindexer spindexer;
-
     public Drivetrain drivetrain;
     public Limelight limelight;
     public REVColourV3 colorSensor;
-
     public ActionScheduler actions;
     public TelemetryControl telemetryControl;
 
@@ -63,15 +61,15 @@ public class Robot {
         ElapsedTime timer = new ElapsedTime();
         return (TelemetryPacket packet) -> {
             if (intake.toggled) {
-                if (spindexer.autoMoving || !spindexer.slots.contains("empty")) {
+                if (spindexer.isMoving || !spindexer.slots.contains("empty")) {
                     intake.targetVel = 0;
                     intake.intake.setVelocity(0);
                     intake.powered = false;
                     timer.reset();
                 } else {
                     if (timer.seconds() > 1.5) {
-                        spindexer.os.enableOscillation(true);
                         spindexer.os.setOscillationPeriod(0.1);
+                        spindexer.os.enableOscillation(true);
                         intake.targetVel = 0;
                         intake.intake.setVelocity(0);
                         intake.powered = false;
@@ -115,7 +113,7 @@ public class Robot {
                 );
             }
         } else {
-            return (TelemetryPacket packet) -> false;
+            return intake.stopIntake();
         }
     }
 

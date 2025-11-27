@@ -50,7 +50,6 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     public List<String> slots = new ArrayList<>(Arrays.asList("green", "purple", "purple"));
 
     public boolean isMoving;
-    public boolean autoMoving;
     public boolean kickScheduled = false;
     public int shotCount = 0;
 
@@ -88,14 +87,8 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
         double adjustedPosition = target - error;
 
-        autoMoving = !(Utilities.isBetween(position, target - 20, target + 20) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, 537.6 - 20, 537.6)));
         double power = pd.calculate(adjustedPosition, target, voltageSensor.getVoltage());
-
-        if (!autoMoving) {
-            spindexer.setPower(0);
-        } else {
-            spindexer.setPower(power);
-        }
+        spindexer.setPower(power);
     }
 
     public Action autonPeriodic() {
@@ -124,7 +117,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
             double power = pd.calculate(adjustedPosition, target, voltageSensor.getVoltage());
             spindexer.setPower(power);
 
-            if (Utilities.isBetween(position, target - 20, target + 20) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, 537.6 - 20, 537.6))) {
+            if (Utilities.isBetween(position, target - 9, target + 9) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, 537.6 - 9, 537.6))) {
                 isMoving = kickScheduled;
                 return false;
             } else {
@@ -182,7 +175,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
             }
 
             kicker.setPosition(0.76);
-            if (timer.seconds() < 1.05) {
+            if (timer.seconds() < 1.15) {
                 return true;
             }
             kickScheduled = false;

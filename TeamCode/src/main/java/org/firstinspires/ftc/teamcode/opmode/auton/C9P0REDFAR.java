@@ -14,7 +14,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.Robot;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
-import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
@@ -22,8 +21,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "Auton RED")
-public class C9P9RED extends LinearOpMode {
+@Autonomous(name = "Auton RED2")
+public class C9P0REDFAR extends LinearOpMode {
     Robot robot;
 
     @Override
@@ -31,7 +30,7 @@ public class C9P9RED extends LinearOpMode {
         robot = new Robot(hardwareMap, telemetry, true);
         MecanumDrive drivebase = robot.drivetrain.getDrive();
 
-        Pose2d initialPose = new Pose2d(-60, -20, Math.toRadians(270));
+        Pose2d initialPose = new Pose2d(-60, -20, Math.toRadians(0));
         drivebase.localizer.setPose(initialPose);
         PoseStorage.currentPose = initialPose;
 
@@ -51,24 +50,24 @@ public class C9P9RED extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        // Main sequence comprised of initial ordered shots, intake first set, shoot second ordered set, intake third set, shoot third ordered set, intake fourth set, shoot fourth ordered set, and park
+        // Main sequence comprised of initial shots, intake first set, shoot first ordered set, intake second set, shoot second ordered set, intake third set, shoot third ordered set, and park
 
-        // Initial movement to large area and flywheel activation
+        // Initial nudge and flywheel activation
         Actions.runBlocking(
                 new SequentialAction(
-                        robot.flywheel.setVls(80),
+                        robot.flywheel.setVls(154),
                         robot.flywheel.runFlywheel(),
                         new RaceAction(
                                 robot.spindexer.autonPeriodic(),
                                 robot.flywheel.autonPeriodic(),
                                 drivebase.actionBuilder(new Pose2d(-60, -20, Math.toRadians(0)), false)
-                                        .strafeToSplineHeading(new Vector2d(15, -20), Math.toRadians(317))
+                                        .strafeToSplineHeading(new Vector2d(-57, -20), Math.toRadians(345))
                                         .build()
                         )
                 )
         );
 
-        // Ordered set of 3
+        // Unordered set of 3
         Actions.runBlocking(
                 new RaceAction(
                         robot.spindexer.autonPeriodic(),
@@ -104,7 +103,7 @@ public class C9P9RED extends LinearOpMode {
                 )
         );
 
-        // Intake initial set, move to large launch zone corner, prime flywheel
+        // Intake initial set, move to large small zone, prime flywheel
         Actions.runBlocking(
                 new RaceAction(
                         new ParallelAction(
@@ -113,19 +112,23 @@ public class C9P9RED extends LinearOpMode {
                                 robot.intakeAutoPeriodic()
                         ),
                         drivebase.actionBuilder(drivebase.localizer.getPose(), false)
-                                .strafeToSplineHeading(new Vector2d(10, -30), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
+                                .strafeToSplineHeading(new Vector2d(-36, -30), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
                                         new TranslationalVelConstraint(40),
                                         new AngularVelConstraint(Math.PI / 2))))
                                 .afterTime(0, robot.intake.toggleIntake(true))
-                                .splineToConstantHeading(new Vector2d(10, -52), Math.toRadians(270), new TranslationalVelConstraint(2.6))
-                                .afterTime(0, new ParallelAction(robot.intake.toggleIntake(false), robot.flywheel.runFlywheel()))
+                                .splineToConstantHeading(new Vector2d(-35, -52), Math.toRadians(270), new TranslationalVelConstraint(2.4))
+                                .afterTime(0, robot.intake.toggleIntake(false))
 
-                                .strafeToSplineHeading(new Vector2d(15, -20), Math.toRadians(317))
+                                .strafeToSplineHeading(new Vector2d(-28, -30), Math.toRadians(312))
+                                .splineToConstantHeading(new Vector2d(10, -10), Math.toRadians(0))
+                                .afterTime(0, new ParallelAction(
+                                        robot.flywheel.setVls(94),
+                                        robot.flywheel.runFlywheel()))
                                 .build()
                 )
         );
 
-        // Ordered set of 3 (2)
+        // Ordered set of 3 (1)
         Actions.runBlocking(
                 new RaceAction(
                         robot.spindexer.autonPeriodic(),
@@ -170,14 +173,16 @@ public class C9P9RED extends LinearOpMode {
                                 robot.intakeAutoPeriodic()
                         ),
                         drivebase.actionBuilder(drivebase.localizer.getPose(), false)
-                                .strafeToSplineHeading(new Vector2d(-15, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
+                                .strafeToSplineHeading(new Vector2d(-5, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
                                         new TranslationalVelConstraint(40),
                                         new AngularVelConstraint(Math.PI / 2))))
                                 .afterTime(0, robot.intake.toggleIntake(true))
-                                .splineToConstantHeading(new Vector2d(-17, -59), Math.toRadians(270), new TranslationalVelConstraint(2.6))
-                                .afterTime(0, new ParallelAction(robot.intake.toggleIntake(false), robot.flywheel.runFlywheel()))
+                                .splineToConstantHeading(new Vector2d(-12, -59), Math.toRadians(270), new TranslationalVelConstraint(2.6))
+                                .afterTime(0, robot.intake.toggleIntake(false))
 
-                                .strafeToSplineHeading(new Vector2d(15, -20), Math.toRadians(317))
+                                .strafeToSplineHeading(new Vector2d(-5, -33), Math.toRadians(320))
+                                .splineToConstantHeading(new Vector2d(10, -18), Math.toRadians(0))
+                                .afterTime(0, robot.flywheel.runFlywheel())
                                 .build()
                 )
         );
@@ -227,14 +232,15 @@ public class C9P9RED extends LinearOpMode {
                                 robot.intakeAutoPeriodic()
                         ),
                         drivebase.actionBuilder(drivebase.localizer.getPose(), false)
-                                .strafeToSplineHeading(new Vector2d(-30, -30), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
+                                .strafeToSplineHeading(new Vector2d(10.5, -30), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
                                         new TranslationalVelConstraint(40),
                                         new AngularVelConstraint(Math.PI / 2))))
                                 .afterTime(0, robot.intake.toggleIntake(true))
-                                .splineToConstantHeading(new Vector2d(-40, -50), Math.toRadians(270), new TranslationalVelConstraint(2.6))
-                                .afterTime(0, new ParallelAction(robot.intake.toggleIntake(false), robot.flywheel.runFlywheel()))
+                                .splineToConstantHeading(new Vector2d(12, -48), Math.toRadians(270), new TranslationalVelConstraint(2.6))
+                                .afterTime(0, robot.intake.toggleIntake(false))
 
-                                .strafeToSplineHeading(new Vector2d(15, -20), Math.toRadians(317))
+                                .strafeToSplineHeading(new Vector2d(29, -24), Math.toRadians(320))
+                                .afterTime(0, robot.flywheel.runFlywheel())
                                 .build()
                 )
         );

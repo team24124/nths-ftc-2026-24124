@@ -37,6 +37,7 @@ public class RobotCentricTeleOp extends OpMode {
         driver = new GamepadEx(gamepad1);
         operator = new GamepadEx(gamepad2);
         robot = new Robot(hardwareMap, telemetry, true);
+        robot.actions.init();
 
 
         // Startup actions
@@ -83,12 +84,7 @@ public class RobotCentricTeleOp extends OpMode {
             robot.actions.schedule(trajectories.poseAlign(robot.drivetrain.getDrive(), targetPose));
         }
 
-        // Reset robot pose with MT2 and heading
-//        if (driver.wasJustPressed(GamepadKeys.Button.START)) {
-//            if (robot.limelight.isDetected() && !alignToAT && !trajectoryAlign) {
-//                robot.drivetrain.getDrive().localizer.setPose(robot.limelight.ATRobotPoseFieldSpace());
-//            }
-//        }
+        // Reset heading (only if necessary)
         if (driver.wasJustPressed(GamepadKeys.Button.X)) {
             Vector2d current = robot.drivetrain.getDrive().localizer.getPose().position;
             robot.drivetrain.getDrive().localizer.setPose(new Pose2d(current, 0));

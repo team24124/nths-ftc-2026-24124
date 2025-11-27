@@ -24,7 +24,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     public boolean primed = false;
     private PIDF pv = new PIDF();
     double[] dists = {36, 50, 60, 70, 80, 90, 100, 150}; // Inches
-    double[] vels = {1050, 1120, 1200, 1220, 1227, 1233, 1235, 1700}; // Ticks/second
+    double[] vels = {1050, 1120, 1200, 1230, 1247, 1253, 1265, 1700}; // Ticks/second
     private final VoltageSensor voltageSensor;
     public InterpLUT lut = new InterpLUT(dists, vels);
     private double distance = 1;
