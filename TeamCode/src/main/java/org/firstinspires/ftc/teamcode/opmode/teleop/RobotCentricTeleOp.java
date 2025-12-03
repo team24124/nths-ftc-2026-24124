@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -14,6 +16,7 @@ import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 import java.util.List;
+import java.util.Objects;
 
 @TeleOp(name = "Robot Centric TeleOp", group = "!")
 public class RobotCentricTeleOp extends OpMode {
@@ -38,7 +41,6 @@ public class RobotCentricTeleOp extends OpMode {
         operator = new GamepadEx(gamepad2);
         robot = new Robot(hardwareMap, telemetry, true);
         robot.actions.init();
-
 
         // Startup actions
         if (!robot.intake.toggled) {
@@ -91,8 +93,13 @@ public class RobotCentricTeleOp extends OpMode {
         }
 
         if (driver.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+            robot.spindexer.os.enableOscillation(false);
             robot.actions.schedule(robot.intakePeriodic());
+        } else if (driver.isDown(GamepadKeys.Button.LEFT_BUMPER) && robot.spindexer.states.getSelectedIndex() > 2) {
+            robot.spindexer.os.enableOscillation(false);
+            robot.actions.schedule(new ParallelAction(robot.intake.reverseIntake(), robot.spindexer.removeIndexed(robot.spindexer.states.getSelectedIndex() - 3)));
         } else {
+            robot.spindexer.os.enableOscillation(true);
             robot.actions.schedule(robot.intake.stopIntake());
         }
 
@@ -103,14 +110,24 @@ public class RobotCentricTeleOp extends OpMode {
             robot.actions.schedule(robot.flywheel.stopFlywheel());
         }
 
-        if (operator.isDown(GamepadKeys.Button.X) && robot.flywheel.primed) {
-            robot.actions.schedule(robot.spindexer.shootOne());
-        }
-        if (operator.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) && robot.flywheel.primed && robot.spindexer.slots.contains("purple")) {
-            robot.actions.schedule(robot.shootColor("purple"));
-        }
-        if (operator.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && robot.flywheel.primed && robot.spindexer.slots.contains("green")) {
-            robot.actions.schedule(robot.shootColor("green"));
+        if (robot.flywheel.primed) {
+            if (operator.isDown(GamepadKeys.Button.X)) {
+                robot.actions.schedule(robot.spindexer.shootOne());
+            }
+            if (operator.wasJustPressed(GamepadKeys.Button.Y) && robot.spindexer.states.getSelectedIndex() < 3) {
+                robot.actions.schedule(
+                        new SequentialAction(
+                                robot.spindexer.kick(),
+                                robot.spindexer.removeIndexed()
+                        )
+                );
+            }
+            if (operator.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) && robot.spindexer.slots.contains("purple")) {
+                robot.actions.schedule(robot.shootColor("purple"));
+            }
+            if (operator.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && robot.spindexer.slots.contains("green")) {
+                robot.actions.schedule(robot.shootColor("green"));
+            }
         }
 
         // --- Periodic calls ---
@@ -137,6 +154,11 @@ public class RobotCentricTeleOp extends OpMode {
         }
         robot.drivetrain.periodic(); // Update position
         robot.spindexer.periodic();
+        if (!robot.spindexer.isMoving && robot.spindexer.states.getSelectedIndex() > 2 && Objects.equals(robot.spindexer.slots.get(robot.spindexer.states.getSelectedIndex() - 3), "empty")) {
+            robot.spindexer.slots.remove(robot.spindexer.states.getSelectedIndex() - 3);
+            robot.spindexer.slots.add(robot.spindexer.states.getSelectedIndex() - 3, robot.colorSensor.getColour());
+        }
+
         if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
             robot.actions.schedule(robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, false)));
         } else {

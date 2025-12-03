@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
@@ -12,6 +14,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
 import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
+import org.firstinspires.ftc.teamcode.opmode.auton.C9P9RED;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,6 +100,17 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
         } else {
             return new ArrayList<>(Arrays.asList("purple", "purple", "green"));
         }
+    }
+
+    public Action setPattern() {
+        return (TelemetryPacket packet) -> {
+            setPipeline(Pipeline.AT1);
+            if (isDetected() && PoseStorage.pattern.isEmpty()) {
+                PoseStorage.pattern.addAll(getPattern());
+                return false;
+            }
+            return true;
+        };
     }
 
     //---------------------------------- values for PIDF ----------------------------------

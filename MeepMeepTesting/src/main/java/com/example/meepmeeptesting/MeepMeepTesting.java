@@ -30,7 +30,7 @@ public class MeepMeepTesting {
 
         // Assuming spindexer & no turret
         bot.runAction(bot.getDrive().actionBuilder(new Pose2d(-60, -20, Math.toRadians(0)))
-                        .strafeToSplineHeading(new Vector2d(-57, -20), Math.toRadians(345))
+                .strafeToSplineHeading(new Vector2d(-57, -20), Math.toRadians(345))
                         .waitSeconds(1)
 
                         .strafeToSplineHeading(new Vector2d(-44.5, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
@@ -59,6 +59,8 @@ public class MeepMeepTesting {
                         .build());
 
         bot2.runAction(bot.getDrive().actionBuilder(new Pose2d(60, -20, Math.toRadians(180)))
+                .strafeTo(new Vector2d(40, -20))
+                .strafeToSplineHeading(new Vector2d(15, -20), Math.toRadians(120), new TranslationalVelConstraint(70))
                 .strafeToSplineHeading(new Vector2d(57, -20), Math.toRadians(195))
                 .waitSeconds(1)
 

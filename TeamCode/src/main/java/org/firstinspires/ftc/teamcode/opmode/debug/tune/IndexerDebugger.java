@@ -48,6 +48,7 @@ public class IndexerDebugger extends OpMode {
         telemetryControl.subscribe(spindexer).subscribe(actions);
         os = new Oscillator(new Double[]{1.0, 2.0}, 1);
         os.enableOscillation(false);
+        spindexer.os.enableOscillation(false);
     }
 
     @Override
@@ -57,7 +58,7 @@ public class IndexerDebugger extends OpMode {
         }
 
         spindexer.setPD(Kp, Kd, 0.7);
-        if (driver.wasJustPressed(GamepadKeys.Button.A)) {
+        if (driver.isDown(GamepadKeys.Button.A)) {
             actions.schedule(spindexer.shootOne());
         }
         if (driver.wasJustPressed(GamepadKeys.Button.B)) {

@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 public class Intake implements SubsystemBase, TelemetryObservable {
     public final DcMotorEx intake;
     public boolean powered = false;
-    public boolean toggled = true;
+    public boolean toggled = false;
     public double targetVel = 0;
 
     public Intake(HardwareMap hw) {
@@ -32,6 +32,16 @@ public class Intake implements SubsystemBase, TelemetryObservable {
         };
     }
 
+    public Action reverseIntake() {
+        return (TelemetryPacket packet) -> {
+            targetVel = ((double) 312 /60)*180; // 1872/2 degrees per second
+            intake.setVelocity(targetVel * (537.6/360)); // Degree to tick conversion
+            powered = true;
+
+            return false;
+        };
+    }
+
     public Action stopIntake() {
         return (TelemetryPacket packet) -> {
             targetVel = 0;
@@ -42,17 +52,9 @@ public class Intake implements SubsystemBase, TelemetryObservable {
         };
     }
 
-    public Action toggleIntake() {
+    public Action toggleIntake(boolean run) {
         return (TelemetryPacket packet) -> {
-            toggled = !toggled;
-
-            return false;
-        };
-    }
-
-    public Action toggleIntake(boolean tog) {
-        return (TelemetryPacket packet) -> {
-            toggled = tog;
+            toggled = run;
 
             return false;
         };

@@ -32,9 +32,9 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     public Oscillator os;
 
     public enum State {
-        SLOT1(267), // Slots are shoot positions
-        SLOT2(90), // Slots increase CCW, IN1 is referencing the same slot as SLOT1
-        SLOT3(449),
+        SLOT1(264), // Slots are shoot positions
+        SLOT2(84), // Slots increase CCW, IN1 is referencing the same slot as SLOT1
+        SLOT3(446),
         IN1(0), // Ins are slots facing towards the intake
         IN2(358), // Ins increase CCW. Since moving CCW results in a positive increase, the second slot CCW from the first one is on the rear left of the robot, making its position -178 + 537.6
         IN3(179);
@@ -48,13 +48,15 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
     public final ArraySelect<State> states = new ArraySelect<>(State.values());
     public List<String> slots = new ArrayList<>(Arrays.asList("green", "purple", "purple"));
+    //public List<String> slots = new ArrayList<>(Arrays.asList("empty", "empty", "empty"));
 
     public boolean isMoving;
+    public boolean isAutoMoving = false;
     public boolean kickScheduled = false;
     public int shotCount = 0;
 
     public Spindexer(HardwareMap hw) {
-        os = new Oscillator(new Double[]{-20.0, 20.0}, 0.2);
+        os = new Oscillator(new Double[]{-15.0, 15.0}, 0.2);
         os.enableOscillation(true);
         pd = new PIDF();
         pd.setPD(0.0035, 0.000001, 0.7);
@@ -89,6 +91,12 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
         double power = pd.calculate(adjustedPosition, target, voltageSensor.getVoltage());
         spindexer.setPower(power);
+
+        if (Utilities.isBetween(position, target - 15, target + 15) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, 537.6 - 15, 537.6))) {
+            isAutoMoving = false;
+        } else {
+            isAutoMoving = true;
+        }
     }
 
     public Action autonPeriodic() {
@@ -117,7 +125,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
             double power = pd.calculate(adjustedPosition, target, voltageSensor.getVoltage());
             spindexer.setPower(power);
 
-            if (Utilities.isBetween(position, target - 9, target + 9) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, 537.6 - 9, 537.6))) {
+            if (Utilities.isBetween(position, target - 15, target + 15) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, 537.6 - 15, 537.6))) {
                 isMoving = kickScheduled;
                 return false;
             } else {
@@ -165,17 +173,17 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
         ElapsedTime timer = new ElapsedTime();
 
         return (TelemetryPacket packet) -> {
-            if (timer.seconds() < 0.18) {
-                return true;
-            }
-            kicker.setPosition(0.35);
-
-            if (timer.seconds() < 0.77) {
+            if (timer.seconds() < 0.3) {
                 return true;
             }
 
-            kicker.setPosition(0.76);
-            if (timer.seconds() < 1.15) {
+            if (timer.seconds() < 0.83) {
+                kicker.setPosition(0.35);
+                return true;
+            }
+
+            if (timer.seconds() < 1.24) {
+                kicker.setPosition(0.76);
                 return true;
             }
             kickScheduled = false;
@@ -190,12 +198,11 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
             if (shotCount == 3) {
                 shotCount = 0;
             }
-            slots.remove(shotCount);
-            slots.add(shotCount, "empty");
             kickScheduled = true;
             return new SequentialAction(
                     sortTo(shotCount),
-                    kick()
+                    kick(),
+                    removeIndexed()
             );
         } else {
             return (TelemetryPacket packet) -> false;

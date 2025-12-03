@@ -52,7 +52,7 @@ public class C9P9BLUE extends LinearOpMode {
         // Autonomous sequence
 
         // Actions called during init
-        Actions.runBlocking(new ParallelAction(robot.intake.toggleIntake()));
+        Actions.runBlocking(new ParallelAction(robot.intake.toggleIntake(false)));
 
         do {
             robot.limelight.setPipeline(Limelight.Pipeline.AT1);
