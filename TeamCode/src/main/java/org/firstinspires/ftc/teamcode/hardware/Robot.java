@@ -69,7 +69,7 @@ public class Robot {
                     return false;
                 }
                 if (spindexer.isAutoMoving) {
-                    intake.targetVel = 0;
+                    intake.targetVel = (-((double) 312 /60)*175) * (537.6/360);
                     intake.intake.setVelocity(0);
                     intake.powered = false;
                     return true;

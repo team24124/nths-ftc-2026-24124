@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
@@ -32,7 +33,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     public Oscillator os;
 
     public enum State {
-        SLOT1(264), // Slots are shoot positions
+        SLOT1(266), // Slots are shoot positions
         SLOT2(84), // Slots increase CCW, IN1 is referencing the same slot as SLOT1
         SLOT3(446),
         IN1(0), // Ins are slots facing towards the intake
@@ -56,10 +57,10 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     public int shotCount = 0;
 
     public Spindexer(HardwareMap hw) {
-        os = new Oscillator(new Double[]{-15.0, 15.0}, 0.2);
+        os = new Oscillator(new Double[]{-8.0, 8.0}, 0.2);
         os.enableOscillation(true);
         pd = new PIDF();
-        pd.setPD(0.0035, 0.000001, 0.7);
+        pd.setPD(0.005, 0.00002, 0.3);
         spindexer = hw.get(DcMotorEx.class, "spindexer");
         spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -89,7 +90,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
         double adjustedPosition = target - error;
 
-        double power = pd.calculate(adjustedPosition, target, voltageSensor.getVoltage());
+        double power = Range.clip(pd.calculate(adjustedPosition, target, voltageSensor.getVoltage()), -1, 1);
         spindexer.setPower(power);
 
         if (Utilities.isBetween(position, target - 15, target + 15) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, 537.6 - 15, 537.6))) {
@@ -122,7 +123,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
             double adjustedPosition = target - error;
 
-            double power = pd.calculate(adjustedPosition, target, voltageSensor.getVoltage());
+            double power = Range.clip(pd.calculate(adjustedPosition, target, voltageSensor.getVoltage()), -0.45, 0.45);
             spindexer.setPower(power);
 
             if (Utilities.isBetween(position, target - 15, target + 15) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, 537.6 - 15, 537.6))) {
@@ -173,17 +174,17 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
         ElapsedTime timer = new ElapsedTime();
 
         return (TelemetryPacket packet) -> {
-            if (timer.seconds() < 0.3) {
+            if (timer.seconds() < 0.5) {
                 return true;
             }
 
-            if (timer.seconds() < 0.83) {
+            if (timer.seconds() < 0.9) {
                 kicker.setPosition(0.35);
                 return true;
             }
 
-            if (timer.seconds() < 1.24) {
-                kicker.setPosition(0.76);
+            if (timer.seconds() < 1.2) {
+                kicker.setPosition(0.8);
                 return true;
             }
             kickScheduled = false;

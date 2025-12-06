@@ -14,20 +14,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.ftccommon.internal.manualcontrol.responses.ParentHub;
 import org.firstinspires.ftc.teamcode.hardware.Robot;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
-import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Vector;
 
-@Autonomous(name = "Auton RED")
-public class C9P9RED extends LinearOpMode {
+@Autonomous(name = "Auton RED 2")
+public class C9P9RED2 extends LinearOpMode {
     Robot robot;
     ElapsedTime timer = new ElapsedTime();
 
@@ -304,12 +299,15 @@ public class C9P9RED extends LinearOpMode {
                                 .splineToConstantHeading(new Vector2d(-8, -58), Math.toRadians(90), new TranslationalVelConstraint(7))
                                 .afterTime(0, robot.flywheel.runFlywheel())
 
-                                .strafeToSplineHeading(new Vector2d(9, -25), Math.toRadians(317), new TranslationalVelConstraint(70), new ProfileAccelConstraint(-30, 80))
-                                .splineToConstantHeading(new Vector2d(15, -20), Math.toRadians(45), new TranslationalVelConstraint(70))
+                                .strafeToSplineHeading(new Vector2d(9, -25), Math.toRadians(289), new TranslationalVelConstraint(70), new ProfileAccelConstraint(-30, 80))
+                                .splineToConstantHeading(new Vector2d(35, -20), Math.toRadians(45), new TranslationalVelConstraint(70))
                                 .afterTime(0, robot.intake.toggleIntake(false))
                                 .build()
                 )
         );
+
+        PoseStorage.currentAlliance = PoseStorage.Alliance.RED;
+        PoseStorage.currentPose = drivebase.localizer.getPose(); // Set global pose value for TeleOp to utilize
 
         // Ordered set of 3 (2)
         if (robot.spindexer.slots.contains(PoseStorage.pattern.get(0))) {
@@ -334,6 +332,19 @@ public class C9P9RED extends LinearOpMode {
                             new SequentialAction(
                                     robot.spindexer.sortTo(robot.spindexer.slots.indexOf(PoseStorage.pattern.get(1))),
                                     robot.spindexer.kick(),
+                                    robot.spindexer.removeIndexed()
+                            )
+                    )
+            );
+        }
+        if (robot.spindexer.slots.contains(PoseStorage.pattern.get(2))) {
+            Actions.runBlocking(
+                    new RaceAction(
+                            robot.spindexer.autonPeriodic(),
+                            robot.flywheel.autonPeriodic(),
+                            new SequentialAction(
+                                    robot.spindexer.sortTo(robot.spindexer.slots.indexOf(PoseStorage.pattern.get(2))),
+                                    robot.spindexer.kick(),
                                     robot.spindexer.removeIndexed(),
                                     robot.flywheel.stopFlywheel(),
                                     new ParallelAction(robot.intake.toggleIntake(false), robot.intake.stopIntake())
@@ -345,14 +356,13 @@ public class C9P9RED extends LinearOpMode {
                 new RaceAction(
                         robot.spindexer.autonPeriodic(),
                         robot.flywheel.autonPeriodic(),
-                        drivebase.actionBuilder(drivebase.localizer.getPose(), true)
-                                .strafeToSplineHeading(new Vector2d(0, -45), 0, new TranslationalVelConstraint(80), new ProfileAccelConstraint(-60, 60))
-                                .afterTime(0, robot.spindexer.sortTo(3))
-                                .build()
+                        new SequentialAction(
+                                robot.spindexer.sortTo(3),
+                                drivebase.actionBuilder(drivebase.localizer.getPose(), false)
+                                        .waitSeconds(1)
+                                        .build()
+                        )
                 )
         );
-
-        PoseStorage.currentAlliance = PoseStorage.Alliance.RED;
-        PoseStorage.currentPose = drivebase.localizer.getPose(); // Set global pose value for TeleOp to utilize
     }
 }

@@ -12,9 +12,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.Robot;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
-import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,6 +44,7 @@ public class FieldCentricTeleOp extends OpMode {
         if (!robot.intake.toggled) {
             robot.intake.toggled = true;
         }
+        robot.spindexer.slots = new ArrayList<>(Arrays.asList("empty", "empty", "empty"));
         if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
             robot.limelight.setPipeline(Limelight.Pipeline.AT3);
         } else {
@@ -73,16 +75,16 @@ public class FieldCentricTeleOp extends OpMode {
             alignToAT = !alignToAT;
         }
 
-        if (driver.wasJustPressed(GamepadKeys.Button.B)) {
-            Pose2d targetPose;
-            alignToAT = false;
-            if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
-                targetPose = new Pose2d(-40, -30, Math.toRadians(180));
-            } else {
-                targetPose = new Pose2d(-40, 30, Math.toRadians(180));
-            }
-            robot.actions.schedule(trajectories.poseAlign(robot.drivetrain.getDrive(), targetPose));
-        }
+//        if (driver.wasJustPressed(GamepadKeys.Button.B)) {
+//            Pose2d targetPose;
+//            alignToAT = false;
+//            if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
+//                targetPose = new Pose2d(-40, -30, Math.toRadians(180));
+//            } else {
+//                targetPose = new Pose2d(-40, 30, Math.toRadians(180));
+//            }
+//            robot.actions.schedule(trajectories.poseAlign(robot.drivetrain.getDrive(), targetPose));
+//        }
 
         if (driver.wasJustPressed(GamepadKeys.Button.X)) {
             Vector2d current = robot.drivetrain.getDrive().localizer.getPose().position;
@@ -151,9 +153,6 @@ public class FieldCentricTeleOp extends OpMode {
         if (!robot.spindexer.isMoving && robot.spindexer.states.getSelectedIndex() > 2 && Objects.equals(robot.spindexer.slots.get(robot.spindexer.states.getSelectedIndex() - 3), "empty")) {
             robot.spindexer.slots.remove(robot.spindexer.states.getSelectedIndex() - 3);
             robot.spindexer.slots.add(robot.spindexer.states.getSelectedIndex() - 3, robot.colorSensor.getColour());
-        }
-        if (robot.intake.toggled && !robot.spindexer.isMoving && robot.spindexer.slots.contains("empty")) {
-            robot.actions.schedule(robot.spindexer.intakeToEmpty());
         }
 
         if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {

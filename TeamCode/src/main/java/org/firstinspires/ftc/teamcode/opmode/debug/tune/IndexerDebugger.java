@@ -30,7 +30,7 @@ public class IndexerDebugger extends OpMode {
     private Spindexer spindexer;
     private TelemetryControl telemetryControl;
     private Oscillator os;
-    public static double Kp = 0.0027;
+    public static double Kp = 0.003;
     public static double Kd = 0.000001;
 
     @Override
@@ -57,7 +57,7 @@ public class IndexerDebugger extends OpMode {
             hub.clearBulkCache();
         }
 
-        spindexer.setPD(Kp, Kd, 0.7);
+        spindexer.setPD(Kp, Kd, 0);
         if (driver.isDown(GamepadKeys.Button.A)) {
             actions.schedule(spindexer.shootOne());
         }

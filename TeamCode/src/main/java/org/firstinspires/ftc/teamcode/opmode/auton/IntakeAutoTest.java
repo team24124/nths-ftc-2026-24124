@@ -44,7 +44,7 @@ public class IntakeAutoTest extends LinearOpMode {
                         robot.spindexer.autonPeriodic(),
                         drivebase.actionBuilder(drivebase.localizer.getPose(), false)
                                 .afterTime(0, robot.intake.toggleIntake(true))
-                                .splineToConstantHeading(new Vector2d(25, 0), Math.toRadians(0), new TranslationalVelConstraint(4))
+                                .splineToConstantHeading(new Vector2d(25, 0), Math.toRadians(0), new TranslationalVelConstraint(7))
                                 .afterTime(0, robot.intake.toggleIntake(false))
                                 .build()
                 )

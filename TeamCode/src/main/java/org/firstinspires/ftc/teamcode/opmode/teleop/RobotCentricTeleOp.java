@@ -15,6 +15,8 @@ import org.firstinspires.ftc.teamcode.hardware.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,6 +48,7 @@ public class RobotCentricTeleOp extends OpMode {
         if (!robot.intake.toggled) {
             robot.intake.toggled = true;
         }
+        robot.spindexer.slots = new ArrayList<>(Arrays.asList("empty", "empty", "empty"));
         if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
             robot.limelight.setPipeline(Limelight.Pipeline.AT3);
         } else {
@@ -75,16 +78,16 @@ public class RobotCentricTeleOp extends OpMode {
         }
 
         // Align with Roadrunner trajectory
-        if (driver.wasJustPressed(GamepadKeys.Button.B)) {
-            Pose2d targetPose;
-            alignToAT = false;
-            if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
-                targetPose = new Pose2d(-40, -30, Math.toRadians(180));
-            } else {
-                targetPose = new Pose2d(-40, 30, Math.toRadians(180));
-            }
-            robot.actions.schedule(trajectories.poseAlign(robot.drivetrain.getDrive(), targetPose));
-        }
+//        if (driver.wasJustPressed(GamepadKeys.Button.B)) {
+//            Pose2d targetPose;
+//            alignToAT = false;
+//            if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
+//                targetPose = new Pose2d(-40, -30, Math.toRadians(180));
+//            } else {
+//                targetPose = new Pose2d(-40, 30, Math.toRadians(180));
+//            }
+//            robot.actions.schedule(trajectories.poseAlign(robot.drivetrain.getDrive(), targetPose));
+//        }
 
         // Reset heading (only if necessary)
         if (driver.wasJustPressed(GamepadKeys.Button.X)) {
@@ -98,6 +101,8 @@ public class RobotCentricTeleOp extends OpMode {
         } else if (driver.isDown(GamepadKeys.Button.LEFT_BUMPER) && robot.spindexer.states.getSelectedIndex() > 2) {
             robot.spindexer.os.enableOscillation(false);
             robot.actions.schedule(new ParallelAction(robot.intake.reverseIntake(), robot.spindexer.removeIndexed(robot.spindexer.states.getSelectedIndex() - 3)));
+        } else if (robot.flywheel.powered && robot.spindexer.states.getSelectedIndex() < 3 && robot.spindexer.isMoving) {
+            robot.actions.schedule(robot.intake.runIntake());
         } else {
             robot.spindexer.os.enableOscillation(true);
             robot.actions.schedule(robot.intake.stopIntake());
@@ -154,10 +159,6 @@ public class RobotCentricTeleOp extends OpMode {
         }
         robot.drivetrain.periodic(); // Update position
         robot.spindexer.periodic();
-        if (!robot.spindexer.isMoving && robot.spindexer.states.getSelectedIndex() > 2 && Objects.equals(robot.spindexer.slots.get(robot.spindexer.states.getSelectedIndex() - 3), "empty")) {
-            robot.spindexer.slots.remove(robot.spindexer.states.getSelectedIndex() - 3);
-            robot.spindexer.slots.add(robot.spindexer.states.getSelectedIndex() - 3, robot.colorSensor.getColour());
-        }
 
         if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
             robot.actions.schedule(robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, false)));
@@ -167,6 +168,11 @@ public class RobotCentricTeleOp extends OpMode {
         robot.flywheel.periodic();
         robot.telemetryControl.update();
         robot.actions.run(); // Call for scheduled actions to run
+
+        if (!robot.spindexer.isMoving && robot.spindexer.states.getSelectedIndex() > 2 && Objects.equals(robot.spindexer.slots.get(robot.spindexer.states.getSelectedIndex() - 3), "empty")) {
+            robot.spindexer.slots.remove(robot.spindexer.states.getSelectedIndex() - 3);
+            robot.spindexer.slots.add(robot.spindexer.states.getSelectedIndex() - 3, robot.colorSensor.getColour());
+        }
     }
 
     @Override

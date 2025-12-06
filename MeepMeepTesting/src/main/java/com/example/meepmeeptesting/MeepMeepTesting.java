@@ -58,8 +58,9 @@ public class MeepMeepTesting {
                         .strafeTo(new Vector2d(0, -24))
                         .build());
 
-        bot2.runAction(bot.getDrive().actionBuilder(new Pose2d(60, -20, Math.toRadians(180)))
-                .strafeTo(new Vector2d(40, -20))
+        bot2.runAction(bot.getDrive().actionBuilder(new Pose2d(46, -52, Math.toRadians(90)))
+                        .strafeToSplineHeading(new Vector2d(35, -35), Math.toRadians(0), new TranslationalVelConstraint(70))
+                        .splineToConstantHeading(new Vector2d(15, -20), Math.toRadians(135), new TranslationalVelConstraint(70))
                 .strafeToSplineHeading(new Vector2d(15, -20), Math.toRadians(120), new TranslationalVelConstraint(70))
                 .strafeToSplineHeading(new Vector2d(57, -20), Math.toRadians(195))
                 .waitSeconds(1)
