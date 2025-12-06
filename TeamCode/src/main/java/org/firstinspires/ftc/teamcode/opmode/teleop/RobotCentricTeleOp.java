@@ -89,10 +89,13 @@ public class RobotCentricTeleOp extends OpMode {
 //            robot.actions.schedule(trajectories.poseAlign(robot.drivetrain.getDrive(), targetPose));
 //        }
 
-        // Reset heading (only if necessary)
+        // Reset PoseStorage (only if necessary)
         if (driver.wasJustPressed(GamepadKeys.Button.X)) {
-            Vector2d current = robot.drivetrain.getDrive().localizer.getPose().position;
-            robot.drivetrain.getDrive().localizer.setPose(new Pose2d(current, 0));
+            if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
+                PoseStorage.currentAlliance = PoseStorage.Alliance.BLUE;
+            } else {
+                PoseStorage.currentAlliance = PoseStorage.Alliance.RED;
+            }
         }
 
         if (driver.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
