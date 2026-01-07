@@ -21,14 +21,14 @@ import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 public abstract class Drivetrain implements SubsystemBase, TelemetryObservable {
     private final MecanumDrive drivetrain;
     private final ArraySelect<Double> speeds;
-    protected PIDF thetaPD = new PIDF();
-    protected final VoltageSensor voltageSensor;
+    public PIDF thetaPD = new PIDF();
+    public final VoltageSensor voltageSensor;
 
     public Drivetrain(HardwareMap hw, Pose2d start) {
         drivetrain = new MecanumDrive(hw, start);
         speeds = new ArraySelect<>(new Double[]{0.5, 1.0});
 
-        thetaPD.setPD(3,0.1,0.7);
+        thetaPD.setPD(4,0.25,0.7);
 
         voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
     }

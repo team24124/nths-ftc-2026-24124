@@ -2,13 +2,12 @@ package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -17,28 +16,27 @@ import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
 import org.firstinspires.ftc.teamcode.util.ArraySelect;
 import org.firstinspires.ftc.teamcode.util.Utilities;
 import org.firstinspires.ftc.teamcode.util.controllers.PIDF;
-import org.firstinspires.ftc.teamcode.util.plotting.Oscillator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class Spindexer implements SubsystemBase, TelemetryObservable {
     public final DcMotorEx spindexer;
-    public final Servo kicker;
-    private final double TPR = 537.6;
+    private final double TPR = 806.4;
     public PIDF pd;
     public final VoltageSensor voltageSensor;
-    public Oscillator os;
 
     public enum State {
-        SLOT1(266), // Slots are shoot positions
-        SLOT2(84), // Slots increase CCW, IN1 is referencing the same slot as SLOT1
-        SLOT3(446),
+        // Previously 230, 48, 410, 0, 358, 179
+        SLOT1(345), // Slots are shoot positions
+        SLOT2(72), // Slots increase CCW, IN1 is referencing the same slot as SLOT1
+        SLOT3(615),
         IN1(0), // Ins are slots facing towards the intake
-        IN2(358), // Ins increase CCW. Since moving CCW results in a positive increase, the second slot CCW from the first one is on the rear left of the robot, making its position -178 + 537.6
-        IN3(179);
+        IN2(537), // Ins increase CCW. Since moving CCW results in a positive increase, the second slot CCW from the first one is on the rear left of the robot, making its position -178 + 537.6
+        IN3(268);
 
         public final int position;
 
@@ -53,19 +51,15 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
     public boolean isMoving;
     public boolean isAutoMoving = false;
-    public boolean kickScheduled = false;
-    public int shotCount = 0;
+    private double prevStatePos = 0;
 
     public Spindexer(HardwareMap hw) {
-        os = new Oscillator(new Double[]{-8.0, 8.0}, 0.2);
-        os.enableOscillation(true);
         pd = new PIDF();
-        pd.setPD(0.005, 0.00002, 0.3);
+        pd.setPD(0.004, 0.000012, 0.3);
         spindexer = hw.get(DcMotorEx.class, "spindexer");
         spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        kicker = hw.get(Servo.class, "kicker");
         voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
 
         states.setSelected(State.IN1);
@@ -74,42 +68,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     // A periodic function is necessary as balls are always rolling in and shifting the indexer
     @Override
     public void periodic() {
-        double target = states.getSelected().position;
-        if (!isMoving && states.getSelectedIndex() > 2) {
-            target -= os.returnSetpoint();
-        }
-        double position = spindexer.getCurrentPosition() % TPR; // Normalize to [0, 537.6)
-        if (position < 0) position += TPR;
-
-        // Compute raw difference
-        double error = target - position;
-
-        // Wrap error into (-TPR/2, +TPR/2]
-        if (error > TPR / 2) error -= TPR;
-        else if (error < -TPR / 2) error += TPR;
-
-        double adjustedPosition = target - error;
-
-        double power = Range.clip(pd.calculate(adjustedPosition, target, voltageSensor.getVoltage()), -1, 1);
-        spindexer.setPower(power);
-
-        if (Utilities.isBetween(position, target - 15, target + 15) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, 537.6 - 15, 537.6))) {
-            isAutoMoving = false;
-        } else {
-            isAutoMoving = true;
-        }
-    }
-
-    public Action autonPeriodic() {
-        return (TelemetryPacket packet) -> {
-            periodic();
-
-            return true;
-        };
-    }
-
-    public Action moveToState() {
-        return (TelemetryPacket packet) -> {
+        if (!isMoving) {
             double target = states.getSelected().position;
             double position = spindexer.getCurrentPosition() % TPR; // Normalize to [0, 537.6)
             if (position < 0) position += TPR;
@@ -123,18 +82,85 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
             double adjustedPosition = target - error;
 
-            double power = Range.clip(pd.calculate(adjustedPosition, target, voltageSensor.getVoltage()), -0.45, 0.45);
+            double power = Range.clip(pd.calculate(adjustedPosition, target, voltageSensor.getVoltage()), -0.9, 0.9);
             spindexer.setPower(power);
 
-            if (Utilities.isBetween(position, target - 15, target + 15) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, 537.6 - 15, 537.6))) {
-                isMoving = kickScheduled;
+            if (Utilities.isBetween(position, target - 27, target + 27) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, TPR - 27, TPR))) {
+                isAutoMoving = false;
+            } else {
+                isAutoMoving = true;
+            }
+        }
+    }
+
+    public Action autonPeriodic() {
+        return (TelemetryPacket packet) -> {
+            periodic();
+
+            return true;
+        };
+    }
+
+    // Commented - used only with a passive indexer
+    private Action outputToState() {
+        AtomicBoolean inInitialLoop = new AtomicBoolean(true);
+        return (TelemetryPacket packet) -> {
+            isMoving = true;
+            double target = states.getSelected().position;
+            double position = spindexer.getCurrentPosition() % TPR; // Normalize to [0, 537.6) (one rotation)
+            if (position < 0) position += TPR; // Eliminate negatives
+
+            if (inInitialLoop.get() && prevStatePos == target && target - position > 0) {
+                position += (target - position);
+            } else {
+                inInitialLoop.set(false);
+            }
+
+            // Wrap around
+            if (target < position) {
+                position -= TPR;
+            }
+
+            int tolerance = 35;
+
+            double power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.8, 0.8);
+            spindexer.setPower(power);
+
+            if (Utilities.isBetween(position % TPR, target - tolerance, target + tolerance) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, TPR - tolerance, TPR))) {
+                isMoving = false;
                 return false;
             } else {
-                isMoving = true;
                 return true;
             }
         };
     }
+
+    private Action sortToState() {
+        return (TelemetryPacket packet) -> {
+            isMoving = true;
+            double target = states.getSelected().position;
+            double position = spindexer.getCurrentPosition() % TPR;
+            if (position < 0) position += TPR;
+
+            // Wrap around
+            if (target > position) {
+                position += TPR;
+            }
+
+            int tolerance = 35;
+
+            double power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.3, 0.3);
+            spindexer.setPower(power);
+
+            if (Utilities.isBetween(position % TPR, target - tolerance, target + tolerance) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, TPR - tolerance, TPR))) {
+                isMoving = false;
+                return false;
+            } else {
+                return true;
+            }
+        };
+    }
+
 
     // Sort to the first specified colour in the array of slots
     public Action inTo(String colour) {
@@ -143,67 +169,34 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
             states.moveSelection(firstColour - states.getSelectedIndex());
         }
 
-        return moveToState();
+        return sortToState();
     }
 
     public Action sortTo(int slot) {
+        if (!isMoving) {
+            states.setSelected(slot);
+
+            return sortToState();
+        } else {
+            return (TelemetryPacket p) -> false;
+        }
+    }
+
+    public Action outputTo(int slot) {
+        prevStatePos = states.getSelected().position;
         states.setSelected(slot);
 
-        return moveToState();
+        return outputToState();
     }
 
-    public Action sortTo(String colour) {
-        int firstColour = slots.indexOf(colour);
-        if (firstColour != -1 && states.getSelectedIndex() != firstColour) {
-            states.moveSelection(firstColour - states.getSelectedIndex());
-        }
-
-        return moveToState();
-    }
-
-    public Action intakeToEmpty() {
-        int firstEmpty = slots.indexOf("empty") + 3;
-        if (firstEmpty != 2 && states.getSelectedIndex() != firstEmpty) {
-            states.moveSelection(firstEmpty - states.getSelectedIndex());
-        }
-
-        return moveToState();
-    }
-
-    public Action kick() {
-        ElapsedTime timer = new ElapsedTime();
-
-        return (TelemetryPacket packet) -> {
-            if (timer.seconds() < 0.5) {
-                return true;
-            }
-
-            if (timer.seconds() < 0.9) {
-                kicker.setPosition(0.35);
-                return true;
-            }
-
-            if (timer.seconds() < 1.2) {
-                kicker.setPosition(0.8);
-                return true;
-            }
-            kickScheduled = false;
-            isMoving = false;
-            return false;
-        };
-    }
-
-    public Action shootOne() {
+    // Meant to shoot from IN1 to SLOT1
+    public Action shootAll() {
         if (!isMoving) {
-            shotCount += 1;
-            if (shotCount == 3) {
-                shotCount = 0;
-            }
-            kickScheduled = true;
             return new SequentialAction(
-                    sortTo(shotCount),
-                    kick(),
-                    removeIndexed()
+                    outputTo(0),
+                    removeIndexed(0),
+                    removeIndexed(1),
+                    removeIndexed(2)
             );
         } else {
             return (TelemetryPacket packet) -> false;
@@ -251,12 +244,12 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
         else if (error < -TPR / 2) error += TPR;
         double adjustedPosition = target - error;
 
-        telemetry.addData("Current State", getCurrentState());
-        telemetry.addData("Est. Motor Position", position);
-        telemetry.addData("Adjusted Position", adjustedPosition);
-        telemetry.addData("Est. target",  target);
-        telemetry.addData("Slots",  slots.toString());
-        telemetry.addData("Moving", isMoving);
+        telemetry.addData("Spindexer Current State", getCurrentState());
+        telemetry.addData("Spindexer Motor Position", position);
+        telemetry.addData("Spindexer Adjusted Position", adjustedPosition);
+        telemetry.addData("Spindexer Target",  target);
+        telemetry.addData("Spindexer Slots",  slots.toString());
+        telemetry.addData("Spindexer Moving", isMoving);
     }
 
     public State getCurrentState(){

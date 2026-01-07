@@ -40,7 +40,7 @@ public class Return extends LinearOpMode {
         Actions.runBlocking(
                 drivebase.actionBuilder(PoseStorage.currentPose, true)
                         .strafeToSplineHeading(new Vector2d(60, endY), Math.toRadians(180))
-                        .afterTime(0, robot.spindexer.intakeToEmpty())
+                        .afterTime(0, robot.spindexer.inTo("empty"))
                         .build()
         );
 

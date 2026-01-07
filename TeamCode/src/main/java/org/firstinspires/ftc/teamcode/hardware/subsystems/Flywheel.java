@@ -24,7 +24,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     public boolean primed = false;
     private PIDF pv = new PIDF();
     double[] dists = {36, 50, 60, 70, 80, 90, 100, 150}; // Inches
-    double[] vels = {1120, 1150, 1220, 1280, 1320, 1330, 1500, 1770}; // Ticks/second
+    double[] vels = {1120, 1150, 1220, 1280, 1340, 1350, 1500, 1770}; // Ticks/second
     private final VoltageSensor voltageSensor;
     public InterpLUT lut = new InterpLUT(dists, vels);
     private double distance = 1;
@@ -57,10 +57,10 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     @Override
     public void periodic(){
         adjustFlap(distance);
-        targetVel = lut.get(distance);
+        targetVel = 1200;
         if (powered) {
             power(targetVel);
-            primed = Utilities.isBetween(wheel1.getVelocity(), targetVel - 20, targetVel + 40);
+            primed = Utilities.isBetween(wheel1.getVelocity(), targetVel -50, targetVel + 50);
         } else {
             power(0);
             primed = false;
@@ -116,13 +116,13 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
 
     @Override
     public void updateTelemetry(Telemetry telemetry) {
-        telemetry.addData("Moving", powered);
-        telemetry.addData("LUT Value", lut.get(distance));
-        telemetry.addData("Target Velocity", targetVel);
-        telemetry.addData("Wheel 1 Velocity", wheel1.getVelocity());
-        telemetry.addData("Wheel 2 Velocity", wheel2.getVelocity());
-        telemetry.addData("Primed", primed);
-        telemetry.addData("Flap Position", flap.getPosition());
+        telemetry.addData("Flywheel Moving", powered);
+        telemetry.addData("Flywheel LUT Value", lut.get(distance));
+        telemetry.addData("Flywheel Target Velocity", targetVel);
+        telemetry.addData("Flywheel 1 Velocity", wheel1.getVelocity());
+        telemetry.addData("Flywheel 2 Velocity", wheel2.getVelocity());
+        telemetry.addData("Flywheel Primed", primed);
+        telemetry.addData("Flywheel Flap Position", flap.getPosition());
     }
 
     @Override

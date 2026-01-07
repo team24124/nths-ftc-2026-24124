@@ -32,6 +32,7 @@ public class Robot {
     public REVColourV3 colorSensor;
     public ActionScheduler actions;
     public TelemetryControl telemetryControl;
+    private double TPR = 806.4;
 
     public Robot(HardwareMap hw, Telemetry telemetry, boolean robotCentric) {
         flywheel = new Flywheel(hw);
@@ -59,7 +60,6 @@ public class Robot {
     }
 
     public Action intakeAutoPeriodic() {
-        spindexer.os.enableOscillation(false);
         return (TelemetryPacket packet) -> {
             if (intake.toggled) {
                 if (!spindexer.slots.contains("empty")) {
@@ -69,7 +69,7 @@ public class Robot {
                     return false;
                 }
                 if (spindexer.isAutoMoving) {
-                    intake.targetVel = (-((double) 312 /60)*175) * (537.6/360);
+                    intake.targetVel = (-((double) 312 /60)*175) * (TPR/360);
                     intake.intake.setVelocity(0);
                     intake.powered = false;
                     return true;
@@ -79,7 +79,7 @@ public class Robot {
                         spindexer.slots.add(spindexer.states.getSelectedIndex() - 3, colorSensor.getColour());
                     }
                     intake.targetVel = -((double) 312 /60)*360;
-                    intake.intake.setVelocity(intake.targetVel * (537.6/360));
+                    intake.intake.setVelocity(intake.targetVel * (TPR/360));
                     intake.powered = true;
 
                     int firstEmpty = spindexer.slots.indexOf("empty") + 3;
@@ -99,10 +99,10 @@ public class Robot {
     public Action intakePeriodic() {
         if (intake.toggled && !spindexer.isMoving && spindexer.slots.contains("empty")) {
             if (spindexer.states.getSelectedIndex() < 3) {
-                return spindexer.intakeToEmpty();
+                return spindexer.inTo("empty");
             } else {
                 if (!Objects.equals(spindexer.slots.get(spindexer.states.getSelectedIndex() - 3), "empty")) {
-                    return spindexer.intakeToEmpty();
+                    return spindexer.inTo("empty");
                 } else {
                     return intake.runIntake();
                 }
@@ -110,14 +110,6 @@ public class Robot {
         } else {
             return intake.stopIntake();
         }
-    }
-
-    public Action shootColor(String str) {
-        return new SequentialAction(
-                spindexer.sortTo(spindexer.slots.indexOf(str)),
-                spindexer.kick(),
-                spindexer.removeIndexed()
-        );
     }
 
     public void removeIndexed(int i) {

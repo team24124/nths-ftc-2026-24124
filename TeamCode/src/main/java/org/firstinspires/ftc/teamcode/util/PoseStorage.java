@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.util;
 import com.acmerobotics.roadrunner.Pose2d;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -15,5 +16,5 @@ public class PoseStorage {
 
     public enum Alliance { RED, BLUE }
     public static Alliance currentAlliance = Alliance.RED;
-    public static List<String> pattern = new ArrayList<>();
+    public static List<String> pattern = new ArrayList<>(Arrays.asList("purple", "purple", "green"));
 }

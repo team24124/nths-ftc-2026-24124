@@ -24,7 +24,6 @@ import java.util.Arrays;
 @Autonomous(name = "Auton BLUE 2")
 public class C9P9BLUE2 extends LinearOpMode {
     Robot robot;
-    ElapsedTime timer = new ElapsedTime();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -33,13 +32,13 @@ public class C9P9BLUE2 extends LinearOpMode {
 
         Pose2d initialPose = new Pose2d(-60, 20, Math.toRadians(0));
         drivebase.localizer.setPose(initialPose);
+
         PoseStorage.currentPose = initialPose;
+        PoseStorage.currentAlliance = PoseStorage.Alliance.BLUE;
+        PoseStorage.pattern.clear();
 
         // Actions called during init
         Actions.runBlocking(new ParallelAction(robot.intake.toggleIntake(false)));
-
-        robot.spindexer.os.enableOscillation(false);
-        PoseStorage.pattern.clear();
 
         waitForStart();
 
@@ -57,7 +56,7 @@ public class C9P9BLUE2 extends LinearOpMode {
         // Initial movement to large area and flywheel activation
         Actions.runBlocking(
                 new SequentialAction(
-                        robot.flywheel.setVls(90),
+                        robot.flywheel.setVls(80),
                         robot.flywheel.runFlywheel(),
                         new RaceAction(
                                 new ParallelAction(
@@ -78,30 +77,7 @@ public class C9P9BLUE2 extends LinearOpMode {
                         robot.spindexer.autonPeriodic(),
                         robot.flywheel.autonPeriodic(),
                         new SequentialAction(
-                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(PoseStorage.pattern.get(0))),
-                                robot.spindexer.kick(),
-                                robot.spindexer.removeIndexed()
-                        )
-                )
-        );
-        Actions.runBlocking(
-                new RaceAction(
-                        robot.spindexer.autonPeriodic(),
-                        robot.flywheel.autonPeriodic(),
-                        new SequentialAction(
-                                robot.spindexer.sortTo(robot.spindexer.slots.indexOf(PoseStorage.pattern.get(1))),
-                                robot.spindexer.kick(),
-                                robot.spindexer.removeIndexed()
-                        )
-                )
-        );
-        Actions.runBlocking(
-                new RaceAction(
-                        robot.spindexer.autonPeriodic(),
-                        robot.flywheel.autonPeriodic(),
-                        new SequentialAction(
                                 robot.spindexer.sortTo(robot.spindexer.slots.indexOf(PoseStorage.pattern.get(2))),
-                                robot.spindexer.kick(),
                                 robot.spindexer.removeIndexed(),
                                 new ParallelAction(robot.intake.toggleIntake(false), robot.intake.stopIntake()),
                                 robot.flywheel.stopFlywheel()
@@ -125,159 +101,33 @@ public class C9P9BLUE2 extends LinearOpMode {
                                 .splineToConstantHeading(new Vector2d(17, 58), Math.toRadians(270), new TranslationalVelConstraint(8))
                                 .afterTime(0, robot.flywheel.runFlywheel())
 
-                                .strafeToSplineHeading(new Vector2d(15, 20), Math.toRadians(44), new TranslationalVelConstraint(70), new ProfileAccelConstraint(-30, 70))
+                                .strafeToSplineHeading(new Vector2d(15, 20), Math.toRadians(48), new TranslationalVelConstraint(70), new ProfileAccelConstraint(-30, 70))
                                 .build()
                 )
         );
 
         // Ordered set of 3 (2)
-        if (robot.spindexer.slots.contains(PoseStorage.pattern.get(0))) {
+        if (robot.spindexer.slots.contains(PoseStorage.pattern.get(2))) {
             Actions.runBlocking(
                     new RaceAction(
                             robot.spindexer.autonPeriodic(),
                             robot.flywheel.autonPeriodic(),
                             new SequentialAction(
-                                    new ParallelAction(robot.intake.toggleIntake(true), robot.intake.runIntake()),
-                                    robot.spindexer.sortTo(robot.spindexer.slots.indexOf(PoseStorage.pattern.get(0))),
-                                    robot.spindexer.kick(),
-                                    robot.spindexer.removeIndexed()
+                                    robot.spindexer.sortTo(robot.spindexer.slots.indexOf(PoseStorage.pattern.get(2))),
+                                    robot.spindexer.removeIndexed(),
+                                    robot.flywheel.stopFlywheel(),
+                                    new ParallelAction(robot.intake.toggleIntake(false), robot.intake.stopIntake())
                             )
                     )
             );
-            if (robot.spindexer.slots.contains(PoseStorage.pattern.get(1))) {
-                Actions.runBlocking(
-                        new RaceAction(
-                                robot.spindexer.autonPeriodic(),
-                                robot.flywheel.autonPeriodic(),
-                                new SequentialAction(
-                                        robot.spindexer.sortTo(robot.spindexer.slots.indexOf(PoseStorage.pattern.get(1))),
-                                        robot.spindexer.kick(),
-                                        robot.spindexer.removeIndexed()
-                                )
-                        )
-                );
-                if (robot.spindexer.slots.contains(PoseStorage.pattern.get(2))) {
-                    Actions.runBlocking(
-                            new RaceAction(
-                                    robot.spindexer.autonPeriodic(),
-                                    robot.flywheel.autonPeriodic(),
-                                    new SequentialAction(
-                                            robot.spindexer.sortTo(robot.spindexer.slots.indexOf(PoseStorage.pattern.get(2))),
-                                            robot.spindexer.kick(),
-                                            robot.spindexer.removeIndexed(),
-                                            robot.flywheel.stopFlywheel(),
-                                            new ParallelAction(robot.intake.toggleIntake(false), robot.intake.stopIntake())
-                                    )
-                            )
-                    );
-                } else {
-                    Actions.runBlocking(
-                            new RaceAction(
-                                    robot.spindexer.autonPeriodic(),
-                                    robot.flywheel.autonPeriodic(),
-                                    new SequentialAction(
-                                            robot.spindexer.sortTo(0),
-                                            robot.spindexer.kick(),
-                                            robot.spindexer.removeIndexed()
-                                    )
-                            )
-                    );
-                    Actions.runBlocking(
-                            new RaceAction(
-                                    robot.spindexer.autonPeriodic(),
-                                    robot.flywheel.autonPeriodic(),
-                                    new SequentialAction(
-                                            robot.spindexer.sortTo(1),
-                                            robot.spindexer.kick(),
-                                            robot.spindexer.removeIndexed()
-                                    )
-                            )
-                    );
-                    Actions.runBlocking(
-                            new RaceAction(
-                                    robot.spindexer.autonPeriodic(),
-                                    robot.flywheel.autonPeriodic(),
-                                    new SequentialAction(
-                                            robot.spindexer.sortTo(2),
-                                            robot.spindexer.kick(),
-                                            robot.spindexer.removeIndexed(),
-                                            new ParallelAction(robot.intake.toggleIntake(false), robot.intake.stopIntake()),
-                                            robot.flywheel.stopFlywheel()
-                                    )
-                            )
-                    );
-                }
-            } else {
-                Actions.runBlocking(
-                        new RaceAction(
-                                robot.spindexer.autonPeriodic(),
-                                robot.flywheel.autonPeriodic(),
-                                new SequentialAction(
-                                        robot.spindexer.sortTo(0),
-                                        robot.spindexer.kick(),
-                                        robot.spindexer.removeIndexed()
-                                )
-                        )
-                );
-                Actions.runBlocking(
-                        new RaceAction(
-                                robot.spindexer.autonPeriodic(),
-                                robot.flywheel.autonPeriodic(),
-                                new SequentialAction(
-                                        robot.spindexer.sortTo(1),
-                                        robot.spindexer.kick(),
-                                        robot.spindexer.removeIndexed()
-                                )
-                        )
-                );
-                Actions.runBlocking(
-                        new RaceAction(
-                                robot.spindexer.autonPeriodic(),
-                                robot.flywheel.autonPeriodic(),
-                                new SequentialAction(
-                                        robot.spindexer.sortTo(2),
-                                        robot.spindexer.kick(),
-                                        robot.spindexer.removeIndexed(),
-                                        new ParallelAction(robot.intake.toggleIntake(false), robot.intake.stopIntake()),
-                                        robot.flywheel.stopFlywheel()
-                                )
-                        )
-                );
-            }
         } else {
             Actions.runBlocking(
                     new RaceAction(
                             robot.spindexer.autonPeriodic(),
                             robot.flywheel.autonPeriodic(),
-                            new SequentialAction(
-                                    new ParallelAction(robot.intake.toggleIntake(true), robot.intake.runIntake()),
-                                    robot.spindexer.sortTo(0),
-                                    robot.spindexer.kick(),
-                                    robot.spindexer.removeIndexed()
-                            )
-                    )
-            );
-            Actions.runBlocking(
-                    new RaceAction(
-                            robot.spindexer.autonPeriodic(),
-                            robot.flywheel.autonPeriodic(),
-                            new SequentialAction(
-                                    robot.spindexer.sortTo(1),
-                                    robot.spindexer.kick(),
-                                    robot.spindexer.removeIndexed()
-                            )
-                    )
-            );
-            Actions.runBlocking(
-                    new RaceAction(
-                            robot.spindexer.autonPeriodic(),
-                            robot.flywheel.autonPeriodic(),
-                            new SequentialAction(
-                                    robot.spindexer.sortTo(2),
-                                    robot.spindexer.kick(),
-                                    robot.spindexer.removeIndexed(),
-                                    new ParallelAction(robot.intake.toggleIntake(false), robot.intake.stopIntake()),
-                                    robot.flywheel.stopFlywheel()
+                            new ParallelAction(
+                                    robot.flywheel.stopFlywheel(),
+                                    new ParallelAction(robot.intake.toggleIntake(false), robot.intake.stopIntake())
                             )
                     )
             );
@@ -299,31 +149,16 @@ public class C9P9BLUE2 extends LinearOpMode {
                                 .splineToConstantHeading(new Vector2d(-8, 58), Math.toRadians(270), new TranslationalVelConstraint(7))
                                 .afterTime(0, robot.flywheel.runFlywheel())
 
-                                .strafeToSplineHeading(new Vector2d(9, 25), Math.toRadians(71), new TranslationalVelConstraint(70), new ProfileAccelConstraint(-30, 80))
-                                .splineToConstantHeading(new Vector2d(35, 20), Math.toRadians(315), new TranslationalVelConstraint(70))
+                                .strafeToSplineHeading(new Vector2d(9, 25), Math.toRadians(59), new TranslationalVelConstraint(70), new ProfileAccelConstraint(-30, 80))
+                                .splineToConstantHeading(new Vector2d(40, 15), Math.toRadians(315), new TranslationalVelConstraint(70))
                                 .afterTime(0, robot.intake.toggleIntake(false))
                                 .build()
                 )
         );
 
-        PoseStorage.currentAlliance = PoseStorage.Alliance.BLUE;
         PoseStorage.currentPose = drivebase.localizer.getPose(); // Set global pose value for TeleOp to utilize
 
         // Ordered set of 3 (2)
-        if (robot.spindexer.slots.contains(PoseStorage.pattern.get(0))) {
-            Actions.runBlocking(
-                    new RaceAction(
-                            robot.spindexer.autonPeriodic(),
-                            robot.flywheel.autonPeriodic(),
-                            new SequentialAction(
-                                    new ParallelAction(robot.intake.toggleIntake(true), robot.intake.runIntake()),
-                                    robot.spindexer.sortTo(robot.spindexer.slots.indexOf(PoseStorage.pattern.get(0))),
-                                    robot.spindexer.kick(),
-                                    robot.spindexer.removeIndexed()
-                            )
-                    )
-            );
-        }
         if (robot.spindexer.slots.contains(PoseStorage.pattern.get(1))) {
             Actions.runBlocking(
                     new RaceAction(
@@ -331,20 +166,6 @@ public class C9P9BLUE2 extends LinearOpMode {
                             robot.flywheel.autonPeriodic(),
                             new SequentialAction(
                                     robot.spindexer.sortTo(robot.spindexer.slots.indexOf(PoseStorage.pattern.get(1))),
-                                    robot.spindexer.kick(),
-                                    robot.spindexer.removeIndexed()
-                            )
-                    )
-            );
-        }
-        if (robot.spindexer.slots.contains(PoseStorage.pattern.get(2))) {
-            Actions.runBlocking(
-                    new RaceAction(
-                            robot.spindexer.autonPeriodic(),
-                            robot.flywheel.autonPeriodic(),
-                            new SequentialAction(
-                                    robot.spindexer.sortTo(robot.spindexer.slots.indexOf(PoseStorage.pattern.get(2))),
-                                    robot.spindexer.kick(),
                                     robot.spindexer.removeIndexed(),
                                     robot.flywheel.stopFlywheel(),
                                     new ParallelAction(robot.intake.toggleIntake(false), robot.intake.stopIntake())

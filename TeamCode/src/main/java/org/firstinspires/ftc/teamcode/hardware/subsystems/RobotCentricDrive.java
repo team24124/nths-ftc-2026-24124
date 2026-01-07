@@ -23,7 +23,12 @@ public class RobotCentricDrive extends Drivetrain implements TelemetryObservable
     public void drive(double x, double y, double rx, boolean align) {
         double voltage = voltageSensor.getVoltage();
         if (align) {
-            rx = -thetaPD.calculate(rx, 0, voltage);
+            if (getSpeeds().getSelected() == 1.0) {
+                thetaPD.setPD(1.4,0.045,0);
+            } else {
+                thetaPD.setPD(4,0.25,0);
+            }
+            rx = thetaPD.calculate(-rx, 0, voltage);
         }
 
         double theta = Math.atan2(y, x);
@@ -40,7 +45,6 @@ public class RobotCentricDrive extends Drivetrain implements TelemetryObservable
 
         if ((power + Math.abs(rx)) > 1) {
             double denominator = power + Math.abs(rx);
-            if (align) denominator += 0.2;
             leftPower /= denominator;
             leftBackPower /= denominator;
             rightPower /= denominator;
@@ -48,21 +52,12 @@ public class RobotCentricDrive extends Drivetrain implements TelemetryObservable
         }
 
         ArraySelect<Double> speeds = getSpeeds();
-        if (align) {
-            super.setDrivePowers(
-                    leftPower * 0.5,
-                    rightPower * 0.5,
-                    leftBackPower * 0.5,
-                    rightBackPower * 0.5
-            );
-        } else {
-            super.setDrivePowers(
-                    leftPower * speeds.getSelected(),
-                    rightPower * speeds.getSelected(),
-                    leftBackPower * speeds.getSelected(),
-                    rightBackPower * speeds.getSelected()
-            );
-        }
+        super.setDrivePowers(
+                leftPower * speeds.getSelected(),
+                rightPower * speeds.getSelected(),
+                leftBackPower * speeds.getSelected(),
+                rightBackPower * speeds.getSelected()
+        );
     }
 
     @Override

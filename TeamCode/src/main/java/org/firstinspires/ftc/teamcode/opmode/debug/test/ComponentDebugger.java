@@ -1,10 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmode.debug.test;
 
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -16,9 +13,7 @@ import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.REVColourV3;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Spindexer;
-import org.firstinspires.ftc.teamcode.opmode.teleop.TeleOpTrajectories;
 import org.firstinspires.ftc.teamcode.util.ActionScheduler;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.util.TelemetryControl;
@@ -91,20 +86,18 @@ public class ComponentDebugger extends OpMode {
         }
 
         if (operator.wasJustPressed(GamepadKeys.Button.Y) && flywheel.primed) {
-            actions.schedule(spindexer.shootOne());
+            actions.schedule(spindexer.shootAll());
         }
         if (operator.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) && flywheel.primed && spindexer.slots.contains("purple")) {
             actions.schedule(new SequentialAction(
-                    spindexer.sortTo(spindexer.slots.indexOf("purple")),
-                    spindexer.kick()
+                    spindexer.sortTo(spindexer.slots.indexOf("purple"))
             ));
             spindexer.slots.remove(spindexer.states.getSelectedIndex());
             spindexer.slots.add(spindexer.states.getSelectedIndex(), "empty");
         }
         if (operator.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && flywheel.primed && spindexer.slots.contains("green")) {
             actions.schedule(new SequentialAction(
-                    spindexer.sortTo(spindexer.slots.indexOf("green")),
-                    spindexer.kick()
+                    spindexer.sortTo(spindexer.slots.indexOf("green"))
             ));
         }
 
@@ -128,7 +121,7 @@ public class ComponentDebugger extends OpMode {
                 spindexer.slots.add(spindexer.states.getSelectedIndex() - 3, colorSensor.getColour());
             }
             return new SequentialAction(
-                    spindexer.intakeToEmpty(),
+                    spindexer.inTo("empty"),
                     intake.runIntake()
             );
         }

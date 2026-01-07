@@ -60,10 +60,7 @@ public class PDAlignmentDebugger extends OpMode {
         double rx = driver.getRightX();
 
         if (driver.wasJustPressed(GamepadKeys.Button.A)) {
-            alignToAT = true;
-        }
-        if (driver.wasJustPressed(GamepadKeys.Button.X)) {
-            alignToAT = false;
+            alignToAT = !alignToAT;
         }
 
         if (driver.wasJustPressed(GamepadKeys.Button.START)) {

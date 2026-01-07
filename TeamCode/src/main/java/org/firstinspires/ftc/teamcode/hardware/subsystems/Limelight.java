@@ -14,7 +14,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.interfaces.SubsystemBase;
 import org.firstinspires.ftc.teamcode.interfaces.TelemetryObservable;
-import org.firstinspires.ftc.teamcode.opmode.auton.C9P9RED;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 import java.util.ArrayList;

@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.RobotCentricDrive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Spindexer;
@@ -86,18 +85,17 @@ public class FlywheelDebugger extends OpMode {
                 actions.schedule(flywheel.stopFlywheel());
             }
 
-            if (Utilities.isBetween(flywheel.wheel1.getVelocity(), velocity - 20, velocity + 50)) {
+            if (Utilities.isBetween(flywheel.wheel1.getVelocity(), velocity + 160, velocity + 300)) {
                 if (driver.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
                     actions.schedule(
                             new SequentialAction(
-                                spindexer.sortTo(0),
-                                spindexer.kick()
+                                spindexer.shootAll()
                             )
                     );
                 }
             }
             if (driver.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-                actions.schedule(spindexer.sortTo(3));
+                actions.schedule(spindexer.sortTo(0));
             }
 
             if (flywheel.powered) {

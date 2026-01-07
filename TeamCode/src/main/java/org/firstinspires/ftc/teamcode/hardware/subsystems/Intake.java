@@ -66,8 +66,8 @@ public class Intake implements SubsystemBase, TelemetryObservable {
 
     @Override
     public void updateTelemetry(Telemetry telemetry) {
-        telemetry.addData("Moving", powered);
-        telemetry.addData("Target Velocity (tps)", targetVel * (537.6/360));
+        telemetry.addData("Intake Moving", powered);
+        telemetry.addData("Intake Target Velocity (tps)", targetVel * (537.6/360));
         telemetry.addData("Intake Velocity (tps)", velocity());
     }
 
