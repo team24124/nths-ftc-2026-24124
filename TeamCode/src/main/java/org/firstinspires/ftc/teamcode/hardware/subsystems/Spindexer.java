@@ -28,6 +28,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     private final double TPR = 806.4;
     public PIDF pd;
     public final VoltageSensor voltageSensor;
+    private boolean distanceFar = false;
 
     public enum State {
         // Previously 230, 48, 410, 0, 358, 179
@@ -82,7 +83,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
             double adjustedPosition = target - error;
 
-            double power = Range.clip(pd.calculate(adjustedPosition, target, voltageSensor.getVoltage()), -0.9, 0.9);
+            double power = Range.clip(pd.calculate(adjustedPosition, target, voltageSensor.getVoltage()), -0.5, 0.5);
             spindexer.setPower(power);
 
             if (Utilities.isBetween(position, target - 27, target + 27) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, TPR - 27, TPR))) {
@@ -110,8 +111,8 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
             double position = spindexer.getCurrentPosition() % TPR; // Normalize to [0, 537.6) (one rotation)
             if (position < 0) position += TPR; // Eliminate negatives
 
-            if (inInitialLoop.get() && prevStatePos == target && target - position > 0) {
-                position += (target - position);
+            if (inInitialLoop.get() && prevStatePos == target && target > position) {
+                position = target + 10;
             } else {
                 inInitialLoop.set(false);
             }
@@ -123,7 +124,12 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
             int tolerance = 35;
 
-            double power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.8, 0.8);
+            double power;
+            if (distanceFar) {
+                power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.25, 0.25);
+            } else {
+                power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.34, 0.34);
+            }
             spindexer.setPower(power);
 
             if (Utilities.isBetween(position % TPR, target - tolerance, target + tolerance) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, TPR - tolerance, TPR))) {
@@ -212,6 +218,19 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
         };
     }
 
+    public Action removeAllIndexed() {
+        return (TelemetryPacket packet) -> {
+            slots.remove(0);
+            slots.add(0, "empty");
+            slots.remove(1);
+            slots.add(1, "empty");
+            slots.remove(2);
+            slots.add(2, "empty");
+
+            return false;
+        };
+    }
+
     public Action removeIndexed(int i) {
         return (TelemetryPacket packet) -> {
             slots.remove(i);
@@ -232,6 +251,10 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
     public void setPD(double Kp, double Kd, double sf) {
         pd.setPD(Kp, Kd, sf);
+    }
+
+    public void updateDistance(double distance) {
+        distanceFar = (distance > 120);
     }
 
     @Override

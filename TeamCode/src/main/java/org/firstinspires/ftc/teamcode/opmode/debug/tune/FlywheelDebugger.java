@@ -31,7 +31,7 @@ public class FlywheelDebugger extends OpMode {
     private ActionScheduler actions;
     private TelemetryControl telemetryControl;
     private TeleOpTrajectories trajectories;
-    public static double Kp = 0.0005;
+    public static double Kp = 0.004;
     public static double Kv = 0.00042;
     public static double velocity = 1; // Enter ticks/second
     private boolean debugServo = true;
@@ -85,11 +85,11 @@ public class FlywheelDebugger extends OpMode {
                 actions.schedule(flywheel.stopFlywheel());
             }
 
-            if (Utilities.isBetween(flywheel.wheel1.getVelocity(), velocity + 160, velocity + 300)) {
+            if (Utilities.isBetween(flywheel.wheel1.getVelocity(), velocity - 50, velocity + 50)) {
                 if (driver.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
                     actions.schedule(
                             new SequentialAction(
-                                spindexer.shootAll()
+                                spindexer.outputTo(0)
                             )
                     );
                 }
@@ -101,7 +101,8 @@ public class FlywheelDebugger extends OpMode {
             if (flywheel.powered) {
                 flywheel.power(velocity);
             } else {
-                flywheel.power(0);
+                flywheel.wheel1.setPower(0);
+                flywheel.wheel2.setPower(0);
             }
         }
 
@@ -112,7 +113,7 @@ public class FlywheelDebugger extends OpMode {
         driver.readButtons();
         drivetrain.periodic();
         spindexer.periodic();
-        flywheel.adjustFlap(trajectories.distanceToTarget(drivetrain, true));
+        //flywheel.adjustFlap(trajectories.distanceToTarget(drivetrain, true));
         actions.run();
         telemetryControl.update();
     }

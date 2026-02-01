@@ -23,8 +23,8 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     public boolean powered = false;
     public boolean primed = false;
     private PIDF pv = new PIDF();
-    double[] dists = {36, 50, 60, 70, 80, 90, 100, 150}; // Inches
-    double[] vels = {1120, 1150, 1220, 1280, 1340, 1350, 1500, 1770}; // Ticks/second
+    double[] dists = {40, 50, 60, 70, 80, 90, 100, 150}; // Inches
+    double[] vels = {1050, 1070, 1120, 1150, 1260, 1310, 1340, 1590}; // Ticks/second
     private final VoltageSensor voltageSensor;
     public InterpLUT lut = new InterpLUT(dists, vels);
     private double distance = 1;
@@ -45,7 +45,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
 
         voltageSensor = hw.get(VoltageSensor.class, "Control Hub");
 
-        pv.setPV(0.0005, 0.00042);
+        pv.setPV(0.004, 0.00042);
 
         lut.setExtrapolation(InterpLUT.Extrapolation.LINEAR);
     }
@@ -57,12 +57,16 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     @Override
     public void periodic(){
         adjustFlap(distance);
-        targetVel = 1200;
+        targetVel = lut.get(distance);
+        if (distance > 120) {
+            setVelPID(0.0007, 0.000475);
+        }
         if (powered) {
             power(targetVel);
-            primed = Utilities.isBetween(wheel1.getVelocity(), targetVel -50, targetVel + 50);
+            primed = Utilities.isBetween(wheel1.getVelocity(), targetVel -100, targetVel + 70);
         } else {
-            power(0);
+            wheel1.setPower(0);
+            wheel2.setPower(0);
             primed = false;
         }
     }
@@ -94,7 +98,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
 
     public void adjustFlap(double distance) {
         // 0.94 is extended 0.18 is lowest
-        flap.setPosition(Range.clip(0.18 + ((distance-40) * 0.0109589041), 0.18, 0.94));
+        flap.setPosition(Range.clip(0.48 + ((distance - 40) * 0.0105589041) - Range.clip((targetVel - wheel1.getVelocity()) / 750, 0, 0.3), 0.34, 0.94));
     }
 
     public void power(double vel) {

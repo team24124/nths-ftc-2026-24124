@@ -15,6 +15,6 @@ public class PoseStorage {
     public static Pose2d currentPose = new Pose2d(0,0,0);
 
     public enum Alliance { RED, BLUE }
-    public static Alliance currentAlliance = Alliance.RED;
+    public static Alliance currentAlliance = Alliance.BLUE;
     public static List<String> pattern = new ArrayList<>(Arrays.asList("purple", "purple", "green"));
 }

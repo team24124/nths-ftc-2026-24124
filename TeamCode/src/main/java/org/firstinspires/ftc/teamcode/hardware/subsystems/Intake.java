@@ -14,6 +14,7 @@ public class Intake implements SubsystemBase, TelemetryObservable {
     public final DcMotorEx intake;
     public boolean powered = false;
     public boolean toggled = false;
+    public boolean overridden = true;
     public double targetVel = 0;
 
     public Intake(HardwareMap hw) {
@@ -55,6 +56,14 @@ public class Intake implements SubsystemBase, TelemetryObservable {
     public Action toggleIntake(boolean run) {
         return (TelemetryPacket packet) -> {
             toggled = run;
+
+            return false;
+        };
+    }
+
+    public Action overrideIntake(boolean o) {
+        return (TelemetryPacket packet) -> {
+            overridden = o;
 
             return false;
         };

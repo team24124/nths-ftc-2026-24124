@@ -105,8 +105,11 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
         return (TelemetryPacket packet) -> {
             setPipeline(Pipeline.AT1);
             if (isDetected() && PoseStorage.pattern.isEmpty()) {
-                PoseStorage.pattern.addAll(getPattern());
-                return false;
+                if (ATType() == 21 || ATType() == 22 || ATType() == 23) {
+                    PoseStorage.pattern.addAll(getPattern());
+                    return false;
+                }
+                return true;
             }
             return true;
         };

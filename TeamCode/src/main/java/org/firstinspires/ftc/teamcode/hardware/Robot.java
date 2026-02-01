@@ -61,51 +61,55 @@ public class Robot {
 
     public Action intakeAutoPeriodic() {
         return (TelemetryPacket packet) -> {
-            if (intake.toggled) {
-                if (!spindexer.slots.contains("empty")) {
+            if (intake.overridden) {
+                return false;
+            } else {
+                if (intake.toggled) {
+                    if (!spindexer.slots.contains("empty")) {
+                        intake.targetVel = 0;
+                        intake.intake.setVelocity(0);
+                        intake.powered = false;
+                        return false;
+                    }
+                    if (spindexer.isAutoMoving) {
+                        intake.targetVel = (-((double) 312 / 60) * 175) * (TPR / 360);
+                        intake.intake.setVelocity(0);
+                        intake.powered = false;
+                        return true;
+                    } else {
+                        if (spindexer.states.getSelectedIndex() > 2 && Objects.equals(spindexer.slots.get(spindexer.states.getSelectedIndex() - 3), "empty")) {
+                            spindexer.slots.remove(spindexer.states.getSelectedIndex() - 3);
+                            spindexer.slots.add(spindexer.states.getSelectedIndex() - 3, colorSensor.getColour());
+                        }
+                        intake.targetVel = -((double) 312 / 60) * 360;
+                        intake.intake.setVelocity(intake.targetVel * (TPR / 360));
+                        intake.powered = true;
+
+                        int firstEmpty = spindexer.slots.indexOf("empty") + 3;
+                        if (firstEmpty != 2 && spindexer.states.getSelectedIndex() != firstEmpty) {
+                            spindexer.states.moveSelection(firstEmpty - spindexer.states.getSelectedIndex());
+                        }
+                    }
+                } else {
                     intake.targetVel = 0;
                     intake.intake.setVelocity(0);
                     intake.powered = false;
-                    return false;
                 }
-                if (spindexer.isAutoMoving) {
-                    intake.targetVel = (-((double) 312 /60)*175) * (TPR/360);
-                    intake.intake.setVelocity(0);
-                    intake.powered = false;
-                    return true;
-                } else {
-                    if (spindexer.states.getSelectedIndex() > 2 && Objects.equals(spindexer.slots.get(spindexer.states.getSelectedIndex() - 3), "empty")) {
-                        spindexer.slots.remove(spindexer.states.getSelectedIndex() - 3);
-                        spindexer.slots.add(spindexer.states.getSelectedIndex() - 3, colorSensor.getColour());
-                    }
-                    intake.targetVel = -((double) 312 /60)*360;
-                    intake.intake.setVelocity(intake.targetVel * (TPR/360));
-                    intake.powered = true;
-
-                    int firstEmpty = spindexer.slots.indexOf("empty") + 3;
-                    if (firstEmpty != 2 && spindexer.states.getSelectedIndex() != firstEmpty) {
-                        spindexer.states.moveSelection(firstEmpty - spindexer.states.getSelectedIndex());
-                    }
-                }
-            } else {
-                intake.targetVel = 0;
-                intake.intake.setVelocity(0);
-                intake.powered = false;
+                return true;
             }
-            return true;
         };
     }
 
     public Action intakePeriodic() {
         if (intake.toggled && !spindexer.isMoving && spindexer.slots.contains("empty")) {
-            if (spindexer.states.getSelectedIndex() < 3) {
+            if (spindexer.states.getSelectedIndex() > 2 && Objects.equals(spindexer.slots.get(spindexer.states.getSelectedIndex() - 3), "empty")) {
+                spindexer.slots.remove(spindexer.states.getSelectedIndex() - 3);
+                spindexer.slots.add(spindexer.states.getSelectedIndex() - 3, colorSensor.getColour());
+            }
+            if (spindexer.states.getSelectedIndex() < 3 || !Objects.equals(spindexer.slots.get(spindexer.states.getSelectedIndex() - 3), "empty")) {
                 return spindexer.inTo("empty");
             } else {
-                if (!Objects.equals(spindexer.slots.get(spindexer.states.getSelectedIndex() - 3), "empty")) {
-                    return spindexer.inTo("empty");
-                } else {
-                    return intake.runIntake();
-                }
+                return intake.runIntake();
             }
         } else {
             return intake.stopIntake();

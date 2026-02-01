@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
 import com.acmerobotics.roadrunner.ParallelAction;
-import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -15,7 +14,6 @@ import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 @TeleOp(name = "Robot Centric TeleOp", group = "!")
 public class RobotCentricTeleOp extends OpMode {
@@ -82,17 +80,6 @@ public class RobotCentricTeleOp extends OpMode {
             robot.drivetrain.drive(x, y, robot.drivetrain.getPosition().heading.toDouble(), true);
         }
 
-        // Reset PoseStorage (only if necessary)
-        if (driver.wasJustPressed(GamepadKeys.Button.X)) {
-            if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
-                robot.drivetrain.getDrive().localizer.setPose(new Pose2d(0, 0, 0));
-                PoseStorage.currentAlliance = PoseStorage.Alliance.BLUE;
-            } else {
-                robot.drivetrain.getDrive().localizer.setPose(new Pose2d(0, 0, 0)) ;
-                PoseStorage.currentAlliance = PoseStorage.Alliance.RED;
-            }
-        }
-
         if (driver.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
             robot.actions.schedule(robot.intakePeriodic());
         } else if (driver.isDown(GamepadKeys.Button.LEFT_BUMPER) && robot.spindexer.states.getSelectedIndex() > 2) {
@@ -113,10 +100,6 @@ public class RobotCentricTeleOp extends OpMode {
             }
         }
 
-        if (operator.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-            robot.actions.schedule(robot.spindexer.sortTo(0));
-        }
-
         if (!robot.spindexer.isMoving && operator.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && robot.spindexer.states.getSelectedIndex() < 3) {
             robot.actions.schedule(robot.spindexer.shootAll());
         }
@@ -131,6 +114,7 @@ public class RobotCentricTeleOp extends OpMode {
         driver.readButtons();
         operator.readButtons();
 
+        robot.drivetrain.periodic(); // Update position
         if (!robot.drivetrain.getDrive().isBusy) { // Ensure drive isn't called during trajectory
             if (alignToAT) {
                 if (robot.limelight.isDetected()) {
@@ -149,19 +133,18 @@ public class RobotCentricTeleOp extends OpMode {
                 robot.drivetrain.drive(x, y, rx, false);
             }
         }
-        robot.drivetrain.periodic(); // Update position
-        robot.spindexer.periodic();
-        if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
-            robot.actions.schedule(robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, false)));
-        } else {
-            robot.actions.schedule(robot.flywheel.setVls(trajectories.distanceToTarget(robot.drivetrain, true)));
-        }
-        robot.flywheel.periodic();
 
-        if (!robot.spindexer.isMoving && robot.spindexer.states.getSelectedIndex() > 2 && Objects.equals(robot.spindexer.slots.get(robot.spindexer.states.getSelectedIndex() - 3), "empty")) {
-            robot.spindexer.slots.remove(robot.spindexer.states.getSelectedIndex() - 3);
-            robot.spindexer.slots.add(robot.spindexer.states.getSelectedIndex() - 3, robot.colorSensor.getColour());
+        robot.spindexer.periodic();
+
+        double d;
+        if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
+            d = trajectories.distanceToTarget(robot.drivetrain, false);
+        } else {
+            d = trajectories.distanceToTarget(robot.drivetrain, true);
         }
+        robot.spindexer.updateDistance(d);
+        robot.actions.schedule(robot.flywheel.setVls(d));
+        robot.flywheel.periodic();
 
         robot.actions.run(); // Call for scheduled actions to run
     }
