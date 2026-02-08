@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.RaceAction;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -28,34 +29,32 @@ public class SUPPORTred extends LinearOpMode {
         robot = new Robot(hardwareMap, telemetry, true);
         MecanumDrive drivebase = robot.drivetrain.getDrive();
 
-        Pose2d initialPose = new Pose2d(53, -48, Math.toRadians(311));
+        Pose2d initialPose = new Pose2d(-63.3, -15.2, Math.toRadians(0));
         drivebase.localizer.setPose(initialPose);
 
         PoseStorage.currentPose = initialPose;
         PoseStorage.currentAlliance = PoseStorage.Alliance.RED;
         PoseStorage.pattern.clear();
 
-        // Actions called during init
         Actions.runBlocking(new ParallelAction(robot.intake.overrideIntake(true), robot.intake.toggleIntake(false)));
 
         waitForStart();
 
         if (isStopRequested()) return;
 
-        // Start flywheel, initial movement shoot 3, intake, open gate start flywheel
         Actions.runBlocking(
                 new SequentialAction(
                         robot.flywheel.runFlywheel(),
-                        robot.flywheel.setVls(61),
+                        robot.flywheel.setVls(160),
                         new RaceAction(
                                 new ParallelAction(
-                                        robot.spindexer.autonPeriodic(),
                                         robot.flywheel.autonPeriodic(),
-                                        robot.spindexer.sortTo(0),
-                                        robot.intakeAutoPeriodic()
+                                        robot.spindexer.autonPeriodic(),
+                                        robot.spindexer.sortTo(0)
                                 ),
                                 drivebase.actionBuilder(initialPose, false)
-                                        .strafeToLinearHeading(new Vector2d(23, -15), Math.toRadians(312.5), new TranslationalVelConstraint(30), new ProfileAccelConstraint(-60, 90))
+                                        .strafeToLinearHeading(new Vector2d(-54, -15), Math.toRadians(345))
+                                        .waitSeconds(3)
                                         .build()
                         )
                 )
@@ -64,7 +63,9 @@ public class SUPPORTred extends LinearOpMode {
         Actions.runBlocking(
                 new RaceAction(
                         robot.flywheel.autonPeriodic(),
+                        robot.spindexer.autonPeriodic(),
                         new SequentialAction(
+                                robot.spindexer.outputTo(0),
                                 robot.spindexer.outputTo(0),
                                 robot.spindexer.removeAllIndexed(),
                                 new ParallelAction(robot.flywheel.stopFlywheel(), robot.intake.overrideIntake(false), robot.intake.toggleIntake(true), robot.intake.runIntake())
@@ -80,109 +81,26 @@ public class SUPPORTred extends LinearOpMode {
                                 robot.intakeAutoPeriodic()
                         ),
                         drivebase.actionBuilder(drivebase.localizer.getPose(), false)
-                                .setTangent(Math.toRadians(180))
-                                .splineToSplineHeading(new Pose2d(17, -25, Math.toRadians(270)), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
-                                        new TranslationalVelConstraint(40),
-                                        new AngularVelConstraint(Math.PI / 2))))
-                                .afterTime(0, new ParallelAction(robot.intake.overrideIntake(false)))
-                                .splineToConstantHeading(new Vector2d(15, -52), Math.toRadians(90), new TranslationalVelConstraint(9))
-                                .afterTime(0.3, new ParallelAction(robot.flywheel.runFlywheel(), robot.intake.toggleIntake(false)))
-                                .build()
-                )
-        );
-
-        // Move to shoot
-        Actions.runBlocking(
-                new RaceAction(
-                        new ParallelAction(
-                                robot.spindexer.autonPeriodic(),
-                                robot.flywheel.autonPeriodic()
-                        ),
-                        drivebase.actionBuilder(drivebase.localizer.getPose(), false)
-                                .strafeToSplineHeading(new Vector2d(25, -16), Math.toRadians(320), new TranslationalVelConstraint(120), new ProfileAccelConstraint(-60, 100))
-                                .afterTime(0, new ParallelAction(robot.spindexer.sortTo(0), robot.intake.overrideIntake(true), robot.intake.toggleIntake(true), robot.intake.runIntake()))
-                                .build()
-                )
-        );
-
-        // Ordered set of 3
-        Actions.runBlocking(
-                new RaceAction(
-                        robot.flywheel.autonPeriodic(),
-                        new SequentialAction(
-                                robot.spindexer.outputTo(0),
-                                robot.spindexer.removeAllIndexed(),
-                                new ParallelAction(robot.flywheel.stopFlywheel(), robot.intake.overrideIntake(false), robot.intake.toggleIntake(false), robot.intake.stopIntake())
-                        )
-                )
-        );
-
-        // Intake second set, move to large launch zone, prime flywheel
-        Actions.runBlocking(
-                new RaceAction(
-                        new ParallelAction(
-                                robot.spindexer.autonPeriodic(),
-                                robot.flywheel.autonPeriodic(),
-                                robot.intakeAutoPeriodic()
-                        ),
-                        drivebase.actionBuilder(drivebase.localizer.getPose(), false)
-                                .strafeToSplineHeading(new Vector2d(-5, -25), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
-                                        new TranslationalVelConstraint(40),
-                                        new AngularVelConstraint(Math.PI / 2))))
+                                .strafeToSplineHeading(new Vector2d(-40, -21), Math.toRadians(270), new TranslationalVelConstraint(100), new ProfileAccelConstraint(-70, 150))
                                 .afterTime(0, robot.intake.toggleIntake(true))
-                                .splineToConstantHeading(new Vector2d(-9, -59), Math.toRadians(75), new TranslationalVelConstraint(12))
-                                .afterTime(0, robot.flywheel.runFlywheel())
-
-                                .splineToSplineHeading(new Pose2d(-5, -33, Math.toRadians(329)), Math.toRadians(58), new TranslationalVelConstraint(90), new ProfileAccelConstraint(-60, 90))
-                                .afterTime(0.3, new ParallelAction(robot.intake.toggleIntake(false), robot.spindexer.sortTo(0)))
-                                .splineToConstantHeading(new Vector2d(25, -16), Math.toRadians(0), new TranslationalVelConstraint(120), new ProfileAccelConstraint(-60, 100))
-                                .afterTime(0, new ParallelAction(robot.intake.overrideIntake(true), robot.intake.toggleIntake(true), robot.intake.runIntake()))
-                                .build()
-                )
-        );
-
-        // Ordered set of 3
-        Actions.runBlocking(
-                new RaceAction(
-                        robot.flywheel.autonPeriodic(),
-                        new SequentialAction(
-                                robot.spindexer.outputTo(0),
-                                robot.spindexer.outputTo(0),
-                                robot.spindexer.removeAllIndexed(),
-                                new ParallelAction(robot.flywheel.stopFlywheel(), robot.intake.overrideIntake(false), robot.intake.toggleIntake(false), robot.intake.stopIntake())
-                        )
-                )
-        );
-
-        // Intake third set, move to large launch zone, prime flywheel
-        Actions.runBlocking(
-                new RaceAction(
-                        new ParallelAction(
-                                robot.spindexer.autonPeriodic(),
-                                robot.flywheel.autonPeriodic(),
-                                robot.intakeAutoPeriodic()
-                        ),
-                        drivebase.actionBuilder(drivebase.localizer.getPose(), false)
-                                .strafeToSplineHeading(new Vector2d(-25.5, -27), Math.toRadians(270), new MinVelConstraint(Arrays.asList(
-                                        new TranslationalVelConstraint(40),
-                                        new AngularVelConstraint(Math.PI / 2))))
-                                .afterTime(0, robot.intake.toggleIntake(true))
-                                .splineToConstantHeading(new Vector2d(-35.5, -57), Math.toRadians(270), new TranslationalVelConstraint(12))
+                                .splineToConstantHeading(new Vector2d(-35.5, -63), Math.toRadians(270), new TranslationalVelConstraint(15))
                                 .afterTime(0, new ParallelAction(robot.flywheel.runFlywheel(), robot.spindexer.sortTo(0)))
 
-                                .strafeToSplineHeading(new Vector2d(70, 30),  Math.toRadians(312), new TranslationalVelConstraint(150), new ProfileAccelConstraint(-60, 120))
-                                .afterTime(0.4, new ParallelAction(robot.intake.overrideIntake(true), robot.intake.toggleIntake(true), robot.intake.runIntake()))
+                                .strafeToSplineHeading(new Vector2d(-54, -15),  Math.toRadians(150))
+                                .afterTime(0.2, new ParallelAction(robot.intake.overrideIntake(true), robot.intake.toggleIntake(true), robot.intake.runIntake()))
                                 .build()
                 )
         );
 
-        PoseStorage.currentPose = new Pose2d(30, -12, Math.toRadians(312)); // Set global pose value for TeleOp to utilize
+        PoseStorage.currentPose = robot.drivetrain.getPosition(); // Set global pose value for TeleOp to utilize
 
         // Ordered set of 3
         Actions.runBlocking(
                 new RaceAction(
                         robot.flywheel.autonPeriodic(),
+                        robot.spindexer.autonPeriodic(),
                         new SequentialAction(
+                                new SleepAction(2),
                                 robot.spindexer.outputTo(0),
                                 robot.spindexer.outputTo(0),
                                 robot.spindexer.removeAllIndexed(),
@@ -193,9 +111,8 @@ public class SUPPORTred extends LinearOpMode {
 
         Actions.runBlocking(
                 new RaceAction(
-                        robot.spindexer.autonPeriodic(),
-                        robot.flywheel.autonPeriodic(),
-                        robot.spindexer.sortTo(0)
+                        robot.spindexer.sortTo(3),
+                        robot.flywheel.autonPeriodic()
                 )
         );
     }

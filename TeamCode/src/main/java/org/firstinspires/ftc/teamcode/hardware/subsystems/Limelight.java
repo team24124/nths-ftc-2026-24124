@@ -119,7 +119,11 @@ public class Limelight implements SubsystemBase, TelemetryObservable {
 
     // Tx for rotation, +east -west
     public double degreeOffset() {
-        return getResult().getTx();
+        if (PoseStorage.currentAlliance == PoseStorage.Alliance.RED) {
+            return getResult().getTx();
+        } else {
+            return getResult().getTx();
+        }
     }
 
     // Distance in inches, AT height / tan of forward to angle to target

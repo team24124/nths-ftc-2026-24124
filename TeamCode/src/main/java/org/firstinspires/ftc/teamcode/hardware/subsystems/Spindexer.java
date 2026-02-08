@@ -31,10 +31,9 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
     private boolean distanceFar = false;
 
     public enum State {
-        // Previously 230, 48, 410, 0, 358, 179
-        SLOT1(345), // Slots are shoot positions
-        SLOT2(72), // Slots increase CCW, IN1 is referencing the same slot as SLOT1
-        SLOT3(615),
+        SLOT1(330), // Slots are shoot positions
+        SLOT2(57), // Slots increase CCW, IN1 is referencing the same slot as SLOT1
+        SLOT3(600),
         IN1(0), // Ins are slots facing towards the intake
         IN2(537), // Ins increase CCW. Since moving CCW results in a positive increase, the second slot CCW from the first one is on the rear left of the robot, making its position -178 + 537.6
         IN3(268);

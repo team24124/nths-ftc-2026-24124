@@ -22,13 +22,13 @@ import java.util.Arrays;
 @Autonomous(name = "Idle Blue")
 public class IDLEblue extends LinearOpMode {
     Robot robot;
-
+    /**Start robot on the very edge of the outer prongs of the center mats**/
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(hardwareMap, telemetry, true);
         MecanumDrive drivebase = robot.drivetrain.getDrive();
 
-        Pose2d initialPose = new Pose2d(-63, 16, Math.toRadians(0));
+        Pose2d initialPose = new Pose2d(-63.3, 15.2, Math.toRadians(0));
         drivebase.localizer.setPose(initialPose);
 
         PoseStorage.currentPose = initialPose;
@@ -42,9 +42,12 @@ public class IDLEblue extends LinearOpMode {
         if (isStopRequested()) return;
 
         Actions.runBlocking(
-                drivebase.actionBuilder(drivebase.localizer.getPose(), true)
-                        .strafeToSplineHeading(new Vector2d(-55, 40), Math.toRadians(315))
-                        .build()
+                new RaceAction(
+                        robot.spindexer.autonPeriodic(),
+                        drivebase.actionBuilder(drivebase.localizer.getPose(), true)
+                                .strafeToSplineHeading(new Vector2d(-55, 40), Math.toRadians(315))
+                                .build()
+                )
         );
 
         PoseStorage.currentPose = drivebase.localizer.getPose();

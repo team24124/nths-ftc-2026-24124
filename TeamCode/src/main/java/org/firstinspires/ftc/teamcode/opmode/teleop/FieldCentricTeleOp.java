@@ -89,10 +89,33 @@ public class FieldCentricTeleOp extends OpMode {
         }
 
         // --------- Operator inputs ---------
+//        if (operator.wasJustPressed(GamepadKeys.Button.A)) {
+//            toggleFlywheel = !toggleFlywheel;
+//            if (toggleFlywheel) {
+//                robot.actions.schedule(new ParallelAction(robot.flywheel.runFlywheel(), robot.spindexer.sortTo(0)));
+//            } else {
+//                robot.actions.schedule(robot.flywheel.stopFlywheel());
+//            }
+//        }
+//
+//        if (!robot.spindexer.isMoving && operator.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && robot.spindexer.states.getSelectedIndex() < 3) {
+//            robot.actions.schedule(robot.spindexer.shootAll());
+//        }
+//
+//        if (robot.flywheel.primed) {
+//            if (!robot.spindexer.isMoving && operator.wasJustPressed(GamepadKeys.Button.X) && robot.spindexer.states.getSelectedIndex() < 3) {
+//                robot.actions.schedule(robot.spindexer.shootAll());
+//            }
+//        }
+
+        if (operator.wasJustPressed(GamepadKeys.Button.B) && !driver.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+            robot.actions.schedule(robot.spindexer.sortTo(0));
+        }
+
         if (operator.wasJustPressed(GamepadKeys.Button.A)) {
             toggleFlywheel = !toggleFlywheel;
             if (toggleFlywheel) {
-                robot.actions.schedule(new ParallelAction(robot.flywheel.runFlywheel(), robot.spindexer.sortTo(0)));
+                robot.actions.schedule(robot.flywheel.runFlywheel());
             } else {
                 robot.actions.schedule(robot.flywheel.stopFlywheel());
             }
