@@ -54,7 +54,7 @@ public class GATEblue extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         robot.flywheel.runFlywheel(),
-                        robot.flywheel.setVls(56),
+                        robot.flywheel.setVls(61),
                         new RaceAction(
                                 new ParallelAction(
                                         robot.spindexer.autonPeriodic(),
@@ -105,7 +105,7 @@ public class GATEblue extends LinearOpMode {
                                 robot.flywheel.autonPeriodic()
                         ),
                         drivebase.actionBuilder(drivebase.localizer.getPose(), false)
-                                .strafeToSplineHeading(new Vector2d(25, 16), Math.toRadians(34), new TranslationalVelConstraint(130), new ProfileAccelConstraint(-90, 130))
+                                .strafeToSplineHeading(new Vector2d(25, 16), Math.toRadians(38), new TranslationalVelConstraint(130), new ProfileAccelConstraint(-90, 130))
                                 .afterTime(0, new ParallelAction(robot.spindexer.sortTo(0), robot.intake.overrideIntake(true), robot.intake.toggleIntake(true), robot.intake.runIntake()))
                                 .build()
                 )

@@ -36,7 +36,7 @@ public class SUPPORTblue extends LinearOpMode {
         PoseStorage.currentAlliance = PoseStorage.Alliance.BLUE;
         PoseStorage.pattern.clear();
 
-        robot.spindexer.updateDistance(170);
+        robot.spindexer.updateDistance(120);
 
         Actions.runBlocking(new ParallelAction(robot.intake.overrideIntake(true), robot.intake.toggleIntake(false)));
 
@@ -47,7 +47,7 @@ public class SUPPORTblue extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         robot.flywheel.runFlywheel(),
-                        robot.flywheel.setVls(170),
+                        robot.flywheel.setVls(120),
                         new RaceAction(
                                 new ParallelAction(
                                         robot.flywheel.autonPeriodic(),
@@ -56,7 +56,7 @@ public class SUPPORTblue extends LinearOpMode {
                                 ),
                                 drivebase.actionBuilder(initialPose, false)
                                         .strafeToLinearHeading(new Vector2d(-58, 15), Math.toRadians(20))
-                                        .waitSeconds(4)
+                                        .waitSeconds(2)
                                         .build()
                         )
                 )
@@ -84,16 +84,15 @@ public class SUPPORTblue extends LinearOpMode {
                         ),
                         drivebase.actionBuilder(drivebase.localizer.getPose(), false)
                                 .setTangent(Math.toRadians(90))
-                                .splineToSplineHeading(new Pose2d(-54, 48, Math.toRadians(110)), Math.toRadians(45))
+                                .splineToSplineHeading(new Pose2d(-57, 48, Math.toRadians(110)), Math.toRadians(45))
                                 .afterTime(0, robot.intake.toggleIntake(true))
-                                .splineToSplineHeading(new Pose2d(-53, 60, Math.toRadians(150)), Math.toRadians(180))
+                                .splineToSplineHeading(new Pose2d(-53, 55, Math.toRadians(150)), Math.toRadians(180))
                                 .afterTime(0, robot.flywheel.runFlywheel())
-                                .splineToLinearHeading(new Pose2d(-63, 60, Math.toRadians(180)), Math.toRadians(180), new TranslationalVelConstraint(30))
+                                .splineToLinearHeading(new Pose2d(-63, 55, Math.toRadians(180)), Math.toRadians(180), new TranslationalVelConstraint(30))
                                 .waitSeconds(1)
-                                .stopAndAdd(robot.spindexer.sortTo(0))
 
                                 .strafeToSplineHeading(new Vector2d(-58, 15),  Math.toRadians(25))
-                                .afterTime(0.2, new ParallelAction(robot.intake.overrideIntake(true), robot.intake.toggleIntake(true), robot.intake.runIntake()))
+                                .afterTime(0.2, new ParallelAction(robot.spindexer.sortTo(0), robot.intake.overrideIntake(true), robot.intake.toggleIntake(true), robot.intake.runIntake()))
                                 .build()
                 )
         );
@@ -104,7 +103,6 @@ public class SUPPORTblue extends LinearOpMode {
                         robot.flywheel.autonPeriodic(),
                         robot.spindexer.autonPeriodic(),
                         new SequentialAction(
-                                new SleepAction(4),
                                 robot.spindexer.outputTo(0),
                                 robot.spindexer.outputTo(0),
                                 robot.spindexer.removeAllIndexed(),
@@ -143,7 +141,6 @@ public class SUPPORTblue extends LinearOpMode {
                         robot.flywheel.autonPeriodic(),
                         robot.spindexer.autonPeriodic(),
                         new SequentialAction(
-                                new SleepAction(4),
                                 robot.spindexer.outputTo(0),
                                 robot.spindexer.outputTo(0),
                                 robot.spindexer.removeAllIndexed(),

@@ -125,9 +125,9 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
             double power;
             if (distanceFar) {
-                power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.25, 0.25);
+                power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.22, 0.22);
             } else {
-                power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.34, 0.34);
+                power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.4, 0.4);
             }
             spindexer.setPower(power);
 

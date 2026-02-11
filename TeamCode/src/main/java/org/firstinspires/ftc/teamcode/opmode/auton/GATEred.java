@@ -54,7 +54,7 @@ public class GATEred extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         robot.flywheel.runFlywheel(),
-                        robot.flywheel.setVls(56),
+                        robot.flywheel.setVls(61),
                         new RaceAction(
                                 new ParallelAction(
                                         robot.spindexer.autonPeriodic(),
@@ -89,9 +89,9 @@ public class GATEred extends LinearOpMode {
                         ),
                         drivebase.actionBuilder(drivebase.localizer.getPose(), false)
                                 .setTangent(Math.toRadians(180))
-                                .splineToSplineHeading(new Pose2d(17, -25, Math.toRadians(270)), Math.toRadians(270), new TranslationalVelConstraint(80), new ProfileAccelConstraint(-50, 130))
+                                .splineToSplineHeading(new Pose2d(15, -24, Math.toRadians(270)), Math.toRadians(270), new TranslationalVelConstraint(80), new ProfileAccelConstraint(-50, 130))
                                 .afterTime(0, new ParallelAction(robot.intake.overrideIntake(false)))
-                                .splineToConstantHeading(new Vector2d(15, -53), Math.toRadians(90), new TranslationalVelConstraint(11))
+                                .splineToConstantHeading(new Vector2d(13, -53), Math.toRadians(90), new TranslationalVelConstraint(11))
                                 .afterTime(0.3, new ParallelAction(robot.flywheel.runFlywheel(), robot.intake.toggleIntake(false)))
                                 .build()
                 )
@@ -105,7 +105,7 @@ public class GATEred extends LinearOpMode {
                                 robot.flywheel.autonPeriodic()
                         ),
                         drivebase.actionBuilder(drivebase.localizer.getPose(), false)
-                                .strafeToSplineHeading(new Vector2d(25, -16), Math.toRadians(335), new TranslationalVelConstraint(130), new ProfileAccelConstraint(-90, 130))
+                                .strafeToSplineHeading(new Vector2d(25, -16), Math.toRadians(329), new TranslationalVelConstraint(130), new ProfileAccelConstraint(-90, 130))
                                 .afterTime(0, new ParallelAction(robot.spindexer.sortTo(0), robot.intake.overrideIntake(true), robot.intake.toggleIntake(true), robot.intake.runIntake()))
                                 .build()
                 )
@@ -137,7 +137,7 @@ public class GATEred extends LinearOpMode {
                                 .splineToConstantHeading(new Vector2d(-9, -60.5), Math.toRadians(75), new TranslationalVelConstraint(15))
                                 .afterTime(0, robot.flywheel.runFlywheel())
 
-                                .splineToSplineHeading(new Pose2d(-5, -33, Math.toRadians(340)), Math.toRadians(58), new TranslationalVelConstraint(90), new ProfileAccelConstraint(-90, 90))
+                                .splineToSplineHeading(new Pose2d(-5, -33, Math.toRadians(330)), Math.toRadians(58), new TranslationalVelConstraint(90), new ProfileAccelConstraint(-90, 90))
                                 .afterTime(0.3, new ParallelAction(robot.intake.toggleIntake(false), robot.spindexer.sortTo(0)))
                                 .splineToConstantHeading(new Vector2d(25, -16), Math.toRadians(0), new TranslationalVelConstraint(130), new ProfileAccelConstraint(-60, 130))
                                 .afterTime(0, new ParallelAction(robot.intake.overrideIntake(true), robot.intake.toggleIntake(true), robot.intake.runIntake()))
@@ -167,12 +167,12 @@ public class GATEred extends LinearOpMode {
                                 robot.intakeAutoPeriodic()
                         ),
                         drivebase.actionBuilder(drivebase.localizer.getPose(), false)
-                                .strafeToSplineHeading(new Vector2d(-25.5, -27), Math.toRadians(270), new TranslationalVelConstraint(200), new ProfileAccelConstraint(-70, 400))
+                                .strafeToSplineHeading(new Vector2d(-25.5, -24), Math.toRadians(270), new TranslationalVelConstraint(200), new ProfileAccelConstraint(-70, 400))
                                 .afterTime(0, robot.intake.toggleIntake(true))
                                 .splineToConstantHeading(new Vector2d(-35.5, -63), Math.toRadians(270), new TranslationalVelConstraint(15))
                                 .afterTime(0, new ParallelAction(robot.flywheel.runFlywheel(), robot.spindexer.sortTo(0)))
 
-                                .strafeToSplineHeading(new Vector2d(36, -15),  Math.toRadians(310), new TranslationalVelConstraint(120))
+                                .strafeToSplineHeading(new Vector2d(36, -15),  Math.toRadians(305), new TranslationalVelConstraint(120))
                                 .afterTime(0.5, new ParallelAction(robot.intake.overrideIntake(true), robot.intake.toggleIntake(true), robot.intake.runIntake()))
                                 .build()
                 )

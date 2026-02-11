@@ -66,8 +66,8 @@ public class Robot {
             } else {
                 if (intake.toggled) {
                     if (!spindexer.slots.contains("empty")) {
-                        intake.targetVel = 400; // Changed from 0
-                        intake.intake.setVelocity(400);
+                        intake.targetVel = 0; // Changed from 0
+                        intake.intake.setVelocity(0);
                         intake.powered = false;
                         return false;
                     }
@@ -91,8 +91,8 @@ public class Robot {
                         }
                     }
                 } else {
-                    intake.targetVel = 400; // Changed from 0
-                    intake.intake.setVelocity(400);
+                    intake.targetVel = 0; // Changed from 0
+                    intake.intake.setVelocity(0);
                     intake.powered = false;
                 }
                 return true;
