@@ -55,7 +55,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
     public Spindexer(HardwareMap hw) {
         pd = new PIDF();
-        pd.setPD(0.004, 0.000012, 0.3);
+        pd.setPD(0.004, 0.00001, 0.3);
         spindexer = hw.get(DcMotorEx.class, "spindexer");
         spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -82,7 +82,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
             double adjustedPosition = target - error;
 
-            double power = Range.clip(pd.calculate(adjustedPosition, target, voltageSensor.getVoltage()), -0.5, 0.5);
+            double power = Range.clip(pd.calculate(adjustedPosition, target, voltageSensor.getVoltage()), -0.6, 0.6);
             spindexer.setPower(power);
 
             if (Utilities.isBetween(position, target - 27, target + 27) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, TPR - 27, TPR))) {
@@ -127,7 +127,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
             if (distanceFar) {
                 power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.22, 0.22);
             } else {
-                power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.4, 0.4);
+                power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.45, 0.45);
             }
             spindexer.setPower(power);
 
@@ -154,7 +154,7 @@ public class Spindexer implements SubsystemBase, TelemetryObservable {
 
             int tolerance = 35;
 
-            double power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.3, 0.3);
+            double power = Range.clip(pd.calculate(position, target, voltageSensor.getVoltage()), -0.45, 0.45);
             spindexer.setPower(power);
 
             if (Utilities.isBetween(position % TPR, target - tolerance, target + tolerance) || (states.getSelected() == State.IN1 && Utilities.isBetween(position, TPR - tolerance, TPR))) {

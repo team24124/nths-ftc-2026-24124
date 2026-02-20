@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.hardware.Robot;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "Gate Blue 222")
-public class ohmydays extends LinearOpMode {
+@Autonomous(name = "RED 3 largezone")
+public class RED3largezone extends LinearOpMode {
     Robot robot;
 
     @Override
@@ -24,11 +24,11 @@ public class ohmydays extends LinearOpMode {
         robot = new Robot(hardwareMap, telemetry, true);
         MecanumDrive drivebase = robot.drivetrain.getDrive();
 
-        Pose2d initialPose = new Pose2d(53, 48, Math.toRadians(49));
+        Pose2d initialPose = new Pose2d(53, -48, Math.toRadians(311));
         drivebase.localizer.setPose(initialPose);
 
         PoseStorage.currentPose = initialPose;
-        PoseStorage.currentAlliance = PoseStorage.Alliance.BLUE;
+        PoseStorage.currentAlliance = PoseStorage.Alliance.RED;
         PoseStorage.pattern.clear();
 
         // Actions called during init
@@ -51,7 +51,7 @@ public class ohmydays extends LinearOpMode {
                                         robot.intakeAutoPeriodic()
                                 ),
                                 drivebase.actionBuilder(initialPose, false)
-                                        .strafeToLinearHeading(new Vector2d(53, 12), Math.toRadians(80), new TranslationalVelConstraint(40), new ProfileAccelConstraint(-60, 90))
+                                        .strafeToLinearHeading(new Vector2d(53, -12), Math.toRadians(290), new TranslationalVelConstraint(40), new ProfileAccelConstraint(-60, 90))
                                         .afterTime(0, new ParallelAction(robot.intake.overrideIntake(true), robot.intake.toggleIntake(true), robot.intake.runIntake()))
                                         .build()
                         )

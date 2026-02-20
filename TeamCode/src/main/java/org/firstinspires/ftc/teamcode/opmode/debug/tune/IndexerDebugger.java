@@ -25,8 +25,8 @@ public class IndexerDebugger extends OpMode {
     private TelemetryControl telemetryControl;
     private Oscillator os;
     private Intake intake;
-    public static double Kp = 0.003;
-    public static double Kd = 0.000001;
+    public static double Kp = 0.005;
+    public static double Kd = 0.000012;
 
     @Override
     public void init() {

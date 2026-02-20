@@ -24,7 +24,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
     public boolean primed = false;
     private PIDF pv = new PIDF();
     double[] dists = {40, 50, 60, 70, 80, 90, 100, 150}; // Inches
-    double[] vels = {1030, 1040, 1080, 1110, 1200, 1290, 1310, 1500}; // Ticks/second
+    double[] vels = {1030, 1040, 1080, 1110, 1190, 1250, 1390, 1480}; // Ticks/second
     private final VoltageSensor voltageSensor;
     public InterpLUT lut = new InterpLUT(dists, vels);
     private double distance = 1;
@@ -63,7 +63,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
         }
         if (powered) {
             power(targetVel);
-            primed = Utilities.isBetween(wheel1.getVelocity(), targetVel -100, targetVel + 70);
+            primed = Utilities.isBetween(wheel1.getVelocity(), targetVel -175, targetVel + 50);
         } else {
             wheel1.setPower(0);
             wheel2.setPower(0);
@@ -98,7 +98,7 @@ public class Flywheel implements SubsystemBase, TelemetryObservable {
 
     public void adjustFlap(double distance) {
         // 0.94 is extended 0.18 is lowest
-        flap.setPosition(Range.clip(0.48 + ((distance - 40) * 0.0105589041) - Range.clip((targetVel - wheel1.getVelocity()) / 750, 0, 0.3), 0.34, 0.94));
+        flap.setPosition(Range.clip(0.48 + ((distance - 40) * 0.0104589041) - Range.clip((targetVel - wheel1.getVelocity()) / 750, 0, 0.3), 0.34, 0.94));
     }
 
     public void power(double vel) {

@@ -1,13 +1,9 @@
 package org.firstinspires.ftc.teamcode.opmode.auton;
 
-import com.acmerobotics.roadrunner.AngularVelConstraint;
-import com.acmerobotics.roadrunner.MinVelConstraint;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.RaceAction;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -18,10 +14,8 @@ import org.firstinspires.ftc.teamcode.hardware.Robot;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-import java.util.Arrays;
-
-@Autonomous(name = "Support Red")
-public class SUPPORTred extends LinearOpMode {
+@Autonomous(name = "-")
+public class BLUE9smallzone extends LinearOpMode {
     Robot robot;
 
     @Override
@@ -29,14 +23,14 @@ public class SUPPORTred extends LinearOpMode {
         robot = new Robot(hardwareMap, telemetry, true);
         MecanumDrive drivebase = robot.drivetrain.getDrive();
 
-        Pose2d initialPose = new Pose2d(-63.3, -15.2, Math.toRadians(0));
+        Pose2d initialPose = new Pose2d(-63.3, 15.2, Math.toRadians(0));
         drivebase.localizer.setPose(initialPose);
 
         PoseStorage.currentPose = initialPose;
         PoseStorage.currentAlliance = PoseStorage.Alliance.BLUE;
         PoseStorage.pattern.clear();
 
-        robot.spindexer.updateDistance(121);
+        robot.spindexer.updateDistance(120);
 
         Actions.runBlocking(new ParallelAction(robot.intake.overrideIntake(true), robot.intake.toggleIntake(false)));
 
@@ -47,7 +41,7 @@ public class SUPPORTred extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         robot.flywheel.runFlywheel(),
-                        robot.flywheel.setVls(121),
+                        robot.flywheel.setVls(120),
                         new RaceAction(
                                 new ParallelAction(
                                         robot.flywheel.autonPeriodic(),
